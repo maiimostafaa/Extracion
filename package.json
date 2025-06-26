@@ -1,0 +1,39 @@
+{
+  "name": "coffee-app",
+  "version": "1.0.0",
+  "main": "index.ts",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web"
+  },
+  "dependencies": {
+    "@react-native-async-storage/async-storage": "^2.2.0",
+    "@react-native-community/datetimepicker": "^8.4.1",
+    "@react-navigation/bottom-tabs": "^7.3.15",
+    "@react-navigation/native": "^7.1.11",
+    "@react-navigation/native-stack": "^7.3.16",
+    "expo": "~53.0.11",
+    "expo-app-loading": "^1.1.2",
+    "expo-clipboard": "~7.1.4",
+    "expo-font": "~13.3.1",
+    "expo-splash-screen": "~0.30.9",
+    "expo-status-bar": "~2.2.3",
+    "react": "19.0.0",
+    "react-native": "0.79.3",
+    "react-native-calendars": "^1.1312.1",
+    "react-native-gesture-handler": "^2.26.0",
+    "react-native-maps": "1.20.1",
+    "react-native-qrcode-svg": "^6.3.15",
+    "react-native-reanimated": "^3.17.4",
+    "react-native-screens": "~4.11.1",
+    "react-native-svg": "^15.12.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.25.2",
+    "@types/react": "~19.0.10",
+    "typescript": "~5.8.3"
+  },
+  "private": true
+}
