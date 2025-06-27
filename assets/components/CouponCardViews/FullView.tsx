@@ -1,6 +1,18 @@
 import React from "react";
-import { View, Text, Image, StyleSheet, ScrollView } from "react-native";
+import {
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  ScrollView,
+  ImageBackground,
+  TouchableOpacity,
+  Modal,
+} from "react-native";
 import QRCode from "react-native-qrcode-svg";
+import { useState } from "react";
+import { Ionicons } from "@expo/vector-icons";
+import { Feather } from "@expo/vector-icons";
 import { coupon } from "../../types/coupon";
 import { RouteProp, useRoute } from "@react-navigation/native";
 import { RootStackParamList } from "../../../navigation/AppNavigator";
@@ -13,6 +25,15 @@ interface FullViewProps {
 const FullView: React.FC<FullViewProps> = ({ coupon: propCoupon }) => {
   const route = useRoute<FullCouponRouteProp>();
   const coupon = propCoupon || route.params.coupon;
+  const [isQRCodeVisible, setQRCodeVisible] = useState(false); // State for modal visibility
+
+  const showQRCode = () => {
+    setQRCodeVisible(true); // Show the QR code popup
+  };
+
+  const hideQRCode = () => {
+    setQRCodeVisible(false); // Hide the QR code popup
+  };
 
   const formatDiscount = () => {
     if (coupon.discountType === "percentage") {
@@ -35,52 +56,133 @@ const FullView: React.FC<FullViewProps> = ({ coupon: propCoupon }) => {
   };
 
   return (
-    <ScrollView style={styles.scrollContainer}>
-      <View style={[styles.container, !coupon.isActive && styles.inactive]}>
-        <Image source={{ uri: coupon.organizationLogo }} style={styles.logo} />
-        <Text style={styles.organization}>{coupon.organization}</Text>
-        <Text style={styles.title}>{formatDiscount()}</Text>
-        <Text style={styles.description}>{coupon.description}</Text>
-
-        {coupon.termsAndConditions && (
-          <View style={styles.bulletList}>
-            <Text style={styles.termsTitle}>Terms & Conditions:</Text>
-            {coupon.termsAndConditions.map((term, index) => (
-              <Text key={index} style={styles.bullet}>
-                • {term}
-              </Text>
-            ))}
+    <View style={[styles.container, { opacity: coupon.isActive ? 1 : 0.5 }]}>
+      <Modal
+        visible={isQRCodeVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={hideQRCode}
+      >
+        <View style={styles.modalBackground}>
+          <View style={styles.qrPopupContainer}>
+            <Text style={styles.qrPopupTitle}>Scan this QR Code</Text>
+            <QRCode value={coupon.QRcode} size={200} />
+            <TouchableOpacity style={styles.closeButton} onPress={hideQRCode}>
+              <Text style={styles.closeButtonText}>Close</Text>
+            </TouchableOpacity>
           </View>
-        )}
-
-        {coupon.isActive && (
-          <View style={styles.qrContainer}>
-            <QRCode value={coupon.QRcode} size={120} />
+        </View>
+      </Modal>
+      <ImageBackground
+        source={require("../../backgrounds/coupon-details.png")}
+        style={styles.background}
+      >
+        <View style={styles.contentContainer}>
+          <View style={styles.topContainer}>
+            <View style={styles.logoContainer}>
+              <Image
+                source={{ uri: coupon.organizationLogo }}
+                style={styles.logo}
+              />
+            </View>
+            <View style={styles.titleContainer}>
+              <Text style={styles.title}>{formatDiscount()}</Text>
+            </View>
           </View>
-        )}
+          <View style={styles.middleContainer}>
+            <Text style={styles.description}>{coupon.description}</Text>
+            <View style={styles.termsContainer}>
+              {coupon.termsAndConditions && (
+                <View style={styles.bulletList}>
+                  {coupon.termsAndConditions.map((term, index) => (
+                    <Text key={index} style={styles.bullet}>
+                      • {term}
+                    </Text>
+                  ))}
+                </View>
+              )}
+            </View>
+          </View>
+          <View style={styles.halfContainer}>
+            <View style={styles.qrContainer}>
+              <QRCode value={coupon.QRcode} size={120} />
+            </View>
 
-        <Text style={styles.expiry}>
-          Valid until {formatExpiryDate(coupon.expirationDate)}
-        </Text>
-
-        {!coupon.isActive && <Text style={styles.expiredText}>EXPIRED</Text>}
-
-        {coupon.usageCount !== undefined && (
-          <Text style={styles.usageCount}>Used {coupon.usageCount} times</Text>
-        )}
-      </View>
-    </ScrollView>
+            <View style={styles.bottomContainer}>
+              <TouchableOpacity
+                onPress={coupon.isActive ? showQRCode : undefined} // Only allow press if the coupon is active
+                disabled={!coupon.isActive} // Disable the button if the coupon is expired
+              >
+                <Feather name="arrow-up-right" size={32} color="#078CC9" />
+              </TouchableOpacity>
+              <View style={styles.expiredInfoContainer}>
+                <Text style={styles.expiry}>
+                  Valid until {formatExpiryDate(coupon.expirationDate)}
+                </Text>
+                {!coupon.isActive && (
+                  <Text style={styles.expiredText}>EXPIRED</Text>
+                )}
+              </View>
+              <Ionicons
+                name="information-circle-outline"
+                size={32}
+                color="#078CC9"
+              />
+            </View>
+          </View>
+        </View>
+      </ImageBackground>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  scrollContainer: {
-    flex: 1,
+  background: {
+    width: "100%",
+    height: 600,
+    resizeMode: "cover",
   },
   container: {
+    flexDirection: "column",
     alignItems: "center",
-    padding: 16,
-    backgroundColor: "#fff",
+    padding: 20,
+    marginVertical: 4,
+  },
+  contentContainer: {
+    flexDirection: "column",
+    alignItems: "center",
+    height: "100%",
+    width: "100%",
+  },
+  topContainer: {
+    flexDirection: "row",
+    width: "100%",
+    paddingHorizontal: 20,
+    marginTop: "2%",
+    marginBottom: "5%",
+  },
+  middleContainer: {
+    flexDirection: "column",
+    width: "90%",
+    marginTop: "25%",
+    marginBottom: "5%",
+  },
+  termsContainer: {
+    flexDirection: "column",
+    width: "80%",
+    marginTop: "5%",
+    marginLeft: "10%",
+  },
+  bottomContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "80%",
+  },
+  halfContainer: {
+    position: "absolute",
+    top: "54%",
+    left: 40,
+    width: "100%",
   },
   inactive: {
     opacity: 0.5,
@@ -89,66 +191,111 @@ const styles = StyleSheet.create({
   logo: {
     width: 60,
     height: 60,
-    marginBottom: 10,
     borderRadius: 30,
   },
-  organization: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#333",
-    marginBottom: 5,
+  logoContainer: {
+    position: "absolute",
+    top: 50,
+    left: 50,
+    width: "100%",
+    height: "20%",
+    justifyContent: "center",
   },
+
   title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#2E7D32",
+    fontSize: 30,
+    fontWeight: "regular",
+    color: "#333333",
     marginBottom: 8,
   },
+  titleContainer: {
+    position: "absolute",
+    top: 20,
+    left: 120,
+    padding: 15,
+    alignContent: "center",
+    width: "100%",
+  },
   description: {
-    fontSize: 16,
-    textAlign: "center",
-    marginVertical: 8,
-    color: "#555",
+    fontSize: 20,
+    textAlign: "left",
+    color: "#333333",
+    fontWeight: "400",
     paddingHorizontal: 20,
   },
   bulletList: {
     alignSelf: "flex-start",
-    marginTop: 16,
-    marginBottom: 16,
     paddingHorizontal: 20,
   },
-  termsTitle: {
-    fontSize: 14,
-    fontWeight: "600",
-    marginBottom: 8,
-    color: "#333",
-  },
   bullet: {
-    fontSize: 13,
-    marginBottom: 4,
-    color: "#666",
+    fontSize: 18,
+    paddingVertical: 10,
+    color: "#000",
+    fontWeight: "200",
   },
   qrContainer: {
-    marginVertical: 20,
+    marginTop: 60,
     padding: 20,
-    backgroundColor: "#f9f9f9",
     borderRadius: 12,
+    marginLeft: "19%",
   },
   expiry: {
-    fontSize: 14,
+    fontSize: 12,
     color: "#666",
-    marginTop: 16,
+    marginTop: 12,
+    fontWeight: "100",
   },
   expiredText: {
     fontSize: 16,
     color: "#ff4444",
     fontWeight: "bold",
-    marginTop: 8,
+    marginTop: 2,
+    marginLeft: "25%",
   },
-  usageCount: {
-    fontSize: 12,
-    color: "#999",
-    marginTop: 8,
+  expiredInfoContainer: {
+    flexDirection: "column",
+  },
+  modalBackground: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)", // Semi-transparent background
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  qrPopupContainer: {
+    backgroundColor: "#fff",
+    padding: 20,
+    borderRadius: 12,
+    alignItems: "center",
+    width: "80%",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5, // For Android shadow
+  },
+  qrPopupTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 20,
+    color: "#333",
+  },
+  closeButton: {
+    marginTop: 20,
+    backgroundColor: "#078CC9",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+  },
+  closeButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  showQRText: {
+    fontSize: 16,
+    color: "#078CC9",
+    textAlign: "center",
+    marginTop: 20,
   },
 });
 

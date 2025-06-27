@@ -40,7 +40,7 @@ export default function CouponCard({
     >
       {viewMode === "compact" && <CompactView coupon={coupon} />}
       {viewMode === "horizontal" && <HorizontalView coupon={coupon} />}
-      {viewMode === "full" && <FullView coupon={coupon} />}
+      {viewMode === "full" && coupon && <FullView coupon={coupon} />}
     </TouchableOpacity>
   );
 }
