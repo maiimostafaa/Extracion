@@ -43,9 +43,6 @@ export default function AllCouponsScreen() {
         {mockCoupons.map((coupon: coupon, index: number) => (
           <TouchableOpacity
             key={index}
-            onPress={() => {
-              navigation.navigate("fullCoupon");
-            }}
             style={{
               width: "100%",
             }}
@@ -81,7 +78,6 @@ const styles = StyleSheet.create({
   },
   couponsContainer: {
     flexDirection: "column",
-    marginTop: "5%",
     width: "100%",
     height: "70%",
   },
