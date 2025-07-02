@@ -47,7 +47,7 @@ export default function CustomHeader() {
 const styles = StyleSheet.create({
   header: {
     paddingTop: 0,
-    paddingBottom: 20,
+    paddingBottom: 30,
     width: "100%",
   },
   topRow: {
