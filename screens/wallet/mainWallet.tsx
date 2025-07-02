@@ -81,16 +81,8 @@ export default function WalletScreen() {
 
             <ScrollView
               horizontal
-              style={styles.couponScrollView}
-              contentContainerStyle={styles.couponScrollContent}
               showsHorizontalScrollIndicator={false}
               nestedScrollEnabled={true}
-              scrollEnabled={true}
-              bounces={false}
-              alwaysBounceHorizontal={false}
-              directionalLockEnabled={true}
-              scrollEventThrottle={16}
-              decelerationRate="normal"
             >
               {mockCoupons.map((coupon, index) => (
                 <View

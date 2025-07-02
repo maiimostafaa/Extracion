@@ -7,13 +7,8 @@ import {
   Image,
   TouchableOpacity,
 } from "react-native";
-
-const icons = {
-  // recycle: require("../assets/icons/recycle.png"),
-  // cafe: require("../assets/icons/cafe.png"),
-  // featuring: require("../assets/icons/featuring.png"),
-  // wallet: require("../assets/icons/wallet.png"),
-};
+import { FontAwesome6 } from "@expo/vector-icons";
+import { Entypo } from "@expo/vector-icons";
 
 export default function CustomHeader() {
   return (
@@ -26,17 +21,10 @@ export default function CustomHeader() {
         />
         <View style={styles.iconRow}>
           <TouchableOpacity style={styles.iconWrapper}>
-            <Image
-              source={require("../assets/icons/notification.png")}
-              style={styles.icon}
-            />
-            <View style={styles.notificationDot} />
+            <FontAwesome6 name="bell" size={24} color="#fff" />
           </TouchableOpacity>
           <TouchableOpacity style={styles.iconWrapper}>
-            <Image
-              source={require("../assets/icons/settings.png")}
-              style={styles.icon}
-            />
+            <Entypo name="dots-three-horizontal" size={24} color="#fff" />
           </TouchableOpacity>
         </View>
       </View>
@@ -56,8 +44,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   logo: {
-    width: 107,
-    height: 25,
+    width: 100,
+    height: 23,
   },
   lightText: {
     fontFamily: "second",
@@ -65,8 +53,6 @@ const styles = StyleSheet.create({
   },
   iconRow: {
     flexDirection: "row",
-    backgroundColor: "#D9D9D9",
-    padding: 4,
     borderRadius: 12,
     position: "absolute",
     top: 0,
