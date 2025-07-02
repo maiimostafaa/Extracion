@@ -32,6 +32,7 @@ import FullCouponScreen from "../screens/wallet/FullCoupon";
 import ProfileScreen from "../screens/ProfileScreen";
 import { coupon } from "../assets/types/coupon";
 import RewardShopScreen from "../screens/RewardShopScreen";
+import BrewLogScreen from "../screens/brew-log/BrewLog";
 
 export type RootStackParamList = {
   Landing: undefined;
@@ -53,6 +54,7 @@ export type RootStackParamList = {
   Extraction: undefined;
   Wallet: undefined;
   allCoupons: undefined;
+  BrewLogScreen: undefined;
   fullCoupon: { coupon: coupon };
   BeanDetail: { beanId: string };
   CafeDetail: { cafeId: string };
@@ -144,7 +146,7 @@ function MainTabs() {
       })}
     >
       <Tab.Screen name="home" component={HomeStackScreen} />
-      <Tab.Screen name="brew log" component={ProfileScreen} />
+      <Tab.Screen name="brew log" component={BrewLogScreen} />
       <Tab.Screen name="scan" component={CameraScreen} />
       <Tab.Screen name="extracion" component={ExtractionInterface} />
       <Tab.Screen name="shop" component={RewardShopScreen} />
@@ -180,6 +182,7 @@ export default function AppNavigator() {
       <Stack.Screen name="Wallet" component={MainWallet} />
       <Stack.Screen name="allCoupons" component={AllCouponsScreen} />
       <Stack.Screen name="fullCoupon" component={FullCouponScreen} />
+      <Stack.Screen name="BrewLogScreen" component={BrewLogScreen} />
     </Stack.Navigator>
   );
 }
