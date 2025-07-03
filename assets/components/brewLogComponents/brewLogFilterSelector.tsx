@@ -34,7 +34,6 @@ const BrewLogFilterSelector: React.FC<BrewLogFilterSelectorProps> = ({ selectedF
                             brewLogFilter={filterOption}
                             isSelected={selectedFilter === filterOption.label}
                             onPress={() => {
-                                console.log('Button pressed:', filterOption.label);   // This is just to test whether it can actually read the change from the button or not
                                 onFilterChange(filterOption.label as filterOptions);
                             }}
                         />
