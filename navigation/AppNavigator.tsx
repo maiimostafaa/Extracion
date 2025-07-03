@@ -33,7 +33,9 @@ import ProfileScreen from "../screens/ProfileScreen";
 import { coupon } from "../assets/types/coupon";
 import RewardShopScreen from "../screens/RewardShopScreen";
 import SearchScreen from "../screens/SearchScreen";
+import { brewLogEntry } from "../assets/types/BrewLog/brewLogEntry"
 import BrewLogScreen from "../screens/brew-log/BrewLog";
+import BrewLogEditScreen from "../screens/brew-log/BrewLogEditScreen"
 
 export type RootStackParamList = {
   Landing: undefined;
@@ -57,6 +59,7 @@ export type RootStackParamList = {
   allCoupons: undefined;
   SearchScreen: undefined;
   BrewLogScreen: undefined;
+  BrewLogEditScreen: { brewLogEntry: brewLogEntry };
   fullCoupon: { coupon: coupon };
   BeanDetail: { beanId: string };
   CafeDetail: { cafeId: string };
@@ -187,6 +190,7 @@ export default function AppNavigator() {
       <Stack.Screen name="fullCoupon" component={FullCouponScreen} />
       <Stack.Screen name="SearchScreen" component={SearchScreen} />
       <Stack.Screen name="BrewLogScreen" component={BrewLogScreen} />
+      <Stack.Screen name="BrewLogEditScreen" component={BrewLogEditScreen} />
     </Stack.Navigator>
   );
 }

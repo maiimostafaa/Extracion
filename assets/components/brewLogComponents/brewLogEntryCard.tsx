@@ -2,6 +2,12 @@ import React from "react";
 import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
 import { Ionicons } from '@expo/vector-icons';
 import { brewLogEntry } from "../../types/BrewLog/brewLogEntry"
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../../../navigation/AppNavigator';
+
+
+type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 interface brewLogEntryCardProps {
     brewLogEntry: brewLogEntry;
@@ -15,9 +21,11 @@ const BrewLogEntryCard: React.FC<brewLogEntryCardProps> = ({ brewLogEntry }) => 
         return `${day}/${month}/${year}`;
     };
 
+    const navigation = useNavigation<NavigationProp>();
+
     const handleIconPress = () => {
         console.log('Icon pressed for:', brewLogEntry.name);
-        // TODO: Navigate to detail view
+        navigation.navigate('BrewLogEditScreen', { brewLogEntry })
     };
 
     return (
