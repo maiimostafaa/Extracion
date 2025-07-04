@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import {
   StyleSheet,
   View,
@@ -26,9 +26,11 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import type { RootStackParamList } from "../navigation/AppNavigator";
 import Header from "../navigation/Header";
 import NewsletterCard from "../assets/components/newsletter";
+import HomePageFilterSelector from "../assets/components/HomePageFilterSelector";
 import mockNewsletters from "../assets/mock_data/mock-newsletter-items";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
+type filterOptions = "all" | "coffee recipe" | "KOL featuring" | "promotion";
 
 const { width } = Dimensions.get("window");
 const frames = [
@@ -49,10 +51,26 @@ export default function HomeScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const scrollY = useRef(new Animated.Value(0)).current;
   const [animationFrame, setAnimationFrame] = useState(0);
+  const [selectedFilter, setSelectedFilter] = useState<filterOptions>("all");
 
-  const headerHeight = scrollY.interpolate({
-    inputRange: [-100, 0],
-    outputRange: [300, 200],
+  // Calculate when header should collapse to just show Header component
+  const headerScale = scrollY.interpolate({
+    inputRange: [0, 150],
+    outputRange: [1, 0.5], // Scale down to 50% of original height
+    extrapolate: "clamp",
+  });
+
+  // Fade out the greeting and points when collapsing
+  const contentOpacity = scrollY.interpolate({
+    inputRange: [0, 100],
+    outputRange: [1, 0],
+    extrapolate: "clamp",
+  });
+
+  // Move the greeting content up when collapsing
+  const contentTranslateY = scrollY.interpolate({
+    inputRange: [0, 120],
+    outputRange: [0, -40],
     extrapolate: "clamp",
   });
 
@@ -72,6 +90,19 @@ export default function HomeScreen() {
       setAnimationFrame(0); // reset to first frame
     }, 1000); // total animation duration
   };
+
+  const filteredData = useMemo(() => {
+    if (selectedFilter === "all") {
+      return mockNewsletters;
+    }
+
+    return mockNewsletters.filter((entry) => entry.category === selectedFilter);
+  }, [selectedFilter, mockNewsletters]);
+
+  const handleFilterChange = (newFilter: filterOptions) => {
+    setSelectedFilter(newFilter);
+  };
+
   const handleWallet = () => {
     navigation.navigate("Wallet");
   };
@@ -88,13 +119,37 @@ export default function HomeScreen() {
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
+        stickyHeaderIndices={[0, 2]} // Make header and filter sticky
       >
-        {/* Animated Header */}
-        <Animated.View style={[styles.header, { height: headerHeight }]}>
+        {/* Collapsible Sticky Header */}
+        <Animated.View
+          style={[
+            styles.header,
+            { transform: [{ scaleY: headerScale }], zIndex: 1000 },
+          ]}
+        >
           <Image source={frames[animationFrame]} style={styles.headerImage} />
           <View style={styles.overlayContent}>
-            <Header />
-            <View style={styles.textOverlayContainer}>
+            <SafeAreaView
+              style={{
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                zIndex: 1001,
+              }}
+            >
+              <Header />
+            </SafeAreaView>
+            <Animated.View
+              style={[
+                styles.textOverlayContainer,
+                {
+                  opacity: contentOpacity,
+                  transform: [{ translateY: contentTranslateY }],
+                },
+              ]}
+            >
               <Text style={styles.greeting}>Hello Miss Wong</Text>
               <View style={styles.pointsContainer}>
                 <View style={styles.border}>
@@ -114,15 +169,14 @@ export default function HomeScreen() {
                   onPress={() => navigation.navigate("SearchScreen")}
                 />
               </View>
-            </View>
+            </Animated.View>
           </View>
         </Animated.View>
 
-        {/* White content scrolls beneath header */}
+        {/* Horizontal Scroll Content */}
         <View style={styles.scrollContent}>
           <ScrollView
             contentContainerStyle={{
-              paddingBottom: 100,
               backgroundColor: "#f5f5f5",
             }}
             horizontal
@@ -151,19 +205,25 @@ export default function HomeScreen() {
               ></ImageBackground>
             </TouchableOpacity>
           </ScrollView>
-          <ScrollView
-            showsVerticalScrollIndicator={false}
-            style={{ padding: 16, width: "100%" }}
-            nestedScrollEnabled={true}
-          >
-            {mockNewsletters.map((item) => (
-              <NewsletterCard
-                key={item.id}
-                item={item}
-                onPress={() => console.log("Go to:", item.id)}
-              />
-            ))}
-          </ScrollView>
+        </View>
+
+        {/* Sticky Filter */}
+        <View style={styles.filterContainer}>
+          <HomePageFilterSelector
+            selectedFilter={selectedFilter}
+            onFilterChange={handleFilterChange}
+          />
+        </View>
+
+        {/* Newsletter Cards */}
+        <View style={styles.newsletterContainer}>
+          {filteredData.map((item) => (
+            <NewsletterCard
+              key={item.id}
+              item={item}
+              onPress={() => console.log("Go to:", item.id)}
+            />
+          ))}
         </View>
       </Animated.ScrollView>
 
@@ -183,11 +243,19 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#eee",
   },
+  filterContainer: {
+    backgroundColor: "#fff",
+    width: "100%",
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
   header: {
     width: "100%",
+    height: 200, // Set a fixed height instead of dynamic
     overflow: "hidden",
     backgroundColor: "#eee",
     borderBottomLeftRadius: 40,
+    zIndex: 1000,
   },
   headerImage: {
     width: "100%",
@@ -226,7 +294,11 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     backgroundColor: "#fff",
-    minHeight: 800,
+  },
+  newsletterContainer: {
+    backgroundColor: "#fff",
+    paddingHorizontal: 16,
+    width: "100%",
   },
   addButton: {
     position: "absolute",
