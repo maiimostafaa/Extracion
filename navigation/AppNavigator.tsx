@@ -36,6 +36,7 @@ import SearchScreen from "../screens/SearchScreen";
 import { brewLogEntry } from "../assets/types/BrewLog/brewLogEntry"
 import BrewLogScreen from "../screens/brew-log/BrewLog";
 import BrewLogEditScreen from "../screens/brew-log/BrewLogEditScreen"
+import BrewLogDetailScreen from "../screens/brew-log/BrewLogDetailScreen"
 
 export type RootStackParamList = {
   Landing: undefined;
@@ -59,6 +60,7 @@ export type RootStackParamList = {
   allCoupons: undefined;
   SearchScreen: undefined;
   BrewLogScreen: undefined;
+  BrewLogDetailScreen: { brewLogEntry: brewLogEntry };
   BrewLogEditScreen: { brewLogEntry: brewLogEntry };
   fullCoupon: { coupon: coupon };
   BeanDetail: { beanId: string };
@@ -190,7 +192,8 @@ export default function AppNavigator() {
       <Stack.Screen name="fullCoupon" component={FullCouponScreen} />
       <Stack.Screen name="SearchScreen" component={SearchScreen} />
       <Stack.Screen name="BrewLogScreen" component={BrewLogScreen} />
-      <Stack.Screen name="BrewLogEditScreen" component={BrewLogEditScreen} />
+      <Stack.Screen name="BrewLogDetailScreen" component={BrewLogDetailScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="BrewLogEditScreen" component={BrewLogEditScreen} options={{presentation: 'modal', gestureEnabled: false, headerShown: false,}} />
     </Stack.Navigator>
   );
 }

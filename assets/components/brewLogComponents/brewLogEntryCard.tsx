@@ -5,6 +5,7 @@ import { brewLogEntry } from "../../types/BrewLog/brewLogEntry"
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../../navigation/AppNavigator';
+import StarRating from '../StarRating';
 
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -23,13 +24,22 @@ const BrewLogEntryCard: React.FC<brewLogEntryCardProps> = ({ brewLogEntry }) => 
 
     const navigation = useNavigation<NavigationProp>();
 
-    const handleIconPress = () => {
-        console.log('Icon pressed for:', brewLogEntry.name);
+    const handleCardPress = () => {
+        console.log('Card pressed for:', brewLogEntry.name);
+        navigation.navigate('BrewLogDetailScreen', { brewLogEntry })
+    };
+
+    const handleEditPress = () => {
+        console.log('Edit pressed for:', brewLogEntry.name);
         navigation.navigate('BrewLogEditScreen', { brewLogEntry })
     };
 
     return (
-        <View style={styles.container}>
+        <TouchableOpacity 
+            style={styles.container}
+            onPress={handleCardPress}
+            activeOpacity={0.95}
+        >
             <Image 
                 source={{ uri: brewLogEntry.image }}
                 style={styles.image}
@@ -45,9 +55,14 @@ const BrewLogEntryCard: React.FC<brewLogEntryCardProps> = ({ brewLogEntry }) => 
                         {brewLogEntry.brewMethod}
                     </Text>
                     
-                    {/* Star rating placeholder */}
+                    {/* Star rating */}
                     <View style={styles.ratingContainer}>
-                        <Text style={styles.ratingText}>★★★★☆</Text>
+                        <StarRating 
+                            rating={brewLogEntry.rating} 
+                            size={12}
+                            color="#FFD700"
+                            outlineColor="#E0E0E0"
+                        />
                     </View>
                 </View>
                 
@@ -56,16 +71,18 @@ const BrewLogEntryCard: React.FC<brewLogEntryCardProps> = ({ brewLogEntry }) => 
                         {formatDate(new Date(brewLogEntry.date))}
                     </Text>
                     
-                    <TouchableOpacity 
-                        style={styles.iconButton}
-                        onPress={handleIconPress}
-                        activeOpacity={0.7}
-                    >
-                        <Ionicons name="chevron-forward" size={16} color="#666" />
-                    </TouchableOpacity>
+                    <View style={styles.editButtonWrapper}>
+                        <TouchableOpacity 
+                            style={styles.iconButton}
+                            onPress={handleEditPress}
+                            activeOpacity={0.7}
+                        >
+                            <Ionicons name="pencil" size={16} color="#666" />
+                        </TouchableOpacity>
+                    </View>
                 </View>
             </View>
-        </View>
+        </TouchableOpacity>
     );
 };
 
@@ -118,10 +135,6 @@ const styles = StyleSheet.create({
     ratingContainer: {
         marginBottom: 4,
     },
-    ratingText: {
-        fontSize: 12,
-        color: '#FFD700', // Gold color for stars
-    },
     bottomRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -134,15 +147,31 @@ const styles = StyleSheet.create({
         color: '#888',
         fontWeight: '500',
     },
+    editButtonWrapper: {
+        // Prevent touch events from bubbling to parent
+        zIndex: 1,
+    },
     iconButton: {
         justifyContent: 'center',
         alignItems: 'center',
         width: 32,
         height: 32,
         borderRadius: 16,
-        backgroundColor: '#f0f0f0',
+        backgroundColor: '#f8f8f8',
         borderWidth: 1,
         borderColor: '#e0e0e0',
+        // Increase touch area for better UX
+        minWidth: 36,
+        minHeight: 36,
+        // Add subtle shadow for better visibility
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 1,
+        },
+        shadowOpacity: 0.1,
+        shadowRadius: 2,
+        elevation: 2,
     },
     iconText: {
         fontSize: 18,
