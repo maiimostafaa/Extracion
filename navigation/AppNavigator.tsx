@@ -31,9 +31,11 @@ import AllCouponsScreen from "../screens/wallet/allCoupons";
 import FullCouponScreen from "../screens/wallet/FullCoupon";
 import ProfileScreen from "../screens/ProfileScreen";
 import { coupon } from "../assets/types/coupon";
-import RewardShopScreen from "../screens/RewardShopScreen";
+import { ShopItem } from "../assets/types/shop-item";
+import ShopScreen from "../screens/ShopScreen";
 import SearchScreen from "../screens/SearchScreen";
 import BrewLogScreen from "../screens/brew-log/BrewLog";
+import ShopItemDetailScreen from "../screens/ShopItemDetailScreen";
 
 export type RootStackParamList = {
   Landing: undefined;
@@ -57,12 +59,14 @@ export type RootStackParamList = {
   allCoupons: undefined;
   SearchScreen: undefined;
   BrewLogScreen: undefined;
+  ShopScreen: undefined;
   fullCoupon: { coupon: coupon };
   BeanDetail: { beanId: string };
   CafeDetail: { cafeId: string };
   ClassDetail: { classId: string };
   ToolDetail: { toolId: string };
   ItemDetail: { itemId: string };
+  ShopItemDetail: { item: ShopItem };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -152,7 +156,7 @@ function MainTabs() {
       <Tab.Screen name="brew log" component={BrewLogScreen} />
       <Tab.Screen name="scan" component={CameraScreen} />
       <Tab.Screen name="extracion" component={ExtractionInterface} />
-      <Tab.Screen name="shop" component={RewardShopScreen} />
+      <Tab.Screen name="shop" component={ShopScreen} />
     </Tab.Navigator>
   );
 }
@@ -187,6 +191,8 @@ export default function AppNavigator() {
       <Stack.Screen name="fullCoupon" component={FullCouponScreen} />
       <Stack.Screen name="SearchScreen" component={SearchScreen} />
       <Stack.Screen name="BrewLogScreen" component={BrewLogScreen} />
+      <Stack.Screen name="ShopScreen" component={ShopScreen} />
+      <Stack.Screen name="ShopItemDetail" component={ShopItemDetailScreen} />
     </Stack.Navigator>
   );
 }

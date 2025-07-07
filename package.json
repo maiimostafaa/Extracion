@@ -20,6 +20,7 @@
     "expo-font": "~13.3.1",
     "expo-splash-screen": "~0.30.9",
     "expo-status-bar": "~2.2.3",
+    "lucide-react": "^0.525.0",
     "react": "19.0.0",
     "react-native": "0.79.3",
     "react-native-calendars": "^1.1312.1",

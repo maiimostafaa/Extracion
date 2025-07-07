@@ -10,21 +10,24 @@ import {
 import { FontAwesome6 } from "@expo/vector-icons";
 import { Entypo } from "@expo/vector-icons";
 
-export default function CustomHeader() {
+interface CustomHeaderProps {
+  tintColor?: string; // Optional prop for tint color
+}
+export default function Header({ tintColor = "#fff" }: CustomHeaderProps) {
   return (
     <View style={styles.header}>
       {/* Top Row: Logo + Icons */}
       <View style={styles.topRow}>
         <Image
           source={require("../assets/nonclickable-visual-elements/getthepong-logo.png")}
-          style={styles.logo}
+          style={[styles.logo, { tintColor }]} // Apply tintColor to the logo
         />
         <View style={styles.iconRow}>
           <TouchableOpacity style={styles.iconWrapper}>
-            <FontAwesome6 name="bell" size={24} color="#fff" />
+            <FontAwesome6 name="bell" size={24} color={tintColor} />
           </TouchableOpacity>
           <TouchableOpacity style={styles.iconWrapper}>
-            <Entypo name="dots-three-horizontal" size={24} color="#fff" />
+            <Entypo name="dots-three-horizontal" size={24} color={tintColor} />
           </TouchableOpacity>
         </View>
       </View>
@@ -46,84 +49,12 @@ const styles = StyleSheet.create({
   logo: {
     width: 100,
     height: 23,
-  },
-  lightText: {
-    fontFamily: "second",
-    color: "#ccc",
+    // tintColor will be dynamically applied via inline style
   },
   iconRow: {
     flexDirection: "row",
-    borderRadius: 12,
-    position: "absolute",
-    top: 0,
-    right: -30,
-    width: "30%",
   },
   iconWrapper: {
-    marginLeft: 16,
-    height: 24,
-    width: 24,
-  },
-  icon: {
-    width: 24,
-    height: 25,
-    tintColor: "#58595B",
-    resizeMode: "contain",
-  },
-  notificationDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: "#068CC9",
-    position: "absolute",
-    top: 1,
-    left: -2,
-  },
-  searchBarContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#868788",
-    borderRadius: 20,
-    marginTop: 16,
-    paddingHorizontal: 12,
-    height: 40,
-    width: "50%",
-  },
-  searchIcon: {
-    width: 20,
-    height: 20,
-    tintColor: "#fff",
-    marginRight: 8,
-  },
-  searchBar: {
-    flex: 1,
-    color: "#fff",
-    fontSize: 16,
-  },
-  bottomRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 16,
-  },
-  navItem: {
-    alignItems: "center",
-  },
-  navIcon: {
-    width: 24,
-    height: 24,
-    tintColor: "#fff",
-    marginBottom: 4,
-    resizeMode: "contain",
-  },
-  navLabel: {
-    color: "#fff",
-    fontSize: 12,
-    fontFamily: "second",
-  },
-  iconRow2: {
-    flexDirection: "row",
-    marginTop: 19,
-    justifyContent: "space-between",
-    width: "45%",
+    marginLeft: 10,
   },
 });
