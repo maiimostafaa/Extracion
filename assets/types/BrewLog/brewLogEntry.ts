@@ -1,4 +1,11 @@
-type tasteCategory = 'Gritty' | 'Smooth' | 'Body' | 'Clean' | 'Fruity' | 'Floral' | 'Chocolate' | 'Nutty' | 'Caramel' | 'Roasted' | 'Cereal' | 'Green' | 'Sour' | 'Bitter' | 'Sweet' | 'Salty'
+// Organized taste categories
+type mouthFeelCategory = 'Gritty' | 'Smooth' | 'Body' | 'Clean';
+type aromaCategory = 'Fruity' | 'Floral' | 'Chocolate' | 'Nutty' | 'Caramel' | 'Roasted' | 'Cereal' | 'Green';
+type tasteCategory = 'Sour' | 'Bitter' | 'Sweet' | 'Salty';
+
+// All taste categories combined for compatibility
+type allTasteCategories = mouthFeelCategory | aromaCategory | tasteCategory;
+
 type brewMethod = 'pour over' | 'cold brew' | 'brew bar' | 'french press';
 
 export interface brewLogEntry {
@@ -9,7 +16,7 @@ export interface brewLogEntry {
     image: any; // URL or local path to the coffee's image
     coffeeBeanDetail: coffeeBeanDetail; // Custom interface to log the details of the coffee beans used
     brewDetail: brewDetail; // Custom interface to hold brew data
-    tasteRating: Record<tasteCategory, number>;  // Dictionary to hold taste : rating (0-3)
+    tasteRating: Record<allTasteCategories, number>;  // Dictionary to hold taste : rating (0-3)
     rating: number; // Rating for the coffee
 }
 

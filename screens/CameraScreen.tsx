@@ -1,112 +1,177 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   StyleSheet,
   View,
   Text,
   TouchableOpacity,
   SafeAreaView,
-  Image,
   Alert,
+  Dimensions,
+  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 
 export default function CameraScreen() {
-  const [scanMode, setScanMode] = useState<'label' | 'grind'>('label');
+  const [scanMode, setScanMode] = useState<'label' | 'QR'>('label');
+  const [permission, requestPermission] = useCameraPermissions();
+  const [selectedLens, setSelectedLens] = useState<string>('builtInWideAngleCamera');
+  const navigation = useNavigation();
+  const cameraRef = useRef<CameraView>(null);
 
-  const handleScan = () => {
-    // Placeholder for actual camera functionality
+  useEffect(() => {
+    if (!permission?.granted) {
+      requestPermission();
+    }
+  }, [permission]);
+
+  // Get available lenses and select the main camera (1x) - iOS only
+  useEffect(() => {
+    const getMainCamera = async () => {
+      if (Platform.OS === 'ios' && cameraRef.current && permission?.granted) {
+        try {
+          const lenses = await cameraRef.current.getAvailableLensesAsync();
+          console.log('Available lenses:', lenses);
+          
+          // Try to find the main camera lens (typically builtInDualCamera or builtInTripleCamera for main lens)
+          // On newer iPhones, these often correspond to the 1x main camera
+          const mainLens = lenses.find(lens => 
+            lens.includes('builtInDualCamera') || 
+            lens.includes('builtInTripleCamera') ||
+            lens.includes('builtInTelephotoCamera')
+          ) || lenses[0]; // fallback to first available
+          
+          console.log('Selected lens:', mainLens);
+          setSelectedLens(mainLens);
+        } catch (error) {
+          console.log('Error getting lenses:', error);
+        }
+      }
+    };
+
+    if (permission?.granted) {
+      // Small delay to ensure camera is mounted
+      setTimeout(getMainCamera, 500);
+    }
+  }, [permission?.granted]);
+
+  const handleCapture = () => {
+    // Placeholder for actual capture functionality
     Alert.alert(
-      'Scan Complete',
+      'Photo Captured',
       scanMode === 'label'
-        ? 'Coffee label detected! Would you like to save this coffee to your collection?'
-        : 'Grind size detected! Would you like to save this setting?'
+        ? 'Coffee label captured! Processing...'
+        : 'QR code captured! Processing...'
     );
   };
 
+  const handleBack = () => {
+    navigation.goBack();
+  };
+
+  if (!permission) {
+    // Camera permissions are still loading
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.cameraContainer}>
+          <Text style={styles.placeholderText}>Loading...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (!permission.granted) {
+    // Camera permissions are not granted yet
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.cameraContainer}>
+          <Text style={styles.placeholderText}>Camera permission required</Text>
+          <TouchableOpacity style={styles.permissionButton} onPress={requestPermission}>
+            <Text style={styles.permissionButtonText}>Grant Permission</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container}>
+      {/* Black Header with Back Button */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Scan Coffee</Text>
+        <TouchableOpacity onPress={handleBack} style={styles.backButton}>
+          <Ionicons name="chevron-back" size={28} color="#fff" />
+        </TouchableOpacity>
       </View>
 
-      <View style={styles.content}>
-        {/* Mode Selection */}
-        <View style={styles.modeContainer}>
+      {/* Camera Viewfinder */}
+      <View style={styles.cameraContainer}>
+        <CameraView
+          ref={cameraRef}
+          style={styles.camera}
+          facing="back"
+          {...(Platform.OS === 'ios' && { selectedLens: selectedLens })}
+          barcodeScannerSettings={{
+            barcodeTypes: scanMode === 'QR' ? ['qr'] : [],
+          }}
+        >
+          {/* Overlay for scan mode indication */}
+          <View style={styles.scanOverlay}>
+            <Text style={styles.scanModeText}>
+              {scanMode === 'label' ? 'Position coffee label in frame' : 'Position QR code in frame'}
+            </Text>
+          </View>
+        </CameraView>
+      </View>
+
+      
+      {/* Mode Toggle Slider */}
+      <View style={styles.toggleContainer}>
+        <View style={styles.toggleSlider}>
           <TouchableOpacity
             style={[
-              styles.modeButton,
-              scanMode === 'label' && styles.modeButtonActive,
+              styles.toggleOption,
+              scanMode === 'label' && styles.toggleOptionActive,
             ]}
             onPress={() => setScanMode('label')}
           >
-            <Ionicons
-              name="camera"
-              size={24}
-              color={scanMode === 'label' ? '#fff' : '#007AFF'}
-            />
             <Text
               style={[
-                styles.modeButtonText,
-                scanMode === 'label' && styles.modeButtonTextActive,
+                styles.toggleText,
+                scanMode === 'label' && styles.toggleTextActive,
               ]}
             >
-              Scan Label
+              Label
             </Text>
           </TouchableOpacity>
-
+          
           <TouchableOpacity
             style={[
-              styles.modeButton,
-              scanMode === 'grind' && styles.modeButtonActive,
+              styles.toggleOption,
+              scanMode === 'QR' && styles.toggleOptionActive,
             ]}
-            onPress={() => setScanMode('grind')}
+            onPress={() => setScanMode('QR')}
           >
-            <Ionicons
-              name="scan"
-              size={24}
-              color={scanMode === 'grind' ? '#fff' : '#007AFF'}
-            />
             <Text
               style={[
-                styles.modeButtonText,
-                scanMode === 'grind' && styles.modeButtonTextActive,
+                styles.toggleText,
+                scanMode === 'QR' && styles.toggleTextActive,
               ]}
             >
-              Scan Grind
+              QR
             </Text>
           </TouchableOpacity>
         </View>
+      </View>
 
-        {/* Camera Preview Placeholder */}
-        <View style={styles.cameraPreview}>
-          <Image
-            source={{ uri: 'https://picsum.photos/400/600' }}
-            style={styles.previewImage}
-          />
-          <View style={styles.scanOverlay}>
-            <View style={styles.scanFrame} />
-          </View>
-        </View>
-
-        {/* Instructions */}
-        <View style={styles.instructions}>
-          <Text style={styles.instructionsTitle}>
-            {scanMode === 'label'
-              ? 'How to scan a coffee label:'
-              : 'How to scan grind size:'}
-          </Text>
-          <Text style={styles.instructionsText}>
-            {scanMode === 'label'
-              ? '1. Position the coffee bag label within the frame\n2. Ensure good lighting\n3. Hold steady and tap the scan button'
-              : '1. Place ground coffee on a white surface\n2. Position within the frame\n3. Hold steady and tap the scan button'}
-          </Text>
-        </View>
-
-        {/* Scan Button */}
-        <TouchableOpacity style={styles.scanButton} onPress={handleScan}>
-          <Ionicons name="scan-circle" size={64} color="#007AFF" />
+      {/* Capture Button */}
+      <View style={styles.captureContainer}>
+        <TouchableOpacity style={styles.captureButton} onPress={handleCapture}>
+          <View style={styles.captureButtonInner} />
         </TouchableOpacity>
       </View>
+
+      
     </SafeAreaView>
   );
 }
@@ -114,92 +179,121 @@ export default function CameraScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#000',
   },
   header: {
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    backgroundColor: '#000000',
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    paddingBottom: 16,
   },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
+  backButton: {
+    alignSelf: 'flex-start',
   },
-  content: {
+  cameraContainer: {
     flex: 1,
-    padding: 16,
+    backgroundColor: '#000',
   },
-  modeContainer: {
-    flexDirection: 'row',
-    marginBottom: 16,
-    gap: 12,
-  },
-  modeButton: {
+  camera: {
     flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#007AFF',
-    gap: 8,
   },
-  modeButtonActive: {
-    backgroundColor: '#007AFF',
-  },
-  modeButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#007AFF',
-  },
-  modeButtonTextActive: {
-    color: '#fff',
-  },
-  cameraPreview: {
+  cameraPlaceholder: {
     flex: 1,
-    position: 'relative',
-    borderRadius: 12,
-    overflow: 'hidden',
-    marginBottom: 16,
-  },
-  previewImage: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'cover',
-  },
-  scanOverlay: {
-    ...StyleSheet.absoluteFillObject,
     justifyContent: 'center',
     alignItems: 'center',
+    padding: 40,
   },
-  scanFrame: {
-    width: '80%',
-    height: '60%',
-    borderWidth: 2,
-    borderColor: '#fff',
-    borderRadius: 12,
-  },
-  instructions: {
-    backgroundColor: '#f8f9fa',
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 16,
-  },
-  instructionsTitle: {
+  placeholderText: {
+    color: '#666',
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 8,
+    marginTop: 16,
+    textAlign: 'center',
   },
-  instructionsText: {
+  placeholderSubtext: {
+    color: '#888',
     fontSize: 14,
-    color: '#666',
-    lineHeight: 20,
+    marginTop: 8,
+    textAlign: 'center',
   },
-  scanButton: {
-    alignSelf: 'center',
-    marginBottom: 16,
+  permissionButton: {
+    backgroundColor: '#8CDBED',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+    marginTop: 16,
+  },
+  permissionButtonText: {
+    color: '#000',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  scanOverlay: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    paddingBottom: 40,
+  },
+  scanModeText: {
+    color: '#fff',
+    fontSize: 16,
+    textAlign: 'center',
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 8,
+  },
+  captureContainer: {
+    backgroundColor: '#000',
+    alignItems: 'center',
+    paddingVertical: 20,
+  },
+  captureButton: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#fff',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 3,
+    borderColor: '#333',
+  },
+  captureButtonInner: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#fff',
+  },
+  toggleContainer: {
+    backgroundColor: '#000',
+    paddingHorizontal: 40,
+    paddingBottom: 0,
+    paddingTop: 10,
+    alignItems: 'center',
+  },
+  toggleSlider: {
+    flexDirection: 'row',
+    backgroundColor: '#58595B',
+    borderRadius: 20,
+    padding: 3,
+    width: 160,
+  },
+  toggleOption: {
+    flex: 1,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 17,
+    alignItems: 'center',
+  },
+  toggleOptionActive: {
+    backgroundColor: '#8CDBED',
+  },
+  toggleText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#fff',
+  },
+  toggleTextActive: {
+    color: '#000',
   },
 }); 

@@ -25,7 +25,7 @@ import ConnectScreen from "../screens/other-screens/ConnectScreen";
 import CameraScreen from "../screens/CameraScreen";
 import DeviceScreen from "../screens/other-screens/DeviceScreen";
 import DevicesScreen from "../screens/devices/DevicesScreen";
-import ExtractionInterface from "../screens/devices/ExtractionInterface";
+import ExtracionScreen from "../screens/ExtracionScreen";
 import MainWallet from "../screens/wallet/mainWallet";
 import AllCouponsScreen from "../screens/wallet/allCoupons";
 import FullCouponScreen from "../screens/wallet/FullCoupon";
@@ -34,7 +34,13 @@ import { coupon } from "../assets/types/coupon";
 import { ShopItem } from "../assets/types/shop-item";
 import ShopScreen from "../screens/ShopScreen";
 import SearchScreen from "../screens/SearchScreen";
+import { brewLogEntry } from "../assets/types/BrewLog/brewLogEntry"
 import BrewLogScreen from "../screens/brew-log/BrewLog";
+import BrewLogEditScreen from "../screens/brew-log/BrewLogEditScreen"
+import BrewLogDetailScreen from "../screens/brew-log/BrewLogDetailScreen"
+import ExtracionConfigScreen from "../screens/ExtracionConfigScreen"
+import ExtracionCoffeeBeanListScreen from "../screens/ExtracionCoffeeBeanListScreen"
+import ExtracionCoffeeBeanInputScreen from "../screens/ExtracionCoffeeBeanInputScreen"
 import ShopItemDetailScreen from "../screens/ShopItemDetailScreen";
 
 export type RootStackParamList = {
@@ -61,12 +67,17 @@ export type RootStackParamList = {
   BrewLogScreen: undefined;
   ShopScreen: undefined;
 
+  BrewLogDetailScreen: { brewLogEntry: brewLogEntry };
+  BrewLogEditScreen: { brewLogEntry: brewLogEntry };
   fullCoupon: { coupon: coupon };
   BeanDetail: { beanId: string };
   CafeDetail: { cafeId: string };
   ClassDetail: { classId: string };
   ToolDetail: { toolId: string };
   ItemDetail: { itemId: string };
+  ExtracionConfigScreen: undefined;
+  ExtracionCoffeeBeanListScreen: undefined;
+  ExtracionCoffeeBeanInputScreen: undefined;
   ShopItemDetail: { item: ShopItem };
 };
 
@@ -156,8 +167,8 @@ function MainTabs() {
       <Tab.Screen name="home" component={HomeStackScreen} />
       <Tab.Screen name="brew log" component={BrewLogScreen} />
       <Tab.Screen name="scan" component={CameraScreen} />
-      <Tab.Screen name="extracion" component={ExtractionInterface} />
       <Tab.Screen name="shop" component={ShopScreen} />
+      <Tab.Screen name="extracion" component={ExtracionScreen} />
     </Tab.Navigator>
   );
 }
@@ -186,12 +197,17 @@ export default function AppNavigator() {
       <Stack.Screen name="Camera" component={CameraScreen} />
       <Stack.Screen name="Device" component={DeviceScreen} />
       <Stack.Screen name="Devices" component={DevicesScreen} />
-      <Stack.Screen name="Extraction" component={ExtractionInterface} />
+      <Stack.Screen name="Extraction" component={ExtracionScreen} />
       <Stack.Screen name="Wallet" component={MainWallet} />
       <Stack.Screen name="allCoupons" component={AllCouponsScreen} />
       <Stack.Screen name="fullCoupon" component={FullCouponScreen} />
       <Stack.Screen name="SearchScreen" component={SearchScreen} />
       <Stack.Screen name="BrewLogScreen" component={BrewLogScreen} />
+      <Stack.Screen name="BrewLogDetailScreen" component={BrewLogDetailScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="BrewLogEditScreen" component={BrewLogEditScreen} options={{presentation: 'modal', gestureEnabled: false, headerShown: false,}} />
+      <Stack.Screen name="ExtracionConfigScreen" component={ExtracionConfigScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="ExtracionCoffeeBeanListScreen" component={ExtracionCoffeeBeanListScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="ExtracionCoffeeBeanInputScreen" component={ExtracionCoffeeBeanInputScreen} options={{ presentation: 'fullScreenModal', gestureEnabled: true, headerShown: false }} />
       <Stack.Screen name="ShopScreen" component={ShopScreen} />
       <Stack.Screen name="ShopItemDetail" component={ShopItemDetailScreen} />
     </Stack.Navigator>

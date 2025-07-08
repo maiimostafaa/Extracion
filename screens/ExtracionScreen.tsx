@@ -12,7 +12,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import type { RootStackParamList } from "../../navigation/AppNavigator";
+import type { RootStackParamList } from "../navigation/AppNavigator";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -229,12 +229,7 @@ export default function ExtractionScreen() {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => navigation.goBack()}
-          >
-            <Ionicons name="arrow-back" size={24} color="#333" />
-          </TouchableOpacity>
+          <View style={styles.backButton} />
           <Text style={styles.headerTitle}>Extraction</Text>
           <View style={styles.headerRight} />
         </View>
@@ -251,6 +246,14 @@ export default function ExtractionScreen() {
           >
             <Text style={styles.connectButtonText}>Connect</Text>
           </TouchableOpacity>
+          
+          {/* Temporary navigation button */}
+          <TouchableOpacity
+            style={styles.testButton}
+            onPress={() => navigation.navigate('ExtracionConfigScreen')}
+          >
+            <Text style={styles.testButtonText}>French Press</Text>
+          </TouchableOpacity>
         </View>
       </SafeAreaView>
     );
@@ -259,12 +262,7 @@ export default function ExtractionScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}
-        >
-          <Ionicons name="arrow-back" size={24} color="#333" />
-        </TouchableOpacity>
+        <View style={styles.backButton} />
         <Text style={styles.headerTitle}>Extraction</Text>
         <TouchableOpacity style={styles.settingsButton}>
           <Ionicons name="settings-outline" size={24} color="#333" />
@@ -429,6 +427,18 @@ const styles = StyleSheet.create({
     borderRadius: 32,
   },
   connectButtonText: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "600",
+  },
+  testButton: {
+    backgroundColor: "#34C759",
+    paddingHorizontal: 32,
+    paddingVertical: 16,
+    borderRadius: 32,
+    marginTop: 16,
+  },
+  testButtonText: {
     color: "#fff",
     fontSize: 18,
     fontWeight: "600",
