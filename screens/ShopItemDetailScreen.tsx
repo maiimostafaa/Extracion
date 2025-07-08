@@ -332,7 +332,7 @@ const styles = StyleSheet.create({
     color: "#fff",
     textAlign: "center",
     marginHorizontal: 16,
-    fontFamily: "main",
+    fontFamily: "second",
   },
   floatingActions: {
     position: "absolute",
@@ -341,7 +341,7 @@ const styles = StyleSheet.create({
     right: 0,
     zIndex: 999,
     paddingTop: (StatusBar.currentHeight || 0) + 12,
-    paddingHorizontal: 16,
+    paddingHorizontal: 40,
     flexDirection: "row",
     justifyContent: "space-between",
   },
@@ -392,14 +392,14 @@ const styles = StyleSheet.create({
   brand: {
     fontSize: 14,
     color: "#666",
-    fontFamily: "main",
+    fontFamily: "second",
     marginBottom: 4,
   },
   name: {
     fontSize: 24,
     fontWeight: "700",
     color: "#000",
-    fontFamily: "main",
+    fontFamily: "second",
     lineHeight: 30,
     marginBottom: 12,
   },
@@ -415,7 +415,7 @@ const styles = StyleSheet.create({
   ratingText: {
     fontSize: 14,
     color: "#666",
-    fontFamily: "main",
+    fontFamily: "second",
   },
   priceContainer: {
     flexDirection: "row",
@@ -426,14 +426,14 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: "700",
     color: "#000",
-    fontFamily: "main",
+    fontFamily: "second",
   },
   originalPrice: {
     fontSize: 20,
     color: "#999",
     textDecorationLine: "line-through",
     marginLeft: 12,
-    fontFamily: "main",
+    fontFamily: "second",
   },
   stockContainer: {
     flexDirection: "row",
@@ -444,7 +444,7 @@ const styles = StyleSheet.create({
     color: "#4CAF50",
     fontWeight: "600",
     marginLeft: 4,
-    fontFamily: "main",
+    fontFamily: "second",
   },
   outOfStock: {
     color: "#FF5252",
@@ -457,13 +457,13 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#000",
     marginBottom: 12,
-    fontFamily: "main",
+    fontFamily: "second",
   },
   description: {
     fontSize: 16,
     color: "#666",
     lineHeight: 24,
-    fontFamily: "main",
+    fontFamily: "second",
   },
   featureRow: {
     flexDirection: "row",
@@ -474,7 +474,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#666",
     marginLeft: 8,
-    fontFamily: "main",
+    fontFamily: "second",
   },
   specRow: {
     flexDirection: "row",
@@ -486,13 +486,13 @@ const styles = StyleSheet.create({
   specKey: {
     fontSize: 14,
     color: "#666",
-    fontFamily: "main",
+    fontFamily: "second",
   },
   specValue: {
     fontSize: 14,
     color: "#000",
     fontWeight: "500",
-    fontFamily: "main",
+    fontFamily: "second",
   },
   quantityContainer: {
     marginBottom: 24,
@@ -502,7 +502,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#000",
     marginBottom: 12,
-    fontFamily: "main",
+    fontFamily: "second",
   },
   quantitySelector: {
     flexDirection: "row",
@@ -524,7 +524,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#000",
     marginHorizontal: 20,
-    fontFamily: "main",
+    fontFamily: "second",
   },
   bottomBar: {
     position: "absolute",
@@ -556,13 +556,13 @@ const styles = StyleSheet.create({
   totalLabel: {
     fontSize: 14,
     color: "#666",
-    fontFamily: "main",
+    fontFamily: "second",
   },
   totalPrice: {
     fontSize: 24,
     fontWeight: "700",
     color: "#000",
-    fontFamily: "main",
+    fontFamily: "second",
   },
   addToCartButton: {
     backgroundColor: "#8CDBED",
@@ -582,6 +582,6 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#fff",
     textAlign: "center",
-    fontFamily: "main",
+    fontFamily: "second",
   },
 });

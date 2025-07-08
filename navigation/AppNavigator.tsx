@@ -60,6 +60,7 @@ export type RootStackParamList = {
   SearchScreen: undefined;
   BrewLogScreen: undefined;
   ShopScreen: undefined;
+
   fullCoupon: { coupon: coupon };
   BeanDetail: { beanId: string };
   CafeDetail: { cafeId: string };

@@ -252,6 +252,7 @@ const styles = StyleSheet.create({
   },
   headerContent: {
     paddingTop: 16,
+    paddingBottom: 10,
   },
   promoBanner: {
     backgroundColor: "#8B4513",
@@ -291,7 +292,6 @@ const styles = StyleSheet.create({
     fontFamily: "main",
   },
   itemsContainer: {
-    paddingHorizontal: 16,
     paddingBottom: 100,
   },
   itemsGrid: {
