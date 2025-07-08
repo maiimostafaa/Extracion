@@ -167,8 +167,8 @@ function MainTabs() {
       <Tab.Screen name="home" component={HomeStackScreen} />
       <Tab.Screen name="brew log" component={BrewLogScreen} />
       <Tab.Screen name="scan" component={CameraScreen} />
-      <Tab.Screen name="shop" component={ShopScreen} />
       <Tab.Screen name="extracion" component={ExtracionScreen} />
+      <Tab.Screen name="shop" component={ShopScreen} />
     </Tab.Navigator>
   );
 }
