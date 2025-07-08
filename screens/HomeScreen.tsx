@@ -139,7 +139,7 @@ export default function HomeScreen() {
                 zIndex: 1001,
               }}
             >
-              <Header />
+              <Header tintColor="#fff" />
             </SafeAreaView>
             <Animated.View
               style={[

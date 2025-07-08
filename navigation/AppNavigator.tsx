@@ -31,7 +31,8 @@ import AllCouponsScreen from "../screens/wallet/allCoupons";
 import FullCouponScreen from "../screens/wallet/FullCoupon";
 import ProfileScreen from "../screens/ProfileScreen";
 import { coupon } from "../assets/types/coupon";
-import RewardShopScreen from "../screens/RewardShopScreen";
+import { ShopItem } from "../assets/types/shop-item";
+import ShopScreen from "../screens/ShopScreen";
 import SearchScreen from "../screens/SearchScreen";
 import { brewLogEntry } from "../assets/types/BrewLog/brewLogEntry"
 import BrewLogScreen from "../screens/brew-log/BrewLog";
@@ -40,6 +41,7 @@ import BrewLogDetailScreen from "../screens/brew-log/BrewLogDetailScreen"
 import ExtracionConfigScreen from "../screens/ExtracionConfigScreen"
 import ExtracionCoffeeBeanListScreen from "../screens/ExtracionCoffeeBeanListScreen"
 import ExtracionCoffeeBeanInputScreen from "../screens/ExtracionCoffeeBeanInputScreen"
+import ShopItemDetailScreen from "../screens/ShopItemDetailScreen";
 
 export type RootStackParamList = {
   Landing: undefined;
@@ -63,6 +65,8 @@ export type RootStackParamList = {
   allCoupons: undefined;
   SearchScreen: undefined;
   BrewLogScreen: undefined;
+  ShopScreen: undefined;
+
   BrewLogDetailScreen: { brewLogEntry: brewLogEntry };
   BrewLogEditScreen: { brewLogEntry: brewLogEntry };
   fullCoupon: { coupon: coupon };
@@ -74,6 +78,7 @@ export type RootStackParamList = {
   ExtracionConfigScreen: undefined;
   ExtracionCoffeeBeanListScreen: undefined;
   ExtracionCoffeeBeanInputScreen: undefined;
+  ShopItemDetail: { item: ShopItem };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -162,8 +167,8 @@ function MainTabs() {
       <Tab.Screen name="home" component={HomeStackScreen} />
       <Tab.Screen name="brew log" component={BrewLogScreen} />
       <Tab.Screen name="scan" component={CameraScreen} />
+      <Tab.Screen name="shop" component={ShopScreen} />
       <Tab.Screen name="extracion" component={ExtracionScreen} />
-      <Tab.Screen name="shop" component={RewardShopScreen} />
     </Tab.Navigator>
   );
 }
@@ -203,6 +208,8 @@ export default function AppNavigator() {
       <Stack.Screen name="ExtracionConfigScreen" component={ExtracionConfigScreen} options={{ headerShown: false }} />
       <Stack.Screen name="ExtracionCoffeeBeanListScreen" component={ExtracionCoffeeBeanListScreen} options={{ headerShown: false }} />
       <Stack.Screen name="ExtracionCoffeeBeanInputScreen" component={ExtracionCoffeeBeanInputScreen} options={{ presentation: 'fullScreenModal', gestureEnabled: true, headerShown: false }} />
+      <Stack.Screen name="ShopScreen" component={ShopScreen} />
+      <Stack.Screen name="ShopItemDetail" component={ShopItemDetailScreen} />
     </Stack.Navigator>
   );
 }
