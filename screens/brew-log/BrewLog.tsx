@@ -232,7 +232,7 @@ export default function BrewLogScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Header />
+        <Header tintColor="#000" />
       </View>
 
       {/* Filter Options */}
@@ -273,11 +273,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#F5F5F5",
   },
   header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
     padding: 16,
-    marginBottom: -30,
   },
   filterOptionContainer: {
     paddingHorizontal: 16,
