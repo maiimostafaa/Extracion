@@ -9,9 +9,8 @@ export const mockNewsletterItems: newsletterItem[] = [
     date: "2023-10-01",
     createdBy: "Coffee Co.",
     category: "coffee recipe",
-    type: "video",
-    videoUrl: "https://example.com/videos/perfect-coffee.mp4",
-    duration: "3:45",
+
+    media_url: "https://example.com/videos/perfect-coffee.mp4",
   },
   {
     id: "2",
@@ -21,13 +20,7 @@ export const mockNewsletterItems: newsletterItem[] = [
     date: "2023-10-02",
     createdBy: "Latte Masters",
     category: "coffee recipe",
-    type: "textPost",
-    content:
-      "Latte art is a skill that takes time to master. Here are 5 tips to get started...",
-    images: [
-      "https://via.placeholder.com/300",
-      "https://via.placeholder.com/300",
-    ],
+    media_url: "https://via.placeholder.com/300",
   },
   {
     id: "3",
@@ -37,8 +30,7 @@ export const mockNewsletterItems: newsletterItem[] = [
     date: "2023-10-03",
     createdBy: "Coffee Co.",
     category: "promotion",
-    type: "textPost",
-    content: "Don't miss out on this limited-time offer for coffee lovers!",
+    media_url: "https://example.com/images/coffee-beans-sale.jpg",
   },
   {
     id: "4",
@@ -48,9 +40,7 @@ export const mockNewsletterItems: newsletterItem[] = [
     date: "2023-10-04",
     createdBy: "Coffee Co.",
     category: "KOL featuring",
-    type: "video",
-    videoUrl: "https://example.com/videos/john-doe-coffee.mp4",
-    duration: "5:20",
+    media_url: "https://example.com/videos/john-doe-coffee.mp4",
   },
   {
     id: "5",
@@ -60,14 +50,7 @@ export const mockNewsletterItems: newsletterItem[] = [
     date: "2023-10-05",
     createdBy: "Coffee Co.",
     category: "coffee recipe",
-    type: "textPost",
-    content:
-      "From beans to brewing methods, this guide covers everything you need to know about coffee.",
-    images: [
-      "https://via.placeholder.com/300",
-      "https://via.placeholder.com/300",
-      "https://via.placeholder.com/300",
-    ],
+    media_url: "https://via.placeholder.com/300",
   },
 ];
 export default mockNewsletterItems;

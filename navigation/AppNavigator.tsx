@@ -34,8 +34,20 @@ import { coupon } from "../assets/types/coupon";
 import { ShopItem } from "../assets/types/shop-item";
 import ShopScreen from "../screens/ShopScreen";
 import SearchScreen from "../screens/SearchScreen";
+<<<<<<< Updated upstream
 import BrewLogScreen from "../screens/brew-log/BrewLog";
+=======
+import { brewLogEntry } from "../assets/types/BrewLog/brewLogEntry";
+import BrewLogScreen from "../screens/brew-log/BrewLog";
+import BrewLogEditScreen from "../screens/brew-log/BrewLogEditScreen";
+import BrewLogDetailScreen from "../screens/brew-log/BrewLogDetailScreen";
+import ExtracionConfigScreen from "../screens/ExtracionConfigScreen";
+import ExtracionCoffeeBeanListScreen from "../screens/ExtracionCoffeeBeanListScreen";
+import ExtracionCoffeeBeanInputScreen from "../screens/ExtracionCoffeeBeanInputScreen";
+>>>>>>> Stashed changes
 import ShopItemDetailScreen from "../screens/ShopItemDetailScreen";
+import { newsletterItem } from "../assets/types/newsletter-item";
+import NewsletterDetailScreen from "../screens/NewsletterDetailScreen";
 
 export type RootStackParamList = {
   Landing: undefined;
@@ -60,7 +72,13 @@ export type RootStackParamList = {
   SearchScreen: undefined;
   BrewLogScreen: undefined;
   ShopScreen: undefined;
+<<<<<<< Updated upstream
 
+=======
+  NewsletterDetail: { item: newsletterItem };
+  BrewLogDetailScreen: { brewLogEntry: brewLogEntry };
+  BrewLogEditScreen: { brewLogEntry: brewLogEntry };
+>>>>>>> Stashed changes
   fullCoupon: { coupon: coupon };
   BeanDetail: { beanId: string };
   CafeDetail: { cafeId: string };
@@ -83,6 +101,10 @@ function HomeStackScreen() {
       <HomeStack.Screen name="allCoupons" component={AllCouponsScreen} />
       <HomeStack.Screen name="fullCoupon" component={FullCouponScreen} />
       <HomeStack.Screen name="SearchScreen" component={SearchScreen} />
+      <HomeStack.Screen
+        name="NewsletterDetail"
+        component={NewsletterDetailScreen}
+      />
     </HomeStack.Navigator>
   );
 }
@@ -192,8 +214,48 @@ export default function AppNavigator() {
       <Stack.Screen name="fullCoupon" component={FullCouponScreen} />
       <Stack.Screen name="SearchScreen" component={SearchScreen} />
       <Stack.Screen name="BrewLogScreen" component={BrewLogScreen} />
+<<<<<<< Updated upstream
+=======
+      <Stack.Screen
+        name="BrewLogDetailScreen"
+        component={BrewLogDetailScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="BrewLogEditScreen"
+        component={BrewLogEditScreen}
+        options={{
+          presentation: "modal",
+          gestureEnabled: false,
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="ExtracionConfigScreen"
+        component={ExtracionConfigScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="ExtracionCoffeeBeanListScreen"
+        component={ExtracionCoffeeBeanListScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="ExtracionCoffeeBeanInputScreen"
+        component={ExtracionCoffeeBeanInputScreen}
+        options={{
+          presentation: "fullScreenModal",
+          gestureEnabled: true,
+          headerShown: false,
+        }}
+      />
+>>>>>>> Stashed changes
       <Stack.Screen name="ShopScreen" component={ShopScreen} />
       <Stack.Screen name="ShopItemDetail" component={ShopItemDetailScreen} />
+      <Stack.Screen
+        name="NewsletterDetail"
+        component={NewsletterDetailScreen}
+      />
     </Stack.Navigator>
   );
 }
