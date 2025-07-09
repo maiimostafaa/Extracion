@@ -190,7 +190,7 @@ export default function HomeScreen() {
                 imageStyle={{ borderRadius: 10 }}
               ></ImageBackground>
             </TouchableOpacity>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => navigation.navigate("CafeFinderScreen")}>
               <ImageBackground
                 source={require("../assets/backgrounds/cafe-finder-bg.png")}
                 style={styles.imageContainer}

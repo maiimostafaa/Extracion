@@ -42,6 +42,7 @@ import ExtracionConfigScreen from "../screens/ExtracionConfigScreen"
 import ExtracionCoffeeBeanListScreen from "../screens/ExtracionCoffeeBeanListScreen"
 import ExtracionCoffeeBeanInputScreen from "../screens/ExtracionCoffeeBeanInputScreen"
 import ShopItemDetailScreen from "../screens/ShopItemDetailScreen";
+import CafeFinderScreen from "../screens/CafeFinderScreen";
 
 export type RootStackParamList = {
   Landing: undefined;
@@ -66,6 +67,7 @@ export type RootStackParamList = {
   SearchScreen: undefined;
   BrewLogScreen: undefined;
   ShopScreen: undefined;
+  CafeFinderScreen: undefined;
 
   BrewLogDetailScreen: { brewLogEntry: brewLogEntry };
   BrewLogEditScreen: { brewLogEntry: brewLogEntry };
@@ -94,6 +96,15 @@ function HomeStackScreen() {
       <HomeStack.Screen name="allCoupons" component={AllCouponsScreen} />
       <HomeStack.Screen name="fullCoupon" component={FullCouponScreen} />
       <HomeStack.Screen name="SearchScreen" component={SearchScreen} />
+      <HomeStack.Screen 
+        name="CafeFinderScreen" 
+        component={CafeFinderScreen}
+        options={{
+          headerShown: false,
+          animation: 'fade',
+          animationDuration: 300,
+        }}
+      />
     </HomeStack.Navigator>
   );
 }
@@ -210,6 +221,15 @@ export default function AppNavigator() {
       <Stack.Screen name="ExtracionCoffeeBeanInputScreen" component={ExtracionCoffeeBeanInputScreen} options={{ presentation: 'fullScreenModal', gestureEnabled: true, headerShown: false }} />
       <Stack.Screen name="ShopScreen" component={ShopScreen} />
       <Stack.Screen name="ShopItemDetail" component={ShopItemDetailScreen} />
+      <Stack.Screen 
+        name="CafeFinderScreen" 
+        component={CafeFinderScreen}
+        options={{
+          headerShown: false,
+          animation: 'fade',
+          animationDuration: 300,
+        }}
+      />
     </Stack.Navigator>
   );
 }
