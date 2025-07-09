@@ -41,91 +41,79 @@ export default function WalletScreen() {
   );
 
   return (
-    <ImageBackground
-      source={require("../../assets/backgrounds/bg-1.png")}
-      style={styles.background}
-    >
-      <SafeAreaView style={styles.container}>
-        <View style={styles.header}>
-          <Header />
+    <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
+        <Header tintColor="#000" />
+      </View>
+
+      {/* Main Content */}
+      <ScrollView
+        style={styles.content}
+        scrollEnabled={true}
+        nestedScrollEnabled={true}
+      >
+        {/* Card */}
+        <View style={styles.section}>
+          <Text style={styles.headerTitle}>my wallet &gt;</Text>
+        </View>
+        <View style={styles.cardContainer}>
+          <FlipCard
+            balance={150}
+            name="Mai Mostafa"
+            qrData="11011011000"
+            expDate="28/09/2029"
+            membership="Silver"
+          />
         </View>
 
-        {/* Main Content */}
-        <ScrollView
-          style={styles.content}
-          scrollEnabled={true}
-          nestedScrollEnabled={true}
-        >
-          {/* Card */}
-          <View style={styles.section}>
-            <Text style={styles.headerTitle}>my wallet &gt;</Text>
-          </View>
-          <View style={styles.cardContainer}>
-            <FlipCard
-              balance={150}
-              name="Mai Mostafa"
-              qrData="11011011000"
-              expDate="28/09/2029"
-              membership="Silver"
-            />
-          </View>
-
-          {/* coupons */}
-          <View style={styles.couponSection}>
-            <Text
-              style={styles.headerTitle}
-              onPress={() => navigation.navigate("allCoupons")}
-            >
-              coupons &gt;
-            </Text>
-
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              nestedScrollEnabled={true}
-            >
-              {mockCoupons.map((coupon, index) => (
-                <View
-                  key={coupon.id}
-                  style={[
-                    styles.couponCardWrapper,
-                    index < mockCoupons.length - 1 && styles.couponSpacing,
-                  ]}
-                >
-                  <CouponCard coupon={coupon} initialViewMode="compact" />
-                </View>
-              ))}
-            </ScrollView>
-          </View>
-          {/* back Button */}
-        </ScrollView>
-        <View style={styles.bottomOverlay}>
-          <TouchableOpacity
-            style={styles.addButton}
-            onPress={navigation.goBack}
+        {/* coupons */}
+        <View style={styles.couponSection}>
+          <Text
+            style={styles.headerTitle}
+            onPress={() => navigation.navigate("allCoupons")}
           >
-            <Ionicons name="return-down-back-sharp" size={32} color="#000" />
-          </TouchableOpacity>
+            coupons &gt;
+          </Text>
+
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            nestedScrollEnabled={true}
+          >
+            {mockCoupons.map((coupon, index) => (
+              <View
+                key={coupon.id}
+                style={[
+                  styles.couponCardWrapper,
+                  index < mockCoupons.length - 1 && styles.couponSpacing,
+                ]}
+              >
+                <CouponCard coupon={coupon} initialViewMode="compact" />
+              </View>
+            ))}
+          </ScrollView>
         </View>
-      </SafeAreaView>
-    </ImageBackground>
+        {/* back Button */}
+      </ScrollView>
+      <View style={styles.bottomOverlay}>
+        <TouchableOpacity style={styles.addButton} onPress={navigation.goBack}>
+          <Ionicons name="return-down-back-sharp" size={32} color="#000" />
+        </TouchableOpacity>
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  background: {
-    flex: 1,
-    resizeMode: "cover",
-  },
   container: {
     flex: 1,
     width: width,
+    backgroundColor: "f5f5f5",
   },
   cardContainer: {
     width: "100%",
     height: "75%",
     marginTop: -40,
-    marginBottom: -30,
   },
   header: {
     flexDirection: "row",
@@ -136,7 +124,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 24,
-    color: "#8CDBED",
+    color: "#078CC9",
     fontFamily: "second",
   },
   content: {
@@ -154,16 +142,16 @@ const styles = StyleSheet.create({
     zIndex: 1, // Ensure it's above other elements
   },
   couponScrollView: {
-    marginTop: 10,
-    height: 120,
     zIndex: 2, // Higher z-index for touch priority
   },
   couponScrollContent: {
+    marginTop: 20,
     paddingHorizontal: 0,
     paddingVertical: 5,
     alignItems: "center", // Center items vertically
   },
   couponCardWrapper: {
+    marginTop: 10,
     width: 220, // Fixed width for horizontal scrolling
     height: 110, // Fixed height for compact view
   },
