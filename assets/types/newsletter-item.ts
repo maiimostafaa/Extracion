@@ -1,6 +1,4 @@
-export type newsletterItem = VideoItem | TextItem;
-
-interface BaseNewsletterItem {
+export interface newsletterItem {
   id: string; // Unique identifier for the item
   title: string; // Title of the item
   description: string; // Short description of the item
@@ -8,16 +6,9 @@ interface BaseNewsletterItem {
   date: string; // Date the item was created or published
   createdBy: string; // Author or creator of the item
   category: "coffee recipe" | "KOL featuring" | "promotion";
-}
-
-interface VideoItem extends BaseNewsletterItem {
-  type: "video"; // Discriminator for video items
-  videoUrl: string; // URL or path to the video file
-  duration: string; // Duration of the video (e.g., "2:30")
-}
-
-interface TextItem extends BaseNewsletterItem {
-  type: "textPost"; // Discriminator for text posts
-  content: string; // Detailed text content of the post
-  images?: string[]; // Optional array of image URLs for the post
+  media_type?: "VIDEO" | "IMAGE" | "CAROUSEL_ALBUM"; // Type of media content
+  media_types?: string[]; // Array of media types if multiple
+  media_url: string; // URL to the media content (video, image, etc.)
+  media_urls?: string[]; // Optional array of media URLs for multiple items
+  permalink?: string; // Optional permalink to the item
 }

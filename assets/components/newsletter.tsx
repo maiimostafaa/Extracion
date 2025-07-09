@@ -1,4 +1,8 @@
 import React from "react";
+import { useNavigation } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import type { RootStackParamList } from "../../navigation/AppNavigator";
+import Video from "react-native-video";
 import {
   View,
   Text,
@@ -9,14 +13,20 @@ import {
 } from "react-native";
 import { newsletterItem } from "../types/newsletter-item";
 
+type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
+
 interface Props {
   item: newsletterItem;
   onPress?: () => void;
 }
 
 const NewsletterCard = ({ item, onPress }: Props) => {
+  const navigation = useNavigation<NavigationProp>();
   return (
-    <TouchableOpacity style={styles.card} onPress={onPress}>
+    <TouchableOpacity
+      style={styles.card}
+      onPress={() => navigation.navigate("NewsletterDetail", { item })}
+    >
       <View style={styles.imageContainer}>
         <Image source={{ uri: item.thumbnail }} style={styles.thumbnail} />
         <View style={styles.labelContainer}>
@@ -25,10 +35,12 @@ const NewsletterCard = ({ item, onPress }: Props) => {
       </View>
 
       <View style={styles.content}>
-        <Text style={styles.title} numberOfLines={2}>
+        <Text style={styles.title} numberOfLines={1}>
           {item.title}
         </Text>
-        <Text style={styles.creator}>By {item.createdBy}</Text>
+        <Text style={styles.creator} numberOfLines={1}>
+          By {item.createdBy}
+        </Text>
       </View>
     </TouchableOpacity>
   );

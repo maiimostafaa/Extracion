@@ -43,6 +43,8 @@ import ExtracionCoffeeBeanListScreen from "../screens/ExtracionCoffeeBeanListScr
 import ExtracionCoffeeBeanInputScreen from "../screens/ExtracionCoffeeBeanInputScreen"
 import ShopItemDetailScreen from "../screens/ShopItemDetailScreen";
 import CafeFinderScreen from "../screens/CafeFinderScreen";
+import { newsletterItem } from "../assets/types/newsletter-item";
+import NewsletterDetailScreen from "../screens/NewsletterDetailScreen";
 
 export type RootStackParamList = {
   Landing: undefined;
@@ -68,7 +70,7 @@ export type RootStackParamList = {
   BrewLogScreen: undefined;
   ShopScreen: undefined;
   CafeFinderScreen: undefined;
-
+NewsletterDetail: {item: newsletterItem}
   BrewLogDetailScreen: { brewLogEntry: brewLogEntry };
   BrewLogEditScreen: { brewLogEntry: brewLogEntry };
   fullCoupon: { coupon: coupon };
@@ -105,6 +107,11 @@ function HomeStackScreen() {
           animationDuration: 300,
         }}
       />
+      <HomeStack.Screen
+        name="NewsletterDetail"
+        component={NewsletterDetailScreen}
+      />
+
     </HomeStack.Navigator>
   );
 }
@@ -230,6 +237,11 @@ export default function AppNavigator() {
           animationDuration: 300,
         }}
       />
+      <Stack.Screen
+        name="NewsletterDetail"
+        component={NewsletterDetailScreen}
+      />
+
     </Stack.Navigator>
   );
 }

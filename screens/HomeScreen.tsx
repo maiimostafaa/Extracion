@@ -22,12 +22,15 @@ import {
 import { Ionicons, EvilIcons } from "@expo/vector-icons";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+// import Video from "react-native-video";
+
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import type { RootStackParamList } from "../navigation/AppNavigator";
 import Header from "../navigation/Header";
 import NewsletterCard from "../assets/components/newsletter";
 import HomePageFilterSelector from "../assets/components/HomePageFilterSelector";
 import mockNewsletters from "../assets/mock_data/mock-newsletter-items";
+import { newsletterItem } from "../assets/types/newsletter-item";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 type filterOptions = "all" | "coffee recipe" | "KOL featuring" | "promotion";
@@ -49,6 +52,8 @@ const frames = [
 export default function HomeScreen() {
   const navigation = useNavigation<NavigationProp>();
   const [refreshing, setRefreshing] = useState(false);
+  const [instagramPosts, setInstagramPosts] = useState<newsletterItem[]>([]);
+
   const scrollY = useRef(new Animated.Value(0)).current;
   const [animationFrame, setAnimationFrame] = useState(0);
   const [selectedFilter, setSelectedFilter] = useState<filterOptions>("all");
@@ -91,13 +96,97 @@ export default function HomeScreen() {
     }, 1000); // total animation duration
   };
 
-  const filteredData = useMemo(() => {
-    if (selectedFilter === "all") {
-      return mockNewsletters;
-    }
+  useEffect(() => {
+    const fetchInstagramFeed = async () => {
+      const accessToken =
+        "EAAQ3NxrYDg0BPIcHVILfIZC6lax4WYBgoT64sCvnFnFxitKvQwSrMasmUDxElgSr4OGnrTqqgGC3vymCoVr6fDPzEgO3h3XIBZBRZBhY3fjKgE8Jtv0QgU2yKJQZAEc96Umw1NgsxSO9L39ZAasyGSsc8fIWMArcTrDIvOPyQB7QyuuaLR2DGbcmumoSIUrjcZAhZCnZCZA2AOlwg6QZDZD";
+      const baseUrl = `https://graph.facebook.com/v18.0/17841408709139123/media`;
+      try {
+        const response = await fetch(
+          `${baseUrl}?fields=id,caption,media_type,media_url,thumbnail_url,permalink,timestamp,children&access_token=${accessToken}`
+        );
+        const json = await response.json();
+        const posts: InstagramPost[] = json.data;
 
-    return mockNewsletters.filter((entry) => entry.category === selectedFilter);
-  }, [selectedFilter, mockNewsletters]);
+        // Convert each post into a format compatible with NewsletterCard
+        console.log("Instagram API Response:", json); // 👀 LOG THE RAW RESPONSE
+
+        if (!json.data || !Array.isArray(json.data)) {
+          console.warn("Instagram response missing data field:", json);
+          return;
+        }
+
+        interface InstagramPost {
+          id: string;
+          caption?: string;
+          thumbnail_url: string;
+          media_url: string;
+          permalink: string;
+          timestamp: string;
+          media_type: "VIDEO" | "IMAGE" | "CAROUSEL_ALBUM";
+          children?: {
+            data: { id: string }[];
+          };
+        }
+
+        const formatted = await Promise.all(
+          posts.map(async (post: InstagramPost) => {
+            let media_urls: string[] = [];
+            let media_types: string[] = [];
+
+            // For CAROUSEL posts, fetch each child media
+            if (post.media_type === "CAROUSEL_ALBUM" && post.children?.data) {
+              const childMedia = await Promise.all(
+                post.children.data.map(async (child: { id: string }) => {
+                  const childRes = await fetch(
+                    `https://graph.facebook.com/v18.0/${child.id}?fields=media_url,media_type,thumbnail_url&access_token=${accessToken}`
+                  );
+                  const childJson = await childRes.json();
+                  return {
+                    url: childJson.media_url || childJson.thumbnail_url,
+                    type: childJson.media_type,
+                  };
+                })
+              );
+
+              media_urls = childMedia.map((child) => child.url);
+              media_types = childMedia.map((child) => child.type);
+            } else {
+              // Regular image or video
+              media_urls = [post.media_url || post.thumbnail_url];
+              media_types = [post.media_type];
+            }
+
+            return {
+              id: `insta-${post.id}`,
+              title: post.caption?.slice(0, 30) || "Instagram Post",
+              description: post.caption || "No description available",
+              media_urls,
+              media_url: media_urls[0],
+              media_types,
+              thumbnail: post.thumbnail_url || media_urls[0],
+              createdBy: "getthepong",
+              category: "KOL featuring" as "KOL featuring",
+              date: post.timestamp,
+              permalink: post.permalink,
+            };
+          })
+        );
+
+        setInstagramPosts(formatted);
+      } catch (err) {
+        console.error("Failed to fetch IG posts:", err);
+      }
+    };
+
+    fetchInstagramFeed();
+  }, []);
+
+  const filteredData = useMemo(() => {
+    const combined = [...instagramPosts, ...mockNewsletters];
+    if (selectedFilter === "all") return combined;
+    return combined.filter((entry) => entry.category === selectedFilter);
+  }, [selectedFilter, instagramPosts]);
 
   const handleFilterChange = (newFilter: filterOptions) => {
     setSelectedFilter(newFilter);
@@ -156,7 +245,23 @@ export default function HomeScreen() {
                   <Text style={styles.points}>
                     Points{" "}
                     <Text style={{ fontWeight: "600", fontFamily: "default" }}>
-                      23{"    "}
+                      23{"  "}
+                      <TouchableOpacity
+                        style={{ borderRadius: 4, backgroundColor: "#8CDBED" }}
+                        onPress={handleWallet}
+                      >
+                        <Text
+                          style={{
+                            fontSize: 14,
+                            fontWeight: "700",
+                            fontFamily: "default",
+                            color: "#fff",
+                          }}
+                        >
+                          {"   "}${"   "}
+                        </Text>
+                      </TouchableOpacity>
+                      {"    "}
                     </Text>
                   </Text>
                 </View>
@@ -195,7 +300,9 @@ export default function HomeScreen() {
                 source={require("../assets/backgrounds/cafe-finder-bg.png")}
                 style={styles.imageContainer}
                 imageStyle={{ borderRadius: 10 }}
+                
               ></ImageBackground>
+              
             </TouchableOpacity>
             <TouchableOpacity>
               <ImageBackground
@@ -226,14 +333,6 @@ export default function HomeScreen() {
           ))}
         </View>
       </Animated.ScrollView>
-
-      {/* Floating Wallet Button */}
-      <TouchableOpacity
-        style={styles.addButton}
-        onPress={() => navigation.navigate("Wallet")}
-      >
-        <Ionicons name="wallet-outline" size={28} color="#000" />
-      </TouchableOpacity>
     </View>
   );
 }
@@ -264,14 +363,14 @@ const styles = StyleSheet.create({
     position: "absolute",
   },
   overlayContent: {
-    paddingTop: 50,
+    paddingTop: 40,
     paddingHorizontal: 20,
     justifyContent: "space-between",
     height: "100%",
   },
   textOverlayContainer: {
     flex: 1,
-    paddingTop: 20,
+    paddingTop: 10,
     paddingHorizontal: 10,
   },
   pointsContainer: {
@@ -316,5 +415,8 @@ const styles = StyleSheet.create({
     width: 200,
     height: 250,
     borderRadius: 10,
+  },
+  walletContainer: {
+    backgroundColor: "#8CDBED",
   },
 });
