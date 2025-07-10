@@ -70,17 +70,19 @@ const ExtracionConfigScreen: React.FC = () => {
       </View>
 
       {/* Navigation Bar */}
-      <View style={styles.navigationBar}>
-        <TouchableOpacity style={styles.navLeft} onPress={handleNavigateToCoffeeBeans}>
-          <Image 
-            source={require('../assets/icons/extracion_coffeebean.png')} 
-            style={styles.navIcon}
-          />
-          <Text style={styles.navText}>select coffee beans</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navRight} onPress={handleNavigateToCoffeeBeans}>
-          <Ionicons name="chevron-forward" size={20} color="#666" />
-        </TouchableOpacity>
+      <View style={styles.selectCoffeeBeansContainer}>
+        <View style={styles.selectCoffeeBeans}>
+          <TouchableOpacity style={styles.navLeft} onPress={handleNavigateToCoffeeBeans}>
+            <Image 
+              source={require('../assets/icons/extracion_coffeebean.png')} 
+              style={styles.navIcon}
+            />
+            <Text style={styles.navText}>select coffee beans</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.navRight} onPress={handleNavigateToCoffeeBeans}>
+            <Ionicons name="chevron-forward" size={20} color="#FFFFFF" />
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Content */}
@@ -174,14 +176,19 @@ const styles = StyleSheet.create({
   headerRight: {
     flex: 1, // Take remaining space to push title left
   },
-  navigationBar: {
+  selectCoffeeBeans: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
-    paddingTop: 40,
     paddingVertical: 12,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#58595B',
+    borderRadius: 50,
+  },
+  selectCoffeeBeansContainer: {
+    paddingTop: 40,
+    paddingHorizontal: 16,
+    backgroundColor: "#FFFFFF",
   },
   navLeft: {
     flexDirection: 'row',
@@ -191,13 +198,13 @@ const styles = StyleSheet.create({
   navIcon: {
     width: 20,
     height: 20,
-    tintColor: '#666',
+    tintColor: '#FFFFFF',
     marginRight: 8,
+    resizeMode: "contain",
   },
   navText: {
     fontSize: 16,
-    color: '#333',
-    fontWeight: '500',
+    color: '#FFFFFF',
   },
   navRight: {
     padding: 4,
