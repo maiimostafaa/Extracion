@@ -58,27 +58,6 @@ export default function HomeScreen() {
   const [animationFrame, setAnimationFrame] = useState(0);
   const [selectedFilter, setSelectedFilter] = useState<filterOptions>("all");
 
-  // Calculate when header should collapse to just show Header component
-  const headerScale = scrollY.interpolate({
-    inputRange: [0, 150],
-    outputRange: [1, 0.5], // Scale down to 50% of original height
-    extrapolate: "clamp",
-  });
-
-  // Fade out the greeting and points when collapsing
-  const contentOpacity = scrollY.interpolate({
-    inputRange: [0, 100],
-    outputRange: [1, 0],
-    extrapolate: "clamp",
-  });
-
-  // Move the greeting content up when collapsing
-  const contentTranslateY = scrollY.interpolate({
-    inputRange: [0, 120],
-    outputRange: [0, -40],
-    extrapolate: "clamp",
-  });
-
   const onRefresh = () => {
     setRefreshing(true);
     let frame = 0;
@@ -109,7 +88,7 @@ export default function HomeScreen() {
         const posts: InstagramPost[] = json.data;
 
         // Convert each post into a format compatible with NewsletterCard
-        console.log("Instagram API Response:", json); // 👀 LOG THE RAW RESPONSE
+        
 
         if (!json.data || !Array.isArray(json.data)) {
           console.warn("Instagram response missing data field:", json);
@@ -198,6 +177,69 @@ export default function HomeScreen() {
 
   return (
     <View style={{ flex: 1 }}>
+      {/* Fixed Banner Header - Outside ScrollView */}
+      <View
+        style={[
+          styles.header,
+          { zIndex: 1000 },
+        ]}
+      >
+        <Image source={frames[animationFrame]} style={styles.headerImage} />
+        <View style={styles.overlayContent}>
+          <SafeAreaView
+            style={{
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              zIndex: 1001,
+            }}
+          >
+            <Header tintColor="#fff" />
+          </SafeAreaView>
+          <View
+            style={styles.textOverlayContainer}
+          >
+            <Text style={styles.greeting}>Hello Miss Wong</Text>
+            <View style={styles.pointsContainer}>
+              <View style={styles.border}>
+                <Text style={styles.points}>
+                  Points{" "}
+                  <Text style={{ fontWeight: "600", fontFamily: "default" }}>
+                    23{"  "}
+                    <TouchableOpacity
+                      style={{ borderRadius: 4, backgroundColor: "#8CDBED" }}
+                      onPress={handleWallet}
+                    >
+                      <Text
+                        style={{
+                          fontSize: 14,
+                          fontWeight: "700",
+                          fontFamily: "default",
+                          color: "#fff",
+                        }}
+                      >
+                        {"   "}${"   "}
+                      </Text>
+                    </TouchableOpacity>
+                    {"    "}
+                  </Text>
+                </Text>
+              </View>
+
+              <EvilIcons
+                name="search"
+                size={24}
+                color="#fff"
+                style={{ marginLeft: 12 }}
+                onPress={() => navigation.navigate("SearchScreen")}
+              />
+            </View>
+          </View>
+        </View>
+      </View>
+
+      {/* Scrollable Content Below Fixed Banner */}
       <Animated.ScrollView
         scrollEventThrottle={16}
         showsVerticalScrollIndicator={false}
@@ -208,75 +250,8 @@ export default function HomeScreen() {
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
-        stickyHeaderIndices={[0, 2]} // Make header and filter sticky
+        stickyHeaderIndices={[1]} // Only make filter sticky (now index 1)
       >
-        {/* Collapsible Sticky Header */}
-        <Animated.View
-          style={[
-            styles.header,
-            { transform: [{ scaleY: headerScale }], zIndex: 1000 },
-          ]}
-        >
-          <Image source={frames[animationFrame]} style={styles.headerImage} />
-          <View style={styles.overlayContent}>
-            <SafeAreaView
-              style={{
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                zIndex: 1001,
-              }}
-            >
-              <Header tintColor="#fff" />
-            </SafeAreaView>
-            <Animated.View
-              style={[
-                styles.textOverlayContainer,
-                {
-                  opacity: contentOpacity,
-                  transform: [{ translateY: contentTranslateY }],
-                },
-              ]}
-            >
-              <Text style={styles.greeting}>Hello Miss Wong</Text>
-              <View style={styles.pointsContainer}>
-                <View style={styles.border}>
-                  <Text style={styles.points}>
-                    Points{" "}
-                    <Text style={{ fontWeight: "600", fontFamily: "default" }}>
-                      23{"  "}
-                      <TouchableOpacity
-                        style={{ borderRadius: 4, backgroundColor: "#8CDBED" }}
-                        onPress={handleWallet}
-                      >
-                        <Text
-                          style={{
-                            fontSize: 14,
-                            fontWeight: "700",
-                            fontFamily: "default",
-                            color: "#fff",
-                          }}
-                        >
-                          {"   "}${"   "}
-                        </Text>
-                      </TouchableOpacity>
-                      {"    "}
-                    </Text>
-                  </Text>
-                </View>
-
-                <EvilIcons
-                  name="search"
-                  size={24}
-                  color="#fff"
-                  style={{ marginLeft: 12 }}
-                  onPress={() => navigation.navigate("SearchScreen")}
-                />
-              </View>
-            </Animated.View>
-          </View>
-        </Animated.View>
 
         {/* Horizontal Scroll Content */}
         <View style={styles.scrollContent}>
@@ -415,6 +390,7 @@ const styles = StyleSheet.create({
     width: 200,
     height: 250,
     borderRadius: 10,
+    marginRight: -20
   },
   walletContainer: {
     backgroundColor: "#8CDBED",
