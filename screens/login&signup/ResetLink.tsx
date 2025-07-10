@@ -15,6 +15,7 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../../navigation/AppNavigator";
+import { Ionicons } from "@expo/vector-icons";
 
 type LoginScreenNavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -33,49 +34,44 @@ export default function SignUpScreen() {
     });
   };
 
+  const handleBack = () => {
+    navigation.goBack();
+  };
+
   return (
-    <ImageBackground
-      source={require("../../assets/backgrounds/bg-1.png")}
-      style={styles.background}
-    >
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}
-      >
-        <View style={styles.header}>
-          <TouchableOpacity
-            onPress={() => navigation.goBack()}
-            style={{
-              padding: 16,
-              zIndex: 99,
-            }}
-          >
-            <Image source={require("../../assets/icons/back.png")} />
-          </TouchableOpacity>
+    <ImageBackground style={styles.background}>
+      <View style={styles.header}>
+        <Ionicons
+          name="chevron-back"
+          size={35}
+          color="#000"
+          style={{ padding: 16 }}
+          onPress={handleBack}
+        />
+        <View style={styles.logoContainer}>
           <Image
             source={require("../../assets/nonclickable-visual-elements/getthepong-logo.png")}
             style={styles.headerLogo}
           />
         </View>
+      </View>
 
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          keyboardShouldPersistTaps="handled"
-        >
-          <View style={styles.textContainer}>
-            <Text style={styles.text}>Link sent! Check your email</Text>
-            <Text style={styles.text}>
-              <Text style={styles.text}>to reset your password.</Text>
-            </Text>
-          </View>
-          <View style={styles.formContainer}>
-            <TouchableOpacity style={styles.submitButton} onPress={handleLogin}>
-              <Text style={styles.submitButtonText}>login</Text>
-            </TouchableOpacity>
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View style={styles.textContainer}>
+          <Text style={styles.text}>Link sent! Check your email</Text>
+          <Text style={styles.text}>
+            <Text style={styles.text}>to reset your password.</Text>
+          </Text>
+        </View>
+        <View style={styles.formContainer}>
+          <TouchableOpacity style={styles.submitButton} onPress={handleLogin}>
+            <Text style={styles.submitButtonText}>login</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
     </ImageBackground>
   );
 }
@@ -89,7 +85,10 @@ const styles = StyleSheet.create({
     padding: 24,
     justifyContent: "center",
   },
-
+  logoContainer: {
+    flexDirection: "row",
+    marginRight: "35%",
+  },
   formContainer: {
     width: "100%",
     alignItems: "center",
@@ -103,18 +102,19 @@ const styles = StyleSheet.create({
     width: "90%",
   },
   submitButton: {
-    backgroundColor: "#8CDBED",
-    padding: 12,
+    backgroundColor: "rgba(140, 219, 237, 0.75)",
+    padding: 8,
     borderRadius: 30,
+    borderWidth: 1,
     alignItems: "center",
     width: "90%",
     marginBottom: 12,
   },
   submitButtonText: {
     color: "#000000",
-    fontSize: 27,
-    fontWeight: "600",
-    fontFamily: "second",
+    fontSize: 23,
+    fontWeight: "300",
+    letterSpacing: 1,
   },
   background: {
     flex: 1,
@@ -134,21 +134,20 @@ const styles = StyleSheet.create({
 
   headerLogo: {
     height: 35,
-    marginLeft: "-11.5%",
     marginTop: "1.5%",
     resizeMode: "contain",
     flex: 1,
     justifyContent: "center",
+    tintColor: "#000000",
   },
   textContainer: {
     flexDirection: "column",
     justifyContent: "center",
-    marginBottom: "22%",
+    marginBottom: "10%",
   },
   text: {
     fontSize: 19,
-    color: "#fff",
+    color: "#000",
     textAlign: "center",
-    fontFamily: "cardRegular",
   },
 });

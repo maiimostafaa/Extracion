@@ -1,45 +1,27 @@
 import React from "react";
+import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../../navigation/AppNavigator";
-import {
-  View,
-  Text,
-  Image,
-  StyleSheet,
-  TouchableOpacity,
-  ImageSourcePropType,
-} from "react-native";
-import { newsletterItem } from "../types/newsletter-item";
+import { bannerItem } from "../types/banner-item";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 interface Props {
-  item: newsletterItem;
+  item: bannerItem;
   onPress?: () => void;
 }
 
-const NewsletterCard = ({ item, onPress }: Props) => {
+const BannerCard = ({ item, onPress }: Props) => {
   const navigation = useNavigation<NavigationProp>();
   return (
-    <TouchableOpacity
-      style={styles.card}
-      onPress={() => navigation.navigate("NewsletterDetail", { item })}
-    >
+    <TouchableOpacity style={styles.card}>
       <View style={styles.imageContainer}>
-        <Image source={{ uri: item.thumbnail }} style={styles.thumbnail} />
+        <Image source={{ uri: item.image_url }} style={styles.thumbnail} />
+
         <View style={styles.labelContainer}>
           <Text style={styles.labelText}>{item.category}</Text>
         </View>
-      </View>
-
-      <View style={styles.content}>
-        <Text style={styles.title} numberOfLines={1}>
-          {item.title}
-        </Text>
-        <Text style={styles.creator} numberOfLines={1}>
-          By {item.createdBy}
-        </Text>
       </View>
     </TouchableOpacity>
   );
@@ -92,13 +74,13 @@ const styles = StyleSheet.create({
     fontWeight: "400",
     color: "#111",
     marginBottom: 4,
-    fontFamily: "cardMedium",
-  },
-  creator: {
-    fontSize: 13,
-    color: "#777",
     fontFamily: "cardRegular",
+  },
+  sub: {
+    fontSize: 13,
+    color: "#000",
+    fontFamily: "cardLight",
   },
 });
 
-export default NewsletterCard;
+export default BannerCard;

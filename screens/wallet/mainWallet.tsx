@@ -54,7 +54,7 @@ export default function WalletScreen() {
       >
         {/* Card */}
         <View style={styles.section}>
-          <Text style={styles.headerTitle}>my wallet &gt;</Text>
+          <Text style={styles.headerTitle}>my wallet</Text>
         </View>
         <View style={styles.cardContainer}>
           <FlipCard
@@ -72,7 +72,7 @@ export default function WalletScreen() {
             style={styles.headerTitle}
             onPress={() => navigation.navigate("allCoupons")}
           >
-            coupons &gt;
+            coupons
           </Text>
 
           <ScrollView
@@ -112,7 +112,11 @@ const styles = StyleSheet.create({
   },
   cardContainer: {
     width: "100%",
+<<<<<<< Updated upstream
     height: "75%",
+=======
+    height: 360,
+>>>>>>> Stashed changes
     marginTop: -40,
   },
   header: {
@@ -125,7 +129,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 24,
     color: "#078CC9",
-    fontFamily: "second",
+    fontFamily: "cardRegular",
   },
   content: {
     flex: 1,
@@ -138,8 +142,15 @@ const styles = StyleSheet.create({
   couponSection: {
     padding: 16,
     width: "100%",
+<<<<<<< Updated upstream
     marginTop: 30,
     zIndex: 1, // Ensure it's above other elements
+=======
+  },
+  couponListContainer: {
+    height: 130,
+    marginTop: 10,
+>>>>>>> Stashed changes
   },
   couponScrollView: {
     zIndex: 2, // Higher z-index for touch priority

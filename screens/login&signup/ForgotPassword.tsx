@@ -15,6 +15,7 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../../navigation/AppNavigator";
+import { Ionicons } from "@expo/vector-icons";
 
 type LoginScreenNavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -24,31 +25,31 @@ export default function SignUpScreen() {
   const handleLogin = () => {
     navigation.navigate("ResetLink");
   };
+  const handleBack = () => {
+    navigation.goBack();
+  };
 
   return (
-    <ImageBackground
-      source={require("../../assets/backgrounds/bg-1.png")}
-      style={styles.background}
-    >
+    <ImageBackground style={styles.background}>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
         keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}
       >
         <View style={styles.header}>
-          <TouchableOpacity
-            onPress={() => navigation.goBack()}
-            style={{
-              padding: 16,
-              zIndex: 99,
-            }}
-          >
-            <Image source={require("../../assets/icons/back.png")} />
-          </TouchableOpacity>
-          <Image
-            source={require("../../assets/nonclickable-visual-elements/getthepong-logo.png")}
-            style={styles.headerLogo}
+          <Ionicons
+            name="chevron-back"
+            size={35}
+            color="#000"
+            style={{ padding: 16 }}
+            onPress={handleBack}
           />
+          <View style={styles.logoContainer}>
+            <Image
+              source={require("../../assets/nonclickable-visual-elements/getthepong-logo.png")}
+              style={styles.headerLogo}
+            />
+          </View>
         </View>
 
         <ScrollView
@@ -92,32 +93,38 @@ const styles = StyleSheet.create({
     padding: 24,
     justifyContent: "center",
   },
-
+  logoContainer: {
+    flexDirection: "row",
+    marginRight: "35%",
+  },
   formContainer: {
     width: "100%",
     alignItems: "center",
   },
   input: {
-    backgroundColor: "#f5f5f5",
-    padding: 16,
+    backgroundColor: "rgba(250, 250, 250, 0.75)",
+    padding: 10,
     borderRadius: 30,
+    borderWidth: 1,
     marginBottom: 30,
     fontSize: 16,
     width: "90%",
   },
   submitButton: {
-    backgroundColor: "#8CDBED",
-    padding: 12,
+    backgroundColor: "rgba(140, 219, 237, 0.75)",
+    padding: 8,
     borderRadius: 30,
+    borderWidth: 1,
     alignItems: "center",
     width: "90%",
     marginBottom: 12,
+    marginTop: 60,
   },
   submitButtonText: {
     color: "#000000",
-    fontSize: 27,
-    fontWeight: "600",
-    fontFamily: "second",
+    fontSize: 23,
+    fontWeight: "300",
+    letterSpacing: 1,
   },
   background: {
     flex: 1,
@@ -137,11 +144,11 @@ const styles = StyleSheet.create({
 
   headerLogo: {
     height: 35,
-    marginLeft: "-11.5%",
     marginTop: "1.5%",
     resizeMode: "contain",
     flex: 1,
     justifyContent: "center",
+    tintColor: "#000000",
   },
   textContainer: {
     flexDirection: "column",
@@ -150,8 +157,7 @@ const styles = StyleSheet.create({
   },
   text: {
     fontSize: 19,
-    color: "#fff",
+    color: "#000",
     textAlign: "center",
-    fontFamily: "cardRegular",
   },
 });

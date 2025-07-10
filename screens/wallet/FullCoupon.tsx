@@ -65,7 +65,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    fontFamily: "second",
+    fontFamily: "cardRegular",
     color: "#ffffff",
     marginTop: "9%",
   },
