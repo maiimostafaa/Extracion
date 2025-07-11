@@ -138,7 +138,7 @@ const styles = StyleSheet.create({
   couponSection: {
     padding: 16,
     width: "100%",
-    marginTop: 30,
+    marginTop: 30, //sigh
     zIndex: 1,
   },
   couponListContainer: {
