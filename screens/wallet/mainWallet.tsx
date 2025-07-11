@@ -46,12 +46,8 @@ export default function WalletScreen() {
         <Header tintColor="#000" />
       </View>
 
-      {/* Main Content */}
-      <ScrollView
-        style={styles.content}
-        scrollEnabled={true}
-        nestedScrollEnabled={true}
-      >
+      {/* Main Content - No ScrollView */}
+      <View style={styles.content}>
         {/* Card */}
         <View style={styles.section}>
           <Text style={styles.headerTitle}>my wallet</Text>
@@ -75,30 +71,31 @@ export default function WalletScreen() {
             coupons
           </Text>
 
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            nestedScrollEnabled={true}
-          >
-            {mockCoupons.map((coupon, index) => (
-              <View
-                key={coupon.id}
-                style={[
-                  styles.couponCardWrapper,
-                  index < mockCoupons.length - 1 && styles.couponSpacing,
-                ]}
-              >
-                <CouponCard coupon={coupon} initialViewMode="compact" />
-              </View>
-            ))}
-          </ScrollView>
+          <View style={styles.couponListContainer}>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              scrollEventThrottle={16}
+              decelerationRate="fast"
+              bounces={true}
+              scrollEnabled={true}
+              contentContainerStyle={styles.couponScrollContent}
+              style={{ flex: 1 }}
+            >
+              {mockCoupons.map((coupon, index) => (
+                <View
+                  key={coupon.id}
+                  style={[
+                    styles.couponCardWrapper,
+                    index < mockCoupons.length - 1 && styles.couponSpacing,
+                  ]}
+                >
+                  <CouponCard coupon={coupon} initialViewMode="compact" />
+                </View>
+              ))}
+            </ScrollView>
+          </View>
         </View>
-        {/* back Button */}
-      </ScrollView>
-      <View style={styles.bottomOverlay}>
-        <TouchableOpacity style={styles.addButton} onPress={navigation.goBack}>
-          <Ionicons name="return-down-back-sharp" size={32} color="#000" />
-        </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
@@ -138,22 +135,19 @@ const styles = StyleSheet.create({
   couponSection: {
     padding: 16,
     width: "100%",
-
-    marginTop: 30, //sigh
-    zIndex: 1,
   },
   couponListContainer: {
     height: 130,
     marginTop: 10,
   },
   couponScrollView: {
-    zIndex: 2, // Higher z-index for touch priority
+    marginTop: 10,
+    maxHeight: 130, // Constrain height to prevent conflicts
   },
   couponScrollContent: {
-    marginTop: 20,
-    paddingHorizontal: 0,
     paddingVertical: 5,
-    alignItems: "center", // Center items vertically
+    paddingHorizontal: 0,
+    alignItems: "flex-start", // Align items to start instead of center
   },
   couponCardWrapper: {
     marginTop: 10,
@@ -167,24 +161,5 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "bold",
     color: "#333",
-  },
-  addButton: {
-    position: "absolute",
-    right: 16,
-    bottom: 16,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: "#8CDBED",
-    justifyContent: "center",
-    alignItems: "center",
-    elevation: 4,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-  },
-  bottomOverlay: {
-    justifyContent: "flex-end",
   },
 });
