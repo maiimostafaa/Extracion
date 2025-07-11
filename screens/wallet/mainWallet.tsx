@@ -50,7 +50,7 @@ export default function WalletScreen() {
       <View style={styles.content}>
         {/* Card */}
         <View style={styles.section}>
-          <Text style={styles.headerTitle}>my wallet &gt;</Text>
+          <Text style={styles.headerTitle}>my wallet</Text>
         </View>
         <View style={styles.cardContainer}>
           <FlipCard
@@ -68,7 +68,7 @@ export default function WalletScreen() {
             style={styles.headerTitle}
             onPress={() => navigation.navigate("allCoupons")}
           >
-            coupons &gt;
+            coupons
           </Text>
 
           <View style={styles.couponListContainer}>
@@ -109,7 +109,7 @@ const styles = StyleSheet.create({
   },
   cardContainer: {
     width: "100%",
-    height: "60%", // Reduced from 75% to give more space for coupons
+    height: 360,
     marginTop: -40,
   },
   header: {
@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 24,
     color: "#078CC9",
-    fontFamily: "second",
+    fontFamily: "cardRegular",
   },
   content: {
     flex: 1,
@@ -136,6 +136,7 @@ const styles = StyleSheet.create({
     padding: 16,
     width: "100%",
     marginTop: 10, // Reduced from 30 to move coupons up
+
   },
   couponListContainer: {
     height: 130,

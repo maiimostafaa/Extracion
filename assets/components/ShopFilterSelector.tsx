@@ -88,10 +88,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 10,
-    backgroundColor: "#f5f5f5",
+
     marginRight: 12,
     borderWidth: 1,
-    borderColor: "#e0e0e0",
+    borderColor: "#000",
   },
   selectedFilter: {
     backgroundColor: "#8CDBED",
@@ -110,7 +110,7 @@ const styles = StyleSheet.create({
   filterText: {
     fontSize: 14,
     color: "#666",
-    fontFamily: "main",
+    fontFamily: "cardRegular",
     fontWeight: "500",
   },
   selectedFilterText: {

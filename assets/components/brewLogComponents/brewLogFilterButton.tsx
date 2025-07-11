@@ -69,7 +69,7 @@ const styles = StyleSheet.create({
     color: "#58595B",
     fontSize: 10,
     fontWeight: "500",
-    fontFamily: "main",
+    fontFamily: "cardRegular",
   },
   containerSelected: {
     width: 60,

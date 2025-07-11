@@ -87,8 +87,7 @@ export default function HomeScreen() {
         const json = await response.json();
         const posts: InstagramPost[] = json.data;
 
-        // Convert each post into a format compatible with NewsletterCard
-        
+        // Convert each post into a format compatible with NewsletterCar
 
         if (!json.data || !Array.isArray(json.data)) {
           console.warn("Instagram response missing data field:", json);
@@ -178,12 +177,8 @@ export default function HomeScreen() {
   return (
     <View style={{ flex: 1 }}>
       {/* Fixed Banner Header - Outside ScrollView */}
-      <View
-        style={[
-          styles.header,
-          { zIndex: 1000 },
-        ]}
-      >
+      <View style={[styles.header, { zIndex: 1000 }]}>
+
         <Image source={frames[animationFrame]} style={styles.headerImage} />
         <View style={styles.overlayContent}>
           <SafeAreaView
@@ -197,9 +192,9 @@ export default function HomeScreen() {
           >
             <Header tintColor="#fff" />
           </SafeAreaView>
-          <View
-            style={styles.textOverlayContainer}
-          >
+
+          <View style={styles.textOverlayContainer}>
+
             <Text style={styles.greeting}>Hello Miss Wong</Text>
             <View style={styles.pointsContainer}>
               <View style={styles.border}>
@@ -240,6 +235,7 @@ export default function HomeScreen() {
       </View>
 
       {/* Scrollable Content Below Fixed Banner */}
+
       <Animated.ScrollView
         scrollEventThrottle={16}
         showsVerticalScrollIndicator={false}
@@ -270,19 +266,19 @@ export default function HomeScreen() {
                 imageStyle={{ borderRadius: 10 }}
               ></ImageBackground>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => navigation.navigate("CafeFinderScreen")}>
+            <TouchableOpacity
+              onPress={() => navigation.navigate("CafeFinderScreen")}
+            >
               <ImageBackground
                 source={require("../assets/backgrounds/cafe-finder-bg.png")}
                 style={styles.imageContainer}
                 imageStyle={{ borderRadius: 10 }}
-                
               ></ImageBackground>
-              
             </TouchableOpacity>
             <TouchableOpacity>
               <ImageBackground
                 source={require("../assets/backgrounds/cafe-event-bg.png")}
-                style={styles.imageContainer}
+                style={{ width: 200, height: 250, borderRadius: 10 }}
                 imageStyle={{ borderRadius: 10 }}
               ></ImageBackground>
             </TouchableOpacity>
@@ -332,10 +328,11 @@ const styles = StyleSheet.create({
     zIndex: 1000,
   },
   headerImage: {
-    width: "100%",
+    width: "101%",
     height: "100%",
     resizeMode: "cover",
     position: "absolute",
+    left: -1,
   },
   overlayContent: {
     paddingTop: 40,
@@ -350,17 +347,18 @@ const styles = StyleSheet.create({
   },
   pointsContainer: {
     flexDirection: "row",
+    marginTop: -5,
   },
   greeting: {
     fontSize: 24,
     color: "#fff",
     marginBottom: 8,
-    fontFamily: "main",
+    fontFamily: "cardRegular",
   },
   points: {
     fontSize: 16,
     color: "#fff",
-    fontFamily: "main",
+    fontFamily: "cardRegular",
   },
   border: {
     borderRightWidth: 1,
@@ -390,7 +388,7 @@ const styles = StyleSheet.create({
     width: 200,
     height: 250,
     borderRadius: 10,
-    marginRight: -20
+    marginRight: -20,
   },
   walletContainer: {
     backgroundColor: "#8CDBED",

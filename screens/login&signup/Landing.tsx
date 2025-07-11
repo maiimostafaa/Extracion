@@ -33,7 +33,8 @@ export default function LandingScreen() {
   return (
     <ImageBackground
       source={require("../../assets/backgrounds/bg-1.png")}
-      style={styles.background}
+      style={{ flex: 1, backgroundColor: "#f5f5f5" }}
+      imageStyle={{ opacity: 0.5 }}
     >
       <View style={styles.header}>
         <Image
@@ -44,10 +45,10 @@ export default function LandingScreen() {
 
       <View style={styles.formContainer}>
         <TouchableOpacity style={styles.signupButton} onPress={handleSignUp}>
-          <Text style={styles.submitButtonText}>Sign up</Text>
+          <Text style={styles.submitButtonText}>sign up</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.submitButton} onPress={handleLogin}>
-          <Text style={styles.submitButtonText}>Login</Text>
+          <Text style={styles.submitButtonText}>login</Text>
         </TouchableOpacity>
       </View>
       <View style={styles.footerContainer}>
@@ -79,31 +80,31 @@ const styles = StyleSheet.create({
   },
 
   signupButton: {
-    backgroundColor: "#fff",
-    padding: 12,
+    backgroundColor: "rgba(250, 250, 250, 0.75)",
+    padding: 8,
     borderRadius: 30,
+    borderWidth: 1,
     alignItems: "center",
-    width: "80%",
+    width: "70%",
     marginBottom: "7%",
   },
   submitButton: {
-    backgroundColor: "#8CDBED",
-    padding: 12,
+    backgroundColor: "rgba(140, 219, 237, 0.75)",
+
+    padding: 8,
     borderRadius: 30,
+    borderWidth: 1,
     alignItems: "center",
-    width: "80%",
+    width: "70%",
     marginBottom: 12,
   },
   submitButtonText: {
     color: "#000000",
-    fontSize: 27,
-    fontWeight: "600",
-    fontFamily: "second",
+    fontSize: 23,
+    fontWeight: "300",
+    letterSpacing: 1,
   },
-  background: {
-    flex: 1,
-    resizeMode: "cover",
-  },
+
   header: {
     flexDirection: "row",
     alignItems: "center",
@@ -114,10 +115,11 @@ const styles = StyleSheet.create({
 
   headerLogo: {
     height: 35,
-    marginTop: "1.5%",
+    marginTop: "10%",
     resizeMode: "contain",
     flex: 1,
     justifyContent: "center",
+    tintColor: "#000000",
   },
 
   termsofServiceContainer: {
@@ -127,15 +129,14 @@ const styles = StyleSheet.create({
   },
   termsofService: {
     fontSize: 14,
-    color: "#fff",
+    color: "#000",
     textAlign: "center",
-    fontFamily: "cardRegular",
   },
   termsofServiceBold: {
     fontSize: 14,
-    color: "#fff",
+    color: "#078CC9",
     textAlign: "center",
-    fontFamily: "cardMedium",
+    fontWeight: "bold",
   },
   extracionContainer: {
     alignItems: "center",
@@ -143,10 +144,11 @@ const styles = StyleSheet.create({
     marginBottom: "5%",
   },
   extracionLogo: {
-    height: 30,
+    height: 22,
     marginTop: "1.5%",
     resizeMode: "contain",
     justifyContent: "center",
+    tintColor: "#000000",
   },
   footerContainer: {
     flex: 1,

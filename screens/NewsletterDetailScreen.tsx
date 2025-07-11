@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef, useState } from "react";
 import {
   View,
   Text,
@@ -9,31 +9,32 @@ import {
   TouchableOpacity,
   Image,
   SafeAreaView,
+  FlatList,
+  ViewToken,
 } from "react-native";
 import { Video, ResizeMode } from "expo-av";
-import { RouteProp, useRoute } from "@react-navigation/native";
-import { RootStackParamList } from "../navigation/AppNavigator"; // adjust path if needed
-import { newsletterItem } from "../assets/types/newsletter-item"; // adjust path if needed
+import { RouteProp, useRoute, useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
-import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { useState, useRef } from "react";
-import { FlatList, ViewToken } from "react-native";
+import { RootStackParamList } from "../navigation/AppNavigator";
+import { newsletterItem } from "../assets/types/newsletter-item";
 
 type NewsletterDetailRouteProp = RouteProp<
   RootStackParamList,
   "NewsletterDetail"
 >;
-
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
+
+const { width } = Dimensions.get("window");
 
 const NewsletterDetailScreen = () => {
   const route = useRoute<NewsletterDetailRouteProp>();
   const { item }: { item: newsletterItem } = route.params;
   const navigation = useNavigation<NavigationProp>();
-  const isVideo = item.media_type === "VIDEO";
-  const mediaUrl = isVideo ? item.media_url : item.thumbnail;
+
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [imageHeights, setImageHeights] = useState<number[]>([]);
+
   const viewabilityConfig = useRef({
     viewAreaCoveragePercentThreshold: 50,
   }).current;
@@ -57,41 +58,61 @@ const NewsletterDetailScreen = () => {
         size={24}
         color="#000"
         style={{ margin: 16 }}
-        onPress={() => handleBack()}
+        onPress={handleBack}
       />
       <ScrollView contentContainerStyle={styles.container}>
         {item.media_urls && item.media_urls.length > 1 ? (
           <>
-            <View style={styles.carouselContainer}>
-              <FlatList
-                data={item.media_urls}
-                keyExtractor={(uri, index) => uri + index}
-                horizontal
-                pagingEnabled
-                showsHorizontalScrollIndicator={false}
-                onViewableItemsChanged={onViewableItemsChanged}
-                viewabilityConfig={viewabilityConfig}
-                renderItem={({ item: uri, index }) => {
-                  const mediaType = item.media_types?.[index] || "IMAGE";
+            <FlatList
+              data={item.media_urls}
+              keyExtractor={(uri, index) => uri + index}
+              horizontal
+              pagingEnabled
+              showsHorizontalScrollIndicator={false}
+              onViewableItemsChanged={onViewableItemsChanged}
+              viewabilityConfig={viewabilityConfig}
+              renderItem={({ item: uri, index }) => {
+                const mediaType = item.media_types?.[index] || "IMAGE";
+
+                if (mediaType === "VIDEO") {
                   return (
-                    <View style={styles.mediaItem}>
-                      {mediaType === "VIDEO" ? (
-                        <Video
-                          source={{ uri }}
-                          style={styles.media}
-                          useNativeControls
-                          resizeMode={ResizeMode.COVER}
-                          shouldPlay
-                          isMuted={false}
-                        />
-                      ) : (
-                        <Image source={{ uri }} style={styles.media} />
-                      )}
+                    <View
+                      style={{ width, height: 300, backgroundColor: "#eee" }}
+                    >
+                      <Video
+                        source={{ uri }}
+                        style={{ width, height: 300 }}
+                        useNativeControls
+                        resizeMode={ResizeMode.COVER}
+                        shouldPlay
+                        isMuted={false}
+                      />
                     </View>
                   );
-                }}
-              />
-            </View>
+                } else {
+                  const height = imageHeights[index] || 300;
+                  return (
+                    <View style={{ width, height, backgroundColor: "#eee" }}>
+                      <Image
+                        source={{ uri }}
+                        style={{ width, height }}
+                        resizeMode="contain"
+                        onLoad={(e) => {
+                          const { width: imgW, height: imgH } =
+                            e.nativeEvent.source;
+                          const scaledHeight = (width / imgW) * imgH;
+                          setImageHeights((prev) => {
+                            const updated = [...prev];
+                            updated[index] = scaledHeight;
+                            return updated;
+                          });
+                        }}
+                      />
+                    </View>
+                  );
+                }
+              }}
+            />
             <View style={styles.dotsContainer}>
               {item.media_urls.map((_, i) => (
                 <View
@@ -105,11 +126,11 @@ const NewsletterDetailScreen = () => {
             </View>
           </>
         ) : (
-          <View style={styles.carouselContainer}>
+          <View style={{ width: "100%", backgroundColor: "#eee" }}>
             {item.media_types?.[0] === "VIDEO" ? (
               <Video
                 source={{ uri: item.media_urls?.[0] ?? "" }}
-                style={styles.media}
+                style={{ width, height: 300 }}
                 useNativeControls
                 resizeMode={ResizeMode.COVER}
                 shouldPlay
@@ -118,7 +139,13 @@ const NewsletterDetailScreen = () => {
             ) : (
               <Image
                 source={{ uri: item.media_urls?.[0] ?? "" }}
-                style={styles.media}
+                style={{ width, height: imageHeights[0] || 300 }}
+                resizeMode="contain"
+                onLoad={(e) => {
+                  const { width: imgW, height: imgH } = e.nativeEvent.source;
+                  const scaledHeight = (width / imgW) * imgH;
+                  setImageHeights([scaledHeight]);
+                }}
               />
             )}
           </View>
@@ -147,21 +174,10 @@ const NewsletterDetailScreen = () => {
 
 export default NewsletterDetailScreen;
 
-const { width } = Dimensions.get("window");
-
 const styles = StyleSheet.create({
   container: {
     backgroundColor: "#fff",
     paddingBottom: 40,
-  },
-  mediaContainer: {
-    width: "100%",
-    height: 300,
-    backgroundColor: "#eee",
-  },
-  media: {
-    width: width,
-    height: 300,
   },
   content: {
     padding: 20,
@@ -180,7 +196,7 @@ const styles = StyleSheet.create({
   },
   button: {
     backgroundColor: "#8CDBED",
-    paddingVertical: 10,
+    paddingVertical: 6,
     paddingHorizontal: 16,
     borderRadius: 8,
     alignSelf: "center",
@@ -189,16 +205,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     color: "#000",
-    fontFamily: "main",
-  },
-  carouselContainer: {
-    width: "100%",
-    height: 300,
-    backgroundColor: "#eee",
-  },
-  mediaItem: {
-    width: width,
-    height: 300,
+    fontFamily: "cardRegular",
   },
   dotsContainer: {
     flexDirection: "row",
@@ -213,17 +220,9 @@ const styles = StyleSheet.create({
     marginHorizontal: 4,
   },
   activeDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    marginHorizontal: 4,
     backgroundColor: "#8CDBED",
   },
   inactiveDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    marginHorizontal: 4,
     backgroundColor: "#000",
   },
 });

@@ -28,6 +28,7 @@ import ShopFilterSelector from "../assets/components/ShopFilterSelector";
 import { mockShopItems } from "../assets/mock_data/mock-shopItems";
 import { ShopItem } from "../assets/types/shop-item";
 import Header from "../navigation/Header";
+import BannerCarousel from "../assets/components/bannerCarousel";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 type FilterOptions = "featured" | "beans" | "tools" | "gift cards";
@@ -96,11 +97,7 @@ export default function ShopScreen() {
 
   const renderHeader = () => (
     <View style={styles.headerContent}>
-      {/* Promo Banner */}
-      <View style={styles.promoBanner}>
-        <Text style={styles.promoLabel}>Promo</Text>
-        <Text style={styles.promoTitle}>Buy one get{"\n"}one FREE</Text>
-      </View>
+      <BannerCarousel />
 
       {/* Filter Selector */}
       <View style={styles.filterContainer}>
@@ -146,11 +143,11 @@ export default function ShopScreen() {
         {/* Quick Actions */}
         <View style={styles.quickActions}>
           <TouchableOpacity style={styles.quickAction} onPress={handleLiked}>
-            <Ionicons name="heart-outline" size={20} color="#000" />
+            <Ionicons name="heart-outline" size={20} color="#58595B" />
             <Text style={styles.quickActionText}>liked</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.quickAction} onPress={handleOrders}>
-            <Ionicons name="receipt-outline" size={20} color="#000" />
+            <Ionicons name="receipt-outline" size={20} color="#58595B" />
             <Text style={styles.quickActionText}>orders</Text>
           </TouchableOpacity>
         </View>
@@ -222,7 +219,7 @@ const styles = StyleSheet.create({
     marginLeft: 8,
     fontSize: 16,
     color: "#000",
-    fontFamily: "main",
+    fontFamily: "cardRegular",
   },
   cartButton: {
     padding: 8,
@@ -230,22 +227,22 @@ const styles = StyleSheet.create({
   quickActions: {
     flexDirection: "row",
     justifyContent: "flex-start",
+    marginBottom: 16,
   },
   quickAction: {
     alignItems: "center",
-    marginRight: 24,
+    marginRight: 15,
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderRadius: 8,
-    borderWidth: 1,
-    borderColor: "#e0e0e0",
-    backgroundColor: "#f9f9f9",
+    borderWidth: 1.5,
+    borderColor: "#58595B",
   },
   quickActionText: {
     fontSize: 12,
-    color: "#666",
+    color: "#58595B",
     marginTop: 4,
-    fontFamily: "main",
+    fontFamily: "cardRegular",
   },
   scrollView: {
     flex: 1,
@@ -254,34 +251,8 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     paddingBottom: 10,
   },
-  promoBanner: {
-    backgroundColor: "#8B4513",
-    borderRadius: 12,
-    padding: 20,
-    marginBottom: 20,
-    position: "relative",
-    overflow: "hidden",
-  },
-  promoLabel: {
-    backgroundColor: "#FF6B6B",
-    color: "#fff",
-    fontSize: 12,
-    fontWeight: "600",
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 4,
-    alignSelf: "flex-start",
-    marginBottom: 8,
-    fontFamily: "main",
-  },
-  promoTitle: {
-    fontSize: 24,
-    fontWeight: "700",
-    color: "#fff",
-    lineHeight: 28,
-    fontFamily: "main",
-  },
   filterContainer: {
+    marginTop: -90,
     marginBottom: 20,
   },
   sectionTitle: {
@@ -289,7 +260,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#4A90E2",
     marginBottom: 16,
-    fontFamily: "main",
+    fontFamily: "cardRegular",
   },
   itemsContainer: {
     paddingBottom: 100,
