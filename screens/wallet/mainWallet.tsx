@@ -135,6 +135,8 @@ const styles = StyleSheet.create({
   couponSection: {
     padding: 16,
     width: "100%",
+    marginTop: 10, // Reduced from 30 to move coupons up
+
   },
   couponListContainer: {
     height: 130,

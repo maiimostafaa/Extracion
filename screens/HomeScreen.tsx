@@ -58,27 +58,6 @@ export default function HomeScreen() {
   const [animationFrame, setAnimationFrame] = useState(0);
   const [selectedFilter, setSelectedFilter] = useState<filterOptions>("all");
 
-  // Calculate when header should collapse to just show Header component
-  const headerScale = scrollY.interpolate({
-    inputRange: [0, 150],
-    outputRange: [1, 0.5], // Scale down to 50% of original height
-    extrapolate: "clamp",
-  });
-
-  // Fade out the greeting and points when collapsing
-  const contentOpacity = scrollY.interpolate({
-    inputRange: [0, 100],
-    outputRange: [1, 0],
-    extrapolate: "clamp",
-  });
-
-  // Move the greeting content up when collapsing
-  const contentTranslateY = scrollY.interpolate({
-    inputRange: [0, 120],
-    outputRange: [0, -40],
-    extrapolate: "clamp",
-  });
-
   const onRefresh = () => {
     setRefreshing(true);
     let frame = 0;
@@ -108,7 +87,7 @@ export default function HomeScreen() {
         const json = await response.json();
         const posts: InstagramPost[] = json.data;
 
-        // Convert each post into a format compatible with NewsletterCard
+        // Convert each post into a format compatible with NewsletterCar
 
         if (!json.data || !Array.isArray(json.data)) {
           console.warn("Instagram response missing data field:", json);
@@ -199,6 +178,7 @@ export default function HomeScreen() {
     <View style={{ flex: 1 }}>
       {/* Fixed Banner Header - Outside ScrollView */}
       <View style={[styles.header, { zIndex: 1000 }]}>
+
         <Image source={frames[animationFrame]} style={styles.headerImage} />
         <View style={styles.overlayContent}>
           <SafeAreaView
@@ -212,7 +192,9 @@ export default function HomeScreen() {
           >
             <Header tintColor="#fff" />
           </SafeAreaView>
+
           <View style={styles.textOverlayContainer}>
+
             <Text style={styles.greeting}>Hello Miss Wong</Text>
             <View style={styles.pointsContainer}>
               <View style={styles.border}>
@@ -266,6 +248,7 @@ export default function HomeScreen() {
         }
         stickyHeaderIndices={[1]} // Only make filter sticky (now index 1)
       >
+
         {/* Horizontal Scroll Content */}
         <View style={styles.scrollContent}>
           <ScrollView

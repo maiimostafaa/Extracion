@@ -25,12 +25,16 @@ export default function CafeFinderScreen() {
   
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [searchText, setSearchText] = useState("");
+  const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const [region, setRegion] = useState<Region>({
     latitude: 37.78825,
     longitude: -122.4324,
     latitudeDelta: 0.0922,
     longitudeDelta: 0.0421,
   });
+
+  // Map reference for programmatic control
+  const mapRef = useRef<MapView>(null);
 
   // Animation for sliding modal - start lower on screen
   const slideAnim = useRef(new Animated.Value(height * 0.65)).current; // Start lower (65% from top)
@@ -90,9 +94,14 @@ export default function CafeFinderScreen() {
       }
 
       let location = await Location.getCurrentPositionAsync({});
-      setRegion({
+      const userCoords = {
         latitude: location.coords.latitude,
         longitude: location.coords.longitude,
+      };
+      setUserLocation(userCoords);
+      setRegion({
+        latitude: userCoords.latitude,
+        longitude: userCoords.longitude,
         latitudeDelta: 0.0922,
         longitudeDelta: 0.0421,
       });
@@ -121,12 +130,11 @@ export default function CafeFinderScreen() {
       }
 
       let location = await Location.getCurrentPositionAsync({});
-      setRegion({
+      const newUserLocation = {
         latitude: location.coords.latitude,
         longitude: location.coords.longitude,
-        latitudeDelta: 0.0922,
-        longitudeDelta: 0.0421,
-      });
+      };
+      setUserLocation(newUserLocation);
     } catch (error) {
       Alert.alert("Error", "Unable to get your current location. Please try again.");
     }
@@ -137,6 +145,55 @@ export default function CafeFinderScreen() {
   const [modalState, setModalState] = useState<ModalState>('collapsed');
   const dragStartPosition = useRef(0);
   const lastKnownPosition = useRef(height * 0.65); // Track the actual position
+
+  // Adjust map region based on modal state to keep user location centered in visible area
+  const adjustMapForModalState = useCallback((modalState: ModalState) => {
+    if (!userLocation || !mapRef.current) return;
+
+    // Calculate the visible height of the map based on modal state
+    let visibleMapHeight: number;
+    let verticalOffset: number;
+
+    switch (modalState) {
+      case 'expanded':
+        // Modal covers most of the map, only top portion visible
+        visibleMapHeight = MODAL_TOP_POSITION - UI_ELEMENTS_HEIGHT;
+        verticalOffset = -((height - MODAL_TOP_POSITION) / 4); // Shift up to center in visible area
+        break;
+      case 'collapsed':
+        // Modal covers lower half, upper half visible
+        visibleMapHeight = MODAL_COLLAPSED_POSITION - UI_ELEMENTS_HEIGHT;
+        verticalOffset = -((height - MODAL_COLLAPSED_POSITION) / 6); // Shift up slightly
+        break;
+      case 'minimized':
+        // Most of map visible, slight shift
+        visibleMapHeight = MODAL_MINIMIZED_POSITION - UI_ELEMENTS_HEIGHT;
+        verticalOffset = 0; // No shift needed
+        break;
+      default:
+        visibleMapHeight = height - UI_ELEMENTS_HEIGHT;
+        verticalOffset = 0;
+    }
+
+    // Calculate appropriate delta values based on visible height
+    const baseLatitudeDelta = 0.0922;
+    const baseVisibleHeight = height * 0.6; // Reference height
+    const heightRatio = visibleMapHeight / baseVisibleHeight;
+    const adjustedLatitudeDelta = Math.max(baseLatitudeDelta * (1 / Math.sqrt(heightRatio)), 0.005);
+
+    // Apply vertical offset to center user location in visible area
+    const adjustedLatitude = userLocation.latitude + (verticalOffset * adjustedLatitudeDelta * 0.0001);
+
+    const newRegion = {
+      latitude: adjustedLatitude,
+      longitude: userLocation.longitude,
+      latitudeDelta: adjustedLatitudeDelta,
+      longitudeDelta: 0.0421 * (1 / Math.sqrt(heightRatio)),
+    };
+
+    // Animate to new region
+    mapRef.current.animateToRegion(newRegion, 800);
+  }, [userLocation, UI_ELEMENTS_HEIGHT, MODAL_TOP_POSITION, MODAL_COLLAPSED_POSITION, MODAL_MINIMIZED_POSITION, height]);
 
   // Handle modal toggle - cycles through the three states
   const toggleModal = useCallback(() => {
@@ -166,10 +223,12 @@ export default function CafeFinderScreen() {
     }).start(() => {
       // Ensure position is synced when animation completes
       lastKnownPosition.current = targetValue;
+      // Adjust map region after animation completes
+      adjustMapForModalState(newState);
     });
     setModalState(newState);
     lastKnownPosition.current = targetValue;
-  }, [modalState, MODAL_COLLAPSED_POSITION, MODAL_TOP_POSITION, slideAnim]);
+  }, [modalState, MODAL_COLLAPSED_POSITION, MODAL_TOP_POSITION, slideAnim, adjustMapForModalState]);
 
   // Memoize modal state text to reduce re-renders
   const modalStateText = useMemo(() => {
@@ -268,12 +327,21 @@ export default function CafeFinderScreen() {
         }).start(() => {
           // Ensure position is synced when animation completes
           lastKnownPosition.current = targetValue;
+          // Adjust map region after animation completes
+          adjustMapForModalState(newState);
         });
         setModalState(newState);
         lastKnownPosition.current = targetValue;
       },
     })
   ).current;
+
+  // Sync map region with user location and modal state
+  useEffect(() => {
+    if (userLocation) {
+      adjustMapForModalState(modalState);
+    }
+  }, [userLocation, modalState, adjustMapForModalState]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -329,6 +397,7 @@ export default function CafeFinderScreen() {
           onRegionChangeComplete={setRegion}
           showsUserLocation={true}
           showsMyLocationButton={false} // Disable default button, we'll use our custom one
+          ref={mapRef} // Attach ref to MapView
         >
           {partnerCafes.map((cafe) => (
             <Marker
