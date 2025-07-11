@@ -112,11 +112,7 @@ const styles = StyleSheet.create({
   },
   cardContainer: {
     width: "100%",
-<<<<<<< Updated upstream
-    height: "75%",
-=======
     height: 360,
->>>>>>> Stashed changes
     marginTop: -40,
   },
   header: {
@@ -142,15 +138,13 @@ const styles = StyleSheet.create({
   couponSection: {
     padding: 16,
     width: "100%",
-<<<<<<< Updated upstream
+
     marginTop: 30,
     zIndex: 1, // Ensure it's above other elements
-=======
   },
   couponListContainer: {
     height: 130,
     marginTop: 10,
->>>>>>> Stashed changes
   },
   couponScrollView: {
     zIndex: 2, // Higher z-index for touch priority

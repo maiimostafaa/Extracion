@@ -109,10 +109,6 @@ export default function HomeScreen() {
         const posts: InstagramPost[] = json.data;
 
         // Convert each post into a format compatible with NewsletterCard
-<<<<<<< Updated upstream
-        console.log("Instagram API Response:", json); // 👀 LOG THE RAW RESPONSE
-=======
->>>>>>> Stashed changes
 
         if (!json.data || !Array.isArray(json.data)) {
           console.warn("Instagram response missing data field:", json);
@@ -201,8 +197,6 @@ export default function HomeScreen() {
 
   return (
     <View style={{ flex: 1 }}>
-<<<<<<< Updated upstream
-=======
       {/* Fixed Banner Header - Outside ScrollView */}
       <View style={[styles.header, { zIndex: 1000 }]}>
         <Image source={frames[animationFrame]} style={styles.headerImage} />
@@ -259,7 +253,7 @@ export default function HomeScreen() {
       </View>
 
       {/* Scrollable Content Below Fixed Banner */}
->>>>>>> Stashed changes
+
       <Animated.ScrollView
         scrollEventThrottle={16}
         showsVerticalScrollIndicator={false}
@@ -270,79 +264,8 @@ export default function HomeScreen() {
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
-        stickyHeaderIndices={[0, 2]} // Make header and filter sticky
+        stickyHeaderIndices={[1]} // Only make filter sticky (now index 1)
       >
-<<<<<<< Updated upstream
-        {/* Collapsible Sticky Header */}
-        <Animated.View
-          style={[
-            styles.header,
-            { transform: [{ scaleY: headerScale }], zIndex: 1000 },
-          ]}
-        >
-          <Image source={frames[animationFrame]} style={styles.headerImage} />
-          <View style={styles.overlayContent}>
-            <SafeAreaView
-              style={{
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                zIndex: 1001,
-              }}
-            >
-              <Header tintColor="#fff" />
-            </SafeAreaView>
-            <Animated.View
-              style={[
-                styles.textOverlayContainer,
-                {
-                  opacity: contentOpacity,
-                  transform: [{ translateY: contentTranslateY }],
-                },
-              ]}
-            >
-              <Text style={styles.greeting}>Hello Miss Wong</Text>
-              <View style={styles.pointsContainer}>
-                <View style={styles.border}>
-                  <Text style={styles.points}>
-                    Points{" "}
-                    <Text style={{ fontWeight: "600", fontFamily: "default" }}>
-                      23{"  "}
-                      <TouchableOpacity
-                        style={{ borderRadius: 4, backgroundColor: "#8CDBED" }}
-                        onPress={handleWallet}
-                      >
-                        <Text
-                          style={{
-                            fontSize: 14,
-                            fontWeight: "700",
-                            fontFamily: "default",
-                            color: "#fff",
-                          }}
-                        >
-                          {"   "}${"   "}
-                        </Text>
-                      </TouchableOpacity>
-                      {"    "}
-                    </Text>
-                  </Text>
-                </View>
-
-                <EvilIcons
-                  name="search"
-                  size={24}
-                  color="#fff"
-                  style={{ marginLeft: 12 }}
-                  onPress={() => navigation.navigate("SearchScreen")}
-                />
-              </View>
-            </Animated.View>
-          </View>
-        </Animated.View>
-
-=======
->>>>>>> Stashed changes
         {/* Horizontal Scroll Content */}
         <View style={styles.scrollContent}>
           <ScrollView
@@ -482,10 +405,7 @@ const styles = StyleSheet.create({
     width: 200,
     height: 250,
     borderRadius: 10,
-<<<<<<< Updated upstream
-=======
     marginRight: -20,
->>>>>>> Stashed changes
   },
   walletContainer: {
     backgroundColor: "#8CDBED",
