@@ -2,6 +2,7 @@ export interface coupon {
   id: string; // Unique identifier for the coupon
   organization: string; // Organization that issued the coupon
   organizationLogo: string; // URL or local path to the organization's logo
+  promoImage?: string;
   QRcode: string; // QR code string for the coupon
   discountType: "percentage" | "fixed" | "item"; // Type of discount
   discountValue?: number; // Value of the discount

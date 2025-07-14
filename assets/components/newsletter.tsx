@@ -34,7 +34,7 @@ const NewsletterCard = ({ item, onPress }: Props) => {
       </View>
 
       <View style={styles.content}>
-        <Text style={styles.title} numberOfLines={1}>
+        <Text style={styles.title} numberOfLines={3}>
           {item.title}
         </Text>
         <Text style={styles.creator} numberOfLines={1}>
@@ -48,16 +48,12 @@ const NewsletterCard = ({ item, onPress }: Props) => {
 const styles = StyleSheet.create({
   card: {
     width: "100%",
-    height: 360,
+    height: 400,
     borderTopLeftRadius: 60,
     backgroundColor: "#fff",
     marginRight: 16,
     overflow: "hidden",
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 6,
-    elevation: 3,
+ 
     marginBottom: 20,
   },
   thumbnail: {
@@ -88,7 +84,7 @@ const styles = StyleSheet.create({
     padding: 12,
   },
   title: {
-    fontSize: 25,
+    fontSize: 18,
     fontWeight: "400",
     color: "#111",
     marginBottom: 4,

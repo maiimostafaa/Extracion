@@ -11,4 +11,6 @@ export interface newsletterItem {
   media_url: string; // URL to the media content (video, image, etc.)
   media_urls?: string[]; // Optional array of media URLs for multiple items
   permalink?: string; // Optional permalink to the item
+  like_count?: string;
+  comments_count?: string;
 }

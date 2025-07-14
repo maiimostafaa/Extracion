@@ -82,7 +82,7 @@ export default function HomeScreen() {
       const baseUrl = `https://graph.facebook.com/v18.0/17841408709139123/media`;
       try {
         const response = await fetch(
-          `${baseUrl}?fields=id,caption,media_type,media_url,thumbnail_url,permalink,timestamp,children&access_token=${accessToken}`
+          `${baseUrl}?fields=id,caption,media_type,media_url,thumbnail_url,permalink,like_count,comments_count,timestamp,children&access_token=${accessToken}`
         );
         const json = await response.json();
         const posts: InstagramPost[] = json.data;
@@ -97,7 +97,7 @@ export default function HomeScreen() {
         interface InstagramPost {
           id: string;
           caption?: string;
-          thumbnail_url: string;
+          thumbnail_url: string;                                                                                        
           media_url: string;
           permalink: string;
           timestamp: string;
@@ -105,6 +105,8 @@ export default function HomeScreen() {
           children?: {
             data: { id: string }[];
           };
+          like_count: string;
+          comments_count: string;
         }
 
         const formatted = await Promise.all(
@@ -137,7 +139,7 @@ export default function HomeScreen() {
 
             return {
               id: `insta-${post.id}`,
-              title: post.caption?.slice(0, 30) || "Instagram Post",
+              title: post.caption?.slice(0, 300) || "Instagram Post",
               description: post.caption || "No description available",
               media_urls,
               media_url: media_urls[0],
@@ -147,6 +149,8 @@ export default function HomeScreen() {
               category: "KOL featuring" as "KOL featuring",
               date: post.timestamp,
               permalink: post.permalink,
+              like_count: post.like_count,
+              comments_count: post.comments_count,
             };
           })
         );
