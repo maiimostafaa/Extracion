@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -6,6 +6,9 @@ import {
   SafeAreaView,
   Dimensions,
   ScrollView,
+  Modal,
+  TouchableOpacity,
+  Image,
 } from "react-native";
 import type { ImageSourcePropType } from 'react-native';
 import { useNavigation } from "@react-navigation/native";
@@ -13,6 +16,7 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../navigation/AppNavigator";
 import Header from "../navigation/Header";
 import BrewingMethodCard from "../assets/components/extracion/BrewingMethodCard";
+import { Ionicons } from '@expo/vector-icons';
 
 // Import images for each brewing method
 const frenchPressImage = require("../assets/nonclickable-visual-elements/extracion_coffeeMachine.png");
@@ -58,10 +62,20 @@ const brewingMethods: BrewingMethod[] = [
 
 export default function ExtractionScreen() {
   const navigation = useNavigation<NavigationProp>();
+  const [showBLEModal, setShowBLEModal] = useState(true);
 
   const handleMethodSelect = (method: BrewingMethod) => {
     // Navigate to ExtracionConfigScreen when any brewing method is selected
     navigation.navigate('ExtracionConfigScreen');
+  };
+
+  const handleBLEModalClose = () => {
+    setShowBLEModal(false);
+  };
+
+  const handleContinue = () => {
+    // Here you would typically handle BLE connection
+    setShowBLEModal(false);
   };
 
   const renderBrewingMethodCard = (method: BrewingMethod, index: number) => (
@@ -104,6 +118,49 @@ export default function ExtractionScreen() {
           </View> */}
         </View>
       </View>
+
+      {/* BLE Connection Modal */}
+      <Modal
+        visible={showBLEModal}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={handleBLEModalClose}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            {/* Close Button */}
+            <TouchableOpacity 
+              style={styles.closeButton}
+              onPress={handleBLEModalClose}
+            >
+              <Ionicons name="close" size={28} color="#666666" />
+            </TouchableOpacity>
+
+            {/* Status Bar */}
+            <View style={styles.statusBar} />
+
+            {/* French Press Icon */}
+            <Image
+              source={require('../assets/nonclickable-visual-elements/extracion_coffeeMachine.png')}
+              style={styles.frenchPressModalIcon}
+            />
+
+            {/* Title */}
+            <Text style={styles.modalTitle}>Turn on your Extracion</Text>
+
+            {/* Subtitle */}
+            <Text style={styles.modalSubtitle}>Continue when it's on.</Text>
+
+            {/* Continue Button */}
+            <TouchableOpacity 
+              style={styles.continueButton}
+              onPress={handleContinue}
+            >
+              <Text style={styles.continueButtonText}>continue</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -155,5 +212,75 @@ const styles = StyleSheet.create({
   },
   activePageIndicator: {
     backgroundColor: '#333',
+  },
+  // Modal Styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: '#F5F5F5',
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    width: '100%',
+    paddingHorizontal: 40,
+    paddingTop: 40,
+    paddingBottom: 80,
+    alignItems: 'center',
+    position: 'relative',
+    maxHeight: '60%',
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 30,
+    left: 30,
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  statusBar: {
+    width: 60,
+    height: 6,
+    backgroundColor: '#D1D1D1',
+    borderRadius: 3,
+    marginBottom: 40,
+    position: 'absolute',
+    top: 15,
+  },
+  frenchPressModalIcon: {
+    width: 100,
+    height: 100,
+    marginBottom: 30,
+    resizeMode: 'contain',
+  },
+  modalTitle: {
+    fontSize: 24,
+    fontWeight: '600',
+    color: '#333333',
+    textAlign: 'center',
+    marginBottom: 12,
+  },
+  modalSubtitle: {
+    fontSize: 16,
+    color: '#999999',
+    textAlign: 'center',
+    marginBottom: 40,
+    lineHeight: 22,
+  },
+  continueButton: {
+    backgroundColor: '#8CDBED',
+    paddingVertical: 16,
+    paddingHorizontal: 60,
+    borderRadius: 50,
+    width: '100%',
+    alignItems: 'center',
+  },
+  continueButtonText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333333',
   },
 });
