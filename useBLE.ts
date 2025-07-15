@@ -117,9 +117,9 @@ function useBLE() {
         return;
       }
 
-      // Show ALL BLE devices for testing purposes
-      if (device) {
-        console.log('Found device:', device.name || device.localName || 'Unknown', device.id);
+      // Only show devices that have a name (filter out unknown devices)
+      if (device && (device.name || device.localName)) {
+        console.log('Found device:', device.name || device.localName, device.id);
         setAllDevices((prevState: Device[]) => {
           if (!isDuplicateDevice(prevState, device)) {
             return [...prevState, device];
