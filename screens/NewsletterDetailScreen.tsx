@@ -14,7 +14,7 @@ import {
 } from "react-native";
 import { Video, ResizeMode } from "expo-av";
 import { RouteProp, useRoute, useNavigation } from "@react-navigation/native";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, EvilIcons } from "@expo/vector-icons";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../navigation/AppNavigator";
 import { newsletterItem } from "../assets/types/newsletter-item";
@@ -33,7 +33,7 @@ const NewsletterDetailScreen = () => {
   const navigation = useNavigation<NavigationProp>();
 
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [imageHeights, setImageHeights] = useState<number[]>([]);
+  const [mediaHeights, setMediaHeights] = useState<number[]>([]);
 
   const viewabilityConfig = useRef({
     viewAreaCoveragePercentThreshold: 50,
@@ -49,6 +49,36 @@ const NewsletterDetailScreen = () => {
 
   const handleBack = () => {
     navigation.goBack();
+  };
+
+  const handleVideoReadyForDisplay = (index: number) => {
+    // This callback fires when video is ready, but we need to use onLoad for dimensions
+    // We'll handle this in the onLoad callback instead
+  };
+
+  const handleVideoLoad = async (index: number, videoRef: any) => {
+    try {
+      if (videoRef.current) {
+        const status = await videoRef.current.getStatusAsync();
+        if (status.isLoaded) {
+          // For expo-av, we need to get dimensions from the video element itself
+          // We'll use a different approach with onReadyForDisplay
+          console.log('Video loaded for index:', index);
+        }
+      }
+    } catch (error) {
+      console.log('Error getting video status:', error);
+    }
+  };
+
+  const handleImageLoad = (e: any, index: number) => {
+    const { width: imgW, height: imgH } = e.nativeEvent.source;
+    const scaledHeight = (width / imgW) * imgH;
+    setMediaHeights((prev) => {
+      const updated = [...prev];
+      updated[index] = scaledHeight;
+      return updated;
+    });
   };
 
   return (
@@ -73,40 +103,42 @@ const NewsletterDetailScreen = () => {
               viewabilityConfig={viewabilityConfig}
               renderItem={({ item: uri, index }) => {
                 const mediaType = item.media_types?.[index] || "IMAGE";
+                const height = mediaHeights[index] || 300;
 
                 if (mediaType === "VIDEO") {
                   return (
                     <View
-                      style={{ width, height: 300, backgroundColor: "#eee" }}
+                      style={{ width, height, backgroundColor: "#eee" }}
                     >
                       <Video
                         source={{ uri }}
-                        style={{ width, height: 300 }}
+                        style={{ width, height }}
                         useNativeControls
-                        resizeMode={ResizeMode.COVER}
+                        resizeMode={ResizeMode.CONTAIN}
                         shouldPlay
                         isMuted={false}
+                        onReadyForDisplay={(readyForDisplayStatus) => {
+                          if (readyForDisplayStatus.naturalSize) {
+                            const { width: videoWidth, height: videoHeight } = readyForDisplayStatus.naturalSize;
+                            const scaledHeight = (width / videoWidth) * videoHeight;
+                            setMediaHeights((prev) => {
+                              const updated = [...prev];
+                              updated[index] = scaledHeight;
+                              return updated;
+                            });
+                          }
+                        }}
                       />
                     </View>
                   );
                 } else {
-                  const height = imageHeights[index] || 300;
                   return (
                     <View style={{ width, height, backgroundColor: "#eee" }}>
                       <Image
                         source={{ uri }}
                         style={{ width, height }}
                         resizeMode="contain"
-                        onLoad={(e) => {
-                          const { width: imgW, height: imgH } =
-                            e.nativeEvent.source;
-                          const scaledHeight = (width / imgW) * imgH;
-                          setImageHeights((prev) => {
-                            const updated = [...prev];
-                            updated[index] = scaledHeight;
-                            return updated;
-                          });
-                        }}
+                        onLoad={(e) => handleImageLoad(e, index)}
                       />
                     </View>
                   );
@@ -130,32 +162,45 @@ const NewsletterDetailScreen = () => {
             {item.media_types?.[0] === "VIDEO" ? (
               <Video
                 source={{ uri: item.media_urls?.[0] ?? "" }}
-                style={{ width, height: 300 }}
+                style={{ width, height: mediaHeights[0] || 300 }}
                 useNativeControls
-                resizeMode={ResizeMode.COVER}
+                resizeMode={ResizeMode.CONTAIN}
                 shouldPlay
                 isMuted={false}
+                onReadyForDisplay={(readyForDisplayStatus) => {
+                  if (readyForDisplayStatus.naturalSize) {
+                    const { width: videoWidth, height: videoHeight } = readyForDisplayStatus.naturalSize;
+                    const scaledHeight = (width / videoWidth) * videoHeight;
+                    setMediaHeights([scaledHeight]);
+                  }
+                }}
               />
             ) : (
               <Image
                 source={{ uri: item.media_urls?.[0] ?? "" }}
-                style={{ width, height: imageHeights[0] || 300 }}
+                style={{ width, height: mediaHeights[0] || 300 }}
                 resizeMode="contain"
-                onLoad={(e) => {
-                  const { width: imgW, height: imgH } = e.nativeEvent.source;
-                  const scaledHeight = (width / imgW) * imgH;
-                  setImageHeights([scaledHeight]);
-                }}
+                onLoad={(e) => handleImageLoad(e, 0)}
               />
             )}
           </View>
         )}
 
+  {item.permalink && (
+         <TouchableOpacity style={{flexDirection: "row", paddingVertical: 10, paddingHorizontal: 5,}}   onPress={() => item.permalink && Linking.openURL(item.permalink)}
+            >
+          <EvilIcons name="heart" size={20} color="#000"></EvilIcons>
+          <Text style={{fontSize: 14, fontFamily: "cardBold", color: "#000"}}>{item.like_count}{"  "}</Text>
+        <EvilIcons name="comment" size={20} color="#000"></EvilIcons>
+          <Text style={{fontSize: 14, fontFamily: "cardBold", color: "#000"}}>{item.comments_count}</Text>
+         </TouchableOpacity>)}
+
         <View style={styles.content}>
-          <Text style={styles.title}>{item.title}</Text>
+        
 
           {item.description && (
-            <Text style={styles.body}>{item.description}</Text>
+           
+            <Text style={styles.body}><Text style={{fontFamily: "cardBold",}}>{item.createdBy}{": "}</Text>{item.description}</Text>
           )}
 
           {item.permalink && (
@@ -177,10 +222,11 @@ export default NewsletterDetailScreen;
 const styles = StyleSheet.create({
   container: {
     backgroundColor: "#fff",
-    paddingBottom: 40,
+    paddingBottom: 60,
   },
   content: {
-    padding: 20,
+    paddingVertical: 10,
+    paddingHorizontal: 10,
   },
   title: {
     fontSize: 22,
@@ -190,7 +236,7 @@ const styles = StyleSheet.create({
   },
   body: {
     fontSize: 16,
-    lineHeight: 22,
+    lineHeight: 20,
     marginBottom: 24,
     fontFamily: "cardRegular",
   },
@@ -214,12 +260,12 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
   dot: {
-    width: 8,
+    width: 8,                                                                                                         
     height: 8,
     borderRadius: 4,
     marginHorizontal: 4,
   },
-  activeDot: {
+  activeDot: { 
     backgroundColor: "#8CDBED",
   },
   inactiveDot: {

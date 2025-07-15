@@ -89,6 +89,13 @@ const FullView: React.FC<FullViewProps> = ({ coupon: propCoupon }) => {
               <Text style={styles.title}>{formatDiscount()}</Text>
             </View>
           </View>
+              <View style={{ width: "100%", height: 250, borderRadius: 10,  overflow: "hidden", justifyContent: "flex-end", alignItems: "center",}}>
+                <Image
+                  source={{ uri: coupon.promoImage }}
+                  style={styles.image}
+                  resizeMode="cover"
+                />
+            </View>
           <View style={styles.middleContainer}>
             <Text style={styles.description}>{coupon.description}</Text>
             <View style={styles.termsContainer}>
@@ -102,10 +109,11 @@ const FullView: React.FC<FullViewProps> = ({ coupon: propCoupon }) => {
                 </View>
               )}
             </View>
+        
           </View>
           <View style={styles.halfContainer}>
             <View style={styles.qrContainer}>
-              <QRCode value={coupon.QRcode} size={120} />
+              <QRCode value={coupon.QRcode} size={180} />
             </View>
 
             <View style={styles.bottomContainer}>
@@ -139,7 +147,7 @@ const FullView: React.FC<FullViewProps> = ({ coupon: propCoupon }) => {
 const styles = StyleSheet.create({
   background: {
     width: "100%",
-    height: 600,
+    height: 850,
     resizeMode: "cover",
   },
   container: {
@@ -153,6 +161,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     height: "100%",
     width: "100%",
+
   },
   topContainer: {
     flexDirection: "row",
@@ -164,7 +173,7 @@ const styles = StyleSheet.create({
   middleContainer: {
     flexDirection: "column",
     width: "90%",
-    marginTop: "25%",
+    marginTop: "5%",
     marginBottom: "5%",
   },
   termsContainer: {
@@ -177,12 +186,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     width: "80%",
+   
   },
   halfContainer: {
     position: "absolute",
-    top: "54%",
+    top: "59%",
     left: 40,
     width: "100%",
+   
   },
   inactive: {
     opacity: 0.5,
@@ -237,7 +248,7 @@ const styles = StyleSheet.create({
     marginTop: 60,
     padding: 20,
     borderRadius: 12,
-    marginLeft: "19%",
+    marginLeft: "13%",
   },
   expiry: {
     fontSize: 12,
@@ -296,6 +307,12 @@ const styles = StyleSheet.create({
     color: "#078CC9",
     textAlign: "center",
     marginTop: 20,
+  },
+   image: {
+    width: 170,
+    height: 170,
+    borderRadius: 10,
+    resizeMode: "cover",
   },
 });
 

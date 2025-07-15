@@ -34,7 +34,7 @@ export default function AllCouponsScreen() {
         >
           <Image source={require("../../assets/icons/back.png")} />
         </TouchableOpacity>
-        <Text style={styles.title}>Coupons</Text>
+        <Text style={styles.title}>coupons</Text>
       </View>
       <ScrollView
         style={styles.couponsContainer}
@@ -72,7 +72,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    fontFamily: "second",
+    fontFamily: "cardRegular",
     color: "#ffffff",
     marginTop: "9%",
   },

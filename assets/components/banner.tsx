@@ -35,11 +35,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     marginRight: 16,
     overflow: "hidden",
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 6,
-    elevation: 3,
     marginBottom: 20,
   },
   thumbnail: {

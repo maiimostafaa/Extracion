@@ -45,17 +45,27 @@ const HorizontalView: React.FC<HorizontalViewProps> = ({ coupon }) => {
               style={styles.logo}
             />
           </View>
+          <View style={{flexDirection: "row", justifyContent: "space-between", width: "55%"}}>
           <View style={styles.textsContainer}>
             <Text style={styles.title}>{formatDiscount()}</Text>
             <Text style={styles.organization}>{coupon.organization}</Text>
-            <Text style={styles.expiry}>
+            <Text style={styles.expiry} numberOfLines={1}>
               Valid until {formatExpiryDate(coupon.expirationDate)}{" "}
-              {!coupon.isActive && (
+             
+            </Text>
+             {!coupon.isActive && (
                 <Text style={styles.expiredText}>EXPIRED</Text>
               )}
-            </Text>
           </View>
+           <View style={styles.imageWrapper}>
+           <Image
+            source={{ uri: coupon.promoImage }}
+            style={styles.image}
+            resizeMode="cover"
+          />
+         </View>
         </View>
+        </View>S
       </ImageBackground>
     </View>
   );
@@ -80,12 +90,14 @@ const styles = StyleSheet.create({
   },
   textsContainer: {
     flexDirection: "column",
+
   },
   contentContainer: {
     flexDirection: "row",
     alignItems: "center",
     height: "100%",
     width: "100%",
+  
   },
   logo: {
     width: 60,
@@ -100,7 +112,7 @@ const styles = StyleSheet.create({
     marginBottom: "1%",
   },
   title: {
-    fontSize: 27,
+    fontSize: 20,
     fontWeight: "normal",
     justifyContent: "flex-start",
     marginTop: "4%",
@@ -113,18 +125,34 @@ const styles = StyleSheet.create({
     fontFamily: "cardRegular",
   },
   expiredText: {
-    textAlign: "center",
-    marginTop: "15%",
+    textAlign: "left",
+   
     fontSize: 10,
     color: "#ff4444",
     fontWeight: "bold",
     fontFamily: "default",
   },
   organization: {
-    fontSize: 15,
+    fontSize: 12,
     fontWeight: "400",
     color: "#333",
     marginBottom: 5,
+  },
+   imageWrapper: {
+    width: 70,
+    height: 70,
+    borderRadius: 10,
+    
+    overflow: "hidden",
+    
+    justifyContent: "flex-end",
+
+  },
+  image: {
+    width: 70,
+    height: 70,
+    borderRadius: 10,
+    resizeMode: "cover",
   },
 });
 
