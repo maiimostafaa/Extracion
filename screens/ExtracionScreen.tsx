@@ -1,18 +1,34 @@
-import React, { useState } from "react";
+// import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
   StyleSheet,
   SafeAreaView,
-  TouchableOpacity,
-  Alert,
   Dimensions,
+  ScrollView,
+  Modal,
+  TouchableOpacity,
+  Image,
+  FlatList,
+  Alert,
   Animated,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import type { ImageSourcePropType } from 'react-native';
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../navigation/AppNavigator";
+import Header from "../navigation/Header";
+import BrewingMethodCard from "../assets/components/extracion/BrewingMethodCard";
+import { Ionicons } from '@expo/vector-icons';
+
+import useBLE from "../useBLE";
+
+// Import images for each brewing method
+const frenchPressImage = require("../assets/nonclickable-visual-elements/extracion_coffeeMachine.png");
+const pourOverImage = require("../assets/nonclickable-visual-elements/extracion_coffeeMachine.png");
+const coldDripImage = require("../assets/nonclickable-visual-elements/extracion_coffeeMachine.png");
+const brewBarImage = require("../assets/nonclickable-visual-elements/extracion_coffeeMachine.png");
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -20,352 +36,416 @@ interface BrewingMethod {
   id: string;
   name: string;
   icon: string;
-  description: string;
-  defaultRatio: number;
-  defaultTime: number;
+  image: ImageSourcePropType;
 }
 
 const brewingMethods: BrewingMethod[] = [
   {
     id: "french_press",
-    name: "French Press",
+    name: "french press",
     icon: "cafe",
-    description: "Full-bodied coffee with rich flavors",
-    defaultRatio: 15,
-    defaultTime: 240,
+    image: frenchPressImage,
   },
   {
     id: "pour_over",
-    name: "Pour Over",
+    name: "pour over",
     icon: "water",
-    description: "Clean and bright coffee with clarity",
-    defaultRatio: 16,
-    defaultTime: 180,
+    image: pourOverImage,
   },
   {
     id: "cold_drip",
-    name: "Cold Drip",
+    name: "cold drip",
     icon: "snow",
-    description: "Smooth and sweet cold brew",
-    defaultRatio: 8,
-    defaultTime: 7200,
+    image: coldDripImage,
   },
   {
     id: "brew_bar",
-    name: "Brew Bar",
+    name: "brew bar",
     icon: "flask",
-    description: "Professional brewing with precise control",
-    defaultRatio: 17,
-    defaultTime: 300,
+    image: brewBarImage,
   },
 ];
 
 export default function ExtractionScreen() {
   const navigation = useNavigation<NavigationProp>();
-  const [isConnected, setIsConnected] = useState(false);
-  const [selectedMethod, setSelectedMethod] = useState<BrewingMethod | null>(
-    null
-  );
-  const [coffeeWeight, setCoffeeWeight] = useState(0);
-  const [waterRatio, setWaterRatio] = useState(0);
-  const [isBrewing, setIsBrewing] = useState(false);
-  const [timeRemaining, setTimeRemaining] = useState(0);
-  const [progress] = useState(new Animated.Value(0));
-  const [ratio, setRatio] = useState(15);
+  const [showBLEModal, setShowBLEModal] = useState(true);
+  const [showDeviceList, setShowDeviceList] = useState(false);
+  
+  console.log('ExtractionScreen render - showBLEModal:', showBLEModal, 'showDeviceList:', showDeviceList);
+  console.log('Modal should be visible:', showBLEModal);
+  console.log('Device list should be shown:', showDeviceList);
+  
+  // Animation for pulsing dot
+  const pulseAnim = new Animated.Value(1);
+  
+  const {
+    requestPermissions,
+    scanForPeripherals,
+    allDevices,
+    connectToDevice,
+    connectedDevice,
+    disconnectFromDevice,
+    isScanning,
+    temperature,
+    weight,
+  } = useBLE();
 
-  const handleConnect = () => {
-    setIsConnected(true);
-    Alert.alert("Connected", "Device connected successfully!");
-  };
+  useEffect(() => {
+    // Request permissions when component mounts
+    requestPermissions().then((granted) => {
+      if (!granted) {
+        Alert.alert('Permissions Required', 'Bluetooth permissions are required to scan for BLE devices');
+      }
+    });
+  }, []);
+
+  // Pulse animation effect
+  useEffect(() => {
+    if (isScanning) {
+      const pulse = () => {
+        Animated.sequence([
+          Animated.timing(pulseAnim, {
+            toValue: 1.3,
+            duration: 800,
+            useNativeDriver: true,
+          }),
+          Animated.timing(pulseAnim, {
+            toValue: 1,
+            duration: 800,
+            useNativeDriver: true,
+          }),
+        ]).start(() => {
+          if (isScanning) pulse();
+        });
+      };
+      pulse();
+    }
+  }, [isScanning, pulseAnim]);
 
   const handleMethodSelect = (method: BrewingMethod) => {
-    setSelectedMethod(method);
-    setRatio(method.defaultRatio);
-    setTimeRemaining(method.defaultTime);
-    if (coffeeWeight > 0) {
-      const newWaterRatio = Number(
-        (coffeeWeight * method.defaultRatio).toFixed(2)
-      );
-      setWaterRatio(newWaterRatio);
+    if (connectedDevice) {
+      navigation.navigate('ExtracionConfigScreen');
+    } else {
+      Alert.alert('Device Required', 'Please connect to a BLE device first', [
+        { text: 'OK', onPress: () => setShowBLEModal(true) }
+      ]);
     }
   };
 
-  const handleCoffeeWeightChange = (weight: number) => {
-    setCoffeeWeight(weight);
-    if (selectedMethod) {
-      const newWaterRatio = Number(
-        (weight * selectedMethod.defaultRatio).toFixed(2)
-      );
-      setWaterRatio(newWaterRatio);
-    }
+  const handleBLEModalClose = () => {
+    setShowBLEModal(false);
   };
 
-  const handleRatioChange = (newRatio: number) => {
-    setRatio(newRatio);
-    if (coffeeWeight > 0) {
-      const newWaterRatio = Number((coffeeWeight * newRatio).toFixed(2));
-      setWaterRatio(newWaterRatio);
-    }
-  };
-
-  const handleTimerChange = (seconds: number) => {
-    setTimeRemaining(seconds);
-  };
-
-  const startBrewing = () => {
-    if (!selectedMethod || coffeeWeight <= 0) {
-      Alert.alert(
-        "Error",
-        "Please select a brewing method and add coffee first"
-      );
+  const handleContinue = async () => {
+    console.log('Continue button pressed - checking permissions and showing modal');
+    if (connectedDevice) {
+      setShowBLEModal(false);
       return;
     }
+    
+    const hasPermissions = await requestPermissions();
+    if (hasPermissions) {
+      console.log('Permissions granted - showing device list modal');
+      setShowDeviceList(true);
+      console.log('Starting BLE scan...');
+      scanForPeripherals();
+    } else {
+      console.log('Permissions denied');
+      Alert.alert('Permissions Required', 'Bluetooth permissions are required');
+    }
+  };
 
-    setIsBrewing(true);
+  const handleDeviceConnect = async (device: any) => {
+    await connectToDevice(device);
+    setShowDeviceList(false);
+    // Keep modal open to show connection status
+  };
 
-    Animated.timing(progress, {
-      toValue: 1,
-      duration: timeRemaining * 1000,
-      useNativeDriver: true,
-    }).start();
-
-    const timer = setInterval(() => {
-      setTimeRemaining((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          setIsBrewing(false);
-          Alert.alert("Brewing Complete", "Your coffee is ready!");
-          return 0;
+  const handleDisconnect = () => {
+    Alert.alert(
+      'Disconnect Device',
+      'Are you sure you want to disconnect from the BLE device?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { 
+          text: 'Disconnect', 
+          style: 'destructive',
+          onPress: () => {
+            disconnectFromDevice();
+            setShowDeviceList(false);
+          }
         }
-        return prev - 1;
-      });
-    }, 1000);
-  };
-
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, "0")}`;
-  };
-
-  const renderBrewingMethod = (method: BrewingMethod) => (
-    <TouchableOpacity
-      key={method.id}
-      style={[
-        styles.methodCard,
-        selectedMethod?.id === method.id && styles.selectedMethodCard,
-      ]}
-      onPress={() => handleMethodSelect(method)}
-    >
-      <Ionicons name={method.icon as any} size={32} color="#007AFF" />
-      <Text style={styles.methodName}>{method.name}</Text>
-      <Text style={styles.methodDesc}>{method.description}</Text>
-      <View style={styles.methodDetails}>
-        <Text style={styles.methodDetail}>1:{method.defaultRatio} ratio</Text>
-        <Text style={styles.methodDetail}>
-          {formatTime(method.defaultTime)}
-        </Text>
-      </View>
-    </TouchableOpacity>
-  );
-
-  const renderRatioMeter = () => (
-    <View style={styles.ratioMeterContainer}>
-      <Text style={styles.sectionTitle}>Coffee:Water Ratio</Text>
-      <View style={styles.ratioMeter}>
-        <View style={styles.ratioScale}>
-          {[8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20].map((value) => (
-            <TouchableOpacity
-              key={value}
-              style={styles.ratioMark}
-              onPress={() => handleRatioChange(value)}
-            >
-              <Text
-                style={[
-                  styles.ratioMarkText,
-                  ratio === value && styles.ratioMarkTextActive,
-                ]}
-              >
-                1:{value}
-              </Text>
-              <View
-                style={[
-                  styles.ratioMarkLine,
-                  ratio === value && styles.ratioMarkLineActive,
-                ]}
-              />
-            </TouchableOpacity>
-          ))}
-        </View>
-        <View style={styles.ratioValueContainer}>
-          <Text style={styles.ratioValueText}>1:{ratio}</Text>
-        </View>
-      </View>
-    </View>
-  );
-
-  const renderTimerAdjustment = () => (
-    <View style={styles.timerSection}>
-      <Text style={styles.sectionTitle}>Brew Time</Text>
-      <View style={styles.timerInput}>
-        <TouchableOpacity
-          style={styles.timerButton}
-          onPress={() => handleTimerChange(Math.max(30, timeRemaining - 30))}
-        >
-          <Ionicons name="remove" size={24} color="#007AFF" />
-        </TouchableOpacity>
-        <Text style={styles.timerText}>{formatTime(timeRemaining)}</Text>
-        <TouchableOpacity
-          style={styles.timerButton}
-          onPress={() => handleTimerChange(timeRemaining + 30)}
-        >
-          <Ionicons name="add" size={24} color="#007AFF" />
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
-
-  if (!isConnected) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.header}>
-          <View style={styles.backButton} />
-          <Text style={styles.headerTitle}>Extraction</Text>
-          <View style={styles.headerRight} />
-        </View>
-
-        <View style={styles.connectContainer}>
-          <Ionicons name="bluetooth" size={64} color="#007AFF" />
-          <Text style={styles.connectTitle}>Connect to Extraction</Text>
-          <Text style={styles.connectDesc}>
-            Make sure your Extraction device is turned on and nearby
-          </Text>
-          <TouchableOpacity
-            style={styles.connectButton}
-            onPress={handleConnect}
-          >
-            <Text style={styles.connectButtonText}>Connect</Text>
-          </TouchableOpacity>
-          
-          {/* Temporary navigation button */}
-          <TouchableOpacity
-            style={styles.testButton}
-            onPress={() => navigation.navigate('ExtracionConfigScreen')}
-          >
-            <Text style={styles.testButtonText}>French Press</Text>
-          </TouchableOpacity>
-        </View>
-      </SafeAreaView>
+      ]
     );
-  }
+  };
+
+  const renderDevice = ({ item }: { item: any }) => {
+    console.log('Rendering device:', item.name || item.localName || 'Unknown', item.id);
+    return (
+      <TouchableOpacity
+        style={styles.deviceItem}
+        onPress={() => handleDeviceConnect(item)}
+      >
+        <View style={styles.deviceInfo}>
+          <Text style={styles.deviceName}>{item.name || item.localName || 'Unknown Device'}</Text>
+          <Text style={styles.deviceId}>{item.id}</Text>
+        </View>
+        <Ionicons name="chevron-forward" size={20} color="#666" />
+      </TouchableOpacity>
+    );
+  };
+
+  const renderBrewingMethodCard = (method: BrewingMethod, index: number) => (
+    <View key={method.id} style={styles.cardContainer}>
+      <BrewingMethodCard
+        title={method.name}
+        image={method.image}
+        onPress={() => handleMethodSelect(method)}
+        isSelected={false}
+      />
+    </View>
+  );
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <View style={styles.backButton} />
-        <Text style={styles.headerTitle}>Extraction</Text>
-        <TouchableOpacity style={styles.settingsButton}>
-          <Ionicons name="settings-outline" size={24} color="#333" />
-        </TouchableOpacity>
+        <Header tintColor="#333" />
       </View>
 
       <View style={styles.content}>
-        {!selectedMethod ? (
-          <View style={styles.methodsContainer}>
-            <Text style={styles.sectionTitle}>Select Brewing Method</Text>
-            <View style={styles.methodsGrid}>
-              {brewingMethods.map(renderBrewingMethod)}
-            </View>
-          </View>
-        ) : isBrewing ? (
-          <View style={styles.brewingContainer}>
-            <View style={styles.timerContainer}>
-              <View style={styles.timerCircle}>
-                <Animated.View
-                  style={[
-                    styles.timerProgress,
-                    {
-                      transform: [
-                        {
-                          rotate: progress.interpolate({
-                            inputRange: [0, 1],
-                            outputRange: ["0deg", "360deg"],
-                          }),
-                        },
-                      ],
-                    },
-                  ]}
-                />
-                <Text style={styles.timerText}>
-                  {formatTime(timeRemaining)}
-                </Text>
-              </View>
-            </View>
-            <TouchableOpacity
-              style={styles.stopButton}
-              onPress={() => setIsBrewing(false)}
-            >
-              <Text style={styles.stopButtonText}>Stop</Text>
-            </TouchableOpacity>
-          </View>
-        ) : (
-          <View style={styles.brewingSetup}>
-            <View style={styles.weightSection}>
-              <Text style={styles.sectionTitle}>Coffee Weight</Text>
-              <View style={styles.weightInput}>
-                <TouchableOpacity
-                  style={styles.weightButton}
-                  onPress={() =>
-                    handleCoffeeWeightChange(Math.max(0, coffeeWeight - 1))
-                  }
-                >
-                  <Ionicons name="remove" size={24} color="#007AFF" />
-                </TouchableOpacity>
-                <Text style={styles.weightText}>{coffeeWeight}g</Text>
-                <TouchableOpacity
-                  style={styles.weightButton}
-                  onPress={() => handleCoffeeWeightChange(coffeeWeight + 1)}
-                >
-                  <Ionicons name="add" size={24} color="#007AFF" />
+        <View style={styles.methodsContainer}>
+          <Text style={styles.sectionTitle}>choose your brewing method</Text>
+          
+          {/* Connection Status and Data */}
+          {connectedDevice && (
+            <View style={styles.deviceStatus}>
+              <View style={styles.statusHeader}>
+                <View style={styles.connectedIndicator}>
+                  <Ionicons name="bluetooth" size={16} color="#4CAF50" />
+                  <Text style={styles.connectedText}>BLE Device Connected</Text>
+                </View>
+                <TouchableOpacity onPress={handleDisconnect} style={styles.disconnectButton}>
+                  <Text style={styles.disconnectText}>Disconnect</Text>
                 </TouchableOpacity>
               </View>
-            </View>
-
-            {renderRatioMeter()}
-
-            <View style={styles.ratioSection}>
-              <Text style={styles.sectionTitle}>Water Level</Text>
-              <View style={styles.ratioInput}>
-                <TouchableOpacity
-                  style={styles.ratioButton}
-                  onPress={() =>
-                    setWaterRatio(
-                      Number(Math.max(0, waterRatio - 10).toFixed(2))
-                    )
-                  }
-                >
-                  <Ionicons name="remove" size={24} color="#007AFF" />
-                </TouchableOpacity>
-                <Text style={styles.ratioText}>{waterRatio.toFixed(2)}ml</Text>
-                <TouchableOpacity
-                  style={styles.ratioButton}
-                  onPress={() =>
-                    setWaterRatio(Number((waterRatio + 10).toFixed(2)))
-                  }
-                >
-                  <Ionicons name="add" size={24} color="#007AFF" />
-                </TouchableOpacity>
+              
+              <View style={styles.dataRow}>
+                <View style={styles.dataItem}>
+                  <Text style={styles.dataLabel}>Temperature</Text>
+                  <Text style={styles.dataValue}>{temperature.toFixed(1)}°C</Text>
+                </View>
+                <View style={styles.dataItem}>
+                  <Text style={styles.dataLabel}>Weight</Text>
+                  <Text style={styles.dataValue}>{weight.toFixed(1)}g</Text>
+                </View>
               </View>
             </View>
-
-            {renderTimerAdjustment()}
-
-            <TouchableOpacity style={styles.startButton} onPress={startBrewing}>
-              <Text style={styles.startButtonText}>Start Brewing</Text>
-            </TouchableOpacity>
-          </View>
-        )}
+          )}
+          
+          <ScrollView 
+            horizontal 
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.carouselContent}
+            style={styles.carousel}
+          >
+            {brewingMethods.map(renderBrewingMethodCard)}
+          </ScrollView>
+          
+          {/* Page indicators */}
+          {/* <View style={styles.pageIndicators}>
+            {brewingMethods.map((_, index) => (
+              <View
+                key={index}
+                style={styles.pageIndicator}
+              />
+            ))}
+          </View> */}
+        </View>
       </View>
+
+      {/* BLE Connection Modal */}
+      <Modal
+        visible={showBLEModal}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={handleBLEModalClose}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            {/* Status Bar - Fixed position outside ScrollView */}
+            <View style={styles.statusBar} />
+            
+            {/* Close Button - Fixed position outside ScrollView */}
+            <TouchableOpacity 
+              style={styles.closeButton}
+              onPress={handleBLEModalClose}
+            >
+              <Ionicons name="close" size={28} color="#666666" />
+            </TouchableOpacity>
+
+            {/* Scrollable Content */}
+            <ScrollView 
+              style={styles.modalScrollView}
+              contentContainerStyle={styles.modalScrollContent}
+              showsVerticalScrollIndicator={true}
+              bounces={true}
+            >
+              {/* Debug: Test that modal content is rendering */}
+              <Text style={{ 
+                fontSize: 24, 
+                color: 'red', 
+                textAlign: 'center', 
+                backgroundColor: 'yellow',
+                padding: 10,
+                margin: 10 
+              }}>
+                DEBUG: MODAL IS RENDERING
+              </Text>
+              {/* French Press Icon */}
+              <Image
+                source={require('../assets/nonclickable-visual-elements/extracion_coffeeMachine.png')}
+                style={styles.frenchPressModalIcon}
+              />
+
+              {/* Title */}
+              <Text style={styles.modalTitle}>
+                {connectedDevice ? 'Device Connected!' : showDeviceList ? 'Select BLE Device' : 'Turn on your device'}
+              </Text>
+
+              {/* Subtitle */}
+              <Text style={styles.modalSubtitle}>
+                {connectedDevice 
+                  ? `Connected to ${connectedDevice.name || connectedDevice.localName || 'Device'} - Ready to brew!` 
+                  : showDeviceList 
+                    ? 'Choose any BLE device from the list below (testing mode):'
+                    : 'Continue to scan for BLE devices.'
+                }
+              </Text>
+
+              {/* Device List or Continue Button */}
+              {showDeviceList && !connectedDevice ? (
+                <View style={styles.deviceListContainer}>
+                  {/* Scanning Status Header */}
+                  <View style={styles.scanningHeader}>
+                    <View style={styles.scanningIconContainer}>
+                      {isScanning ? (
+                        <>
+                          <Animated.View 
+                            style={[
+                              styles.pulsingDot, 
+                              { transform: [{ scale: pulseAnim }] }
+                            ]} 
+                          />
+                          <Ionicons name="bluetooth" size={24} color="#007AFF" />
+                        </>
+                      ) : (
+                        <Ionicons name="bluetooth" size={24} color="#666" />
+                      )}
+                    </View>
+                    <Text style={[styles.scanningHeaderText, isScanning && styles.scanningActiveText]}>
+                      {isScanning ? 'Scanning for BLE devices...' : `Found ${allDevices.length} device${allDevices.length !== 1 ? 's' : ''}`}
+                    </Text>
+                    {isScanning && (
+                      <View style={styles.scanningProgress}>
+                        <View style={styles.progressBar} />
+                      </View>
+                    )}
+                  </View>
+
+                  {/* Device List - Fixed Height and Scrollable */}
+                  <View style={styles.deviceListWrapper}>
+                    <Text style={styles.debugText}>Debug: {allDevices.length} devices in array</Text>
+                    {allDevices.length > 0 ? (
+                      <>
+                        <Text style={styles.listHeader}>Available Devices:</Text>
+                        <FlatList
+                          data={allDevices}
+                          renderItem={renderDevice}
+                          keyExtractor={(item) => item.id}
+                          style={styles.deviceList}
+                          contentContainerStyle={styles.deviceListContent}
+                          showsVerticalScrollIndicator={true}
+                          scrollEnabled={true}
+                          nestedScrollEnabled={true}
+                          bounces={true}
+                        />
+                      </>
+                    ) : (
+                      <>
+                        {/* Test with mock data to verify list works */}
+                        <Text style={styles.listHeader}>Test Devices (if no real devices):</Text>
+                        <FlatList
+                          data={[
+                            { id: 'test1', name: 'Test Device 1', localName: 'TestBLE1' },
+                            { id: 'test2', name: 'Test Device 2', localName: 'TestBLE2' },
+                            { id: 'test3', name: null, localName: 'TestBLE3' },
+                            { id: 'test4', name: 'Test Device 4', localName: 'TestBLE4' },
+                            { id: 'test5', name: 'Test Device 5', localName: 'TestBLE5' },
+                          ]}
+                          renderItem={renderDevice}
+                          keyExtractor={(item) => item.id}
+                          style={styles.deviceList}
+                          contentContainerStyle={styles.deviceListContent}
+                          showsVerticalScrollIndicator={true}
+                          scrollEnabled={true}
+                          nestedScrollEnabled={true}
+                          bounces={true}
+                        />
+                        <View style={styles.emptyList}>
+                          <Ionicons 
+                            name={isScanning ? "bluetooth" : "bluetooth-outline"} 
+                            size={48} 
+                            color={isScanning ? "#007AFF" : "#CCC"} 
+                            style={styles.emptyIcon}
+                          />
+                          <Text style={styles.emptyText}>
+                            {isScanning ? 'Searching for BLE devices...' : 'Real devices will replace test data above'}
+                          </Text>
+                          <Text style={styles.emptySubtext}>
+                            {isScanning 
+                              ? 'This may take a few seconds' 
+                              : 'Tap "Scan Again" to search for real devices'
+                            }
+                          </Text>
+                        </View>
+                      </>
+                    )}
+                  </View>
+
+                  {/* Action Buttons */}
+                  <View style={styles.actionButtons}>
+                    <TouchableOpacity
+                      style={[styles.rescanButton, isScanning && styles.rescanButtonDisabled]}
+                      onPress={scanForPeripherals}
+                      disabled={isScanning}
+                    >
+                      <Ionicons 
+                        name="refresh" 
+                        size={16} 
+                        color={isScanning ? "#999" : "#333"} 
+                        style={styles.buttonIcon}
+                      />
+                      <Text style={[styles.rescanButtonText, isScanning && styles.rescanButtonTextDisabled]}>
+                        {isScanning ? 'Scanning...' : 'Scan Again'}
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              ) : (
+                /* Continue Button */
+                <TouchableOpacity 
+                  style={styles.continueButton}
+                  onPress={handleContinue}
+                >
+                  <Text style={styles.continueButtonText}>
+                    {connectedDevice ? 'continue' : 'find device'}
+                  </Text>
+                </TouchableOpacity>
+              )}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -376,312 +456,352 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
   header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
     padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
-  },
-  backButton: {
-    padding: 8,
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#333",
-  },
-  headerRight: {
-    width: 40,
-  },
-  settingsButton: {
-    padding: 8,
   },
   content: {
     flex: 1,
     padding: 16,
   },
-  connectContainer: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 32,
-  },
-  connectTitle: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#333",
-    marginTop: 24,
-    marginBottom: 8,
-  },
-  connectDesc: {
-    fontSize: 16,
-    color: "#666",
-    textAlign: "center",
-    marginBottom: 32,
-  },
-  connectButton: {
-    backgroundColor: "#007AFF",
-    paddingHorizontal: 32,
-    paddingVertical: 16,
-    borderRadius: 32,
-  },
-  connectButtonText: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "600",
-  },
-  testButton: {
-    backgroundColor: "#34C759",
-    paddingHorizontal: 32,
-    paddingVertical: 16,
-    borderRadius: 32,
-    marginTop: 16,
-  },
-  testButtonText: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "600",
-  },
-  brewingContainer: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  timerContainer: {
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  timerCircle: {
-    width: 200,
-    height: 200,
-    borderRadius: 100,
-    backgroundColor: "#f8f9fa",
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 8,
-    borderColor: "#E5E5E5",
-  },
-  timerProgress: {
-    position: "absolute",
-    width: "100%",
-    height: "100%",
-    borderRadius: 100,
-    borderWidth: 8,
-    borderColor: "#007AFF",
-    borderTopColor: "transparent",
-    borderRightColor: "transparent",
-  },
-  timerText: {
-    fontSize: 48,
-    fontWeight: "bold",
-    color: "#333",
-  },
-  stopButton: {
-    backgroundColor: "#FF3B30",
-    paddingHorizontal: 32,
-    paddingVertical: 16,
-    borderRadius: 32,
-    marginTop: 32,
-  },
-  stopButtonText: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "600",
-  },
-  brewingSetup: {
-    flex: 1,
-  },
-  weightSection: {
-    marginBottom: 24,
-  },
-  weightInput: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#f8f9fa",
-    borderRadius: 12,
-    padding: 16,
-  },
-  weightButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: "#fff",
-    justifyContent: "center",
-    alignItems: "center",
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  weightText: {
-    fontSize: 32,
-    fontWeight: "bold",
-    color: "#333",
-    marginHorizontal: 24,
-  },
-  ratioSection: {
-    marginBottom: 32,
-  },
-  ratioInput: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#f8f9fa",
-    borderRadius: 12,
-    padding: 16,
-  },
-  ratioButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: "#fff",
-    justifyContent: "center",
-    alignItems: "center",
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  ratioText: {
-    fontSize: 32,
-    fontWeight: "bold",
-    color: "#333",
-    marginHorizontal: 24,
-  },
-  startButton: {
-    backgroundColor: "#007AFF",
-    padding: 16,
-    borderRadius: 12,
-    alignItems: "center",
-  },
-  startButtonText: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "600",
-  },
-  ratioMeterContainer: {
-    marginBottom: 24,
-    paddingHorizontal: 16,
-  },
-  ratioMeter: {
-    height: 80,
-    position: "relative",
-    marginTop: 16,
-  },
-  ratioScale: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingHorizontal: 20,
-    marginBottom: 8,
-  },
-  ratioMark: {
-    alignItems: "center",
-    padding: 8,
-  },
-  ratioMarkText: {
-    fontSize: 12,
-    color: "#666",
-    marginBottom: 4,
-  },
-  ratioMarkTextActive: {
-    color: "#007AFF",
-    fontWeight: "bold",
-  },
-  ratioMarkLine: {
-    width: 2,
-    height: 8,
-    backgroundColor: "#ccc",
-  },
-  ratioMarkLineActive: {
-    backgroundColor: "#007AFF",
-    height: 12,
-  },
-  ratioValueContainer: {
-    alignItems: "center",
-    marginTop: 8,
-  },
-  ratioValueText: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#007AFF",
-  },
-  timerSection: {
-    marginBottom: 24,
-  },
-  timerInput: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#f8f9fa",
-    borderRadius: 12,
-    padding: 16,
-  },
-  timerButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: "#fff",
-    justifyContent: "center",
-    alignItems: "center",
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
   sectionTitle: {
     fontSize: 24,
-    fontWeight: "bold",
     color: "#333",
     marginBottom: 24,
   },
   methodsContainer: {
     flex: 1,
-  },
-  methodsGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
-  },
-  methodCard: {
-    width: "48%",
-    backgroundColor: "#f8f9fa",
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
     alignItems: "center",
   },
-  selectedMethodCard: {
-    backgroundColor: "#E3F2FD",
-    borderColor: "#007AFF",
-    borderWidth: 2,
+  carousel: {
+    marginVertical: 20,
+    height: 400, // Make carousel taller
   },
-  methodName: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#333",
-    marginTop: 12,
+  carouselContent: {
+    paddingHorizontal: 0,
+  },
+  cardContainer: {
+    marginHorizontal: 10,
+    width: Dimensions.get('window').width * 0.8,
+  },
+  pageIndicators: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 30,
+  },
+  pageIndicator: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: '#E5E5E5',
+    marginHorizontal: 6,
+  },
+  activePageIndicator: {
+    backgroundColor: '#333',
+  },
+  
+  // Device Status Styles
+  deviceStatus: {
+    backgroundColor: '#F8F9FA',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 20,
+    width: '100%',
+    borderWidth: 1,
+    borderColor: '#E8F5E8',
+  },
+  statusHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  connectedIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  connectedText: {
+    marginLeft: 8,
+    color: '#4CAF50',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  disconnectButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    backgroundColor: '#FFF3F3',
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#FFE6E6',
+  },
+  disconnectText: {
+    color: '#E53E3E',
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  dataRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+  },
+  dataItem: {
+    alignItems: 'center',
+    flex: 1,
+  },
+  dataLabel: {
+    fontSize: 12,
+    color: '#666',
     marginBottom: 4,
   },
-  methodDesc: {
+  dataValue: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333',
+  },
+
+  // Modal Styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: '#F5F5F5',
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    width: '100%',
+    height: '90%', // Changed from maxHeight to height
+    minHeight: 500, // Added minimum height
+    position: 'relative',
+    borderWidth: 3, // Debug: Add visible border
+    borderColor: 'red', // Debug: Make border highly visible
+  },
+  modalScrollView: {
+    flex: 1,
+    width: '100%',
+  },
+  modalScrollContent: {
+    paddingHorizontal: 40,
+    paddingTop: 40,
+    paddingBottom: 40,
+    alignItems: 'center',
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 30,
+    left: 30,
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  statusBar: {
+    width: 60,
+    height: 6,
+    backgroundColor: '#D1D1D1',
+    borderRadius: 3,
+    marginBottom: 40,
+    position: 'absolute',
+    top: 15,
+  },
+  frenchPressModalIcon: {
+    width: 100,
+    height: 100,
+    marginBottom: 30,
+    resizeMode: 'contain',
+  },
+  modalTitle: {
+    fontSize: 24,
+    fontWeight: '600',
+    color: '#333333',
+    textAlign: 'center',
+    marginBottom: 12,
+  },
+  modalSubtitle: {
+    fontSize: 16,
+    color: '#999999',
+    textAlign: 'center',
+    marginBottom: 30,
+    lineHeight: 22,
+  },
+  continueButton: {
+    backgroundColor: '#8CDBED',
+    paddingVertical: 16,
+    paddingHorizontal: 60,
+    borderRadius: 50,
+    width: '100%',
+    alignItems: 'center',
+  },
+  continueButtonText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333333',
+  },
+
+  // Device List Styles
+  deviceListContainer: {
+    width: '100%',
+    minHeight: 400, // Use minHeight instead of maxHeight
+  },
+  deviceListWrapper: {
+    minHeight: 300, // Use min height instead of fixed height
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    paddingVertical: 8,
+    borderWidth: 2,
+    borderColor: '#007AFF',
+    marginBottom: 20, // Add margin for spacing
+  },
+  deviceList: {
+    flex: 1,
+    paddingHorizontal: 8,
+  },
+  deviceListContent: {
+    paddingBottom: 10,
+  },
+  deviceItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    borderWidth: 2,
+    borderColor: '#00FF00', // Bright green border for debugging
+    backgroundColor: '#FFFFFF',
+    marginVertical: 4,
+    borderRadius: 8,
+    marginHorizontal: 8,
+    minHeight: 60, // Ensure minimum height
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  deviceInfo: {
+    flex: 1,
+  },
+  deviceName: {
     fontSize: 14,
-    color: "#666",
-    textAlign: "center",
+    fontWeight: '600',
+    color: '#333',
+  },
+  deviceId: {
+    fontSize: 10,
+    color: '#666',
+    marginTop: 2,
+  },
+  emptyList: {
+    padding: 20,
+    alignItems: 'center',
+  },
+  emptyText: {
+    fontSize: 14,
+    color: '#666',
+    textAlign: 'center',
     marginBottom: 8,
   },
-  methodDetails: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    width: "100%",
-    marginTop: 8,
-  },
-  methodDetail: {
+  emptySubtext: {
     fontSize: 12,
-    color: "#007AFF",
-    fontWeight: "500",
+    color: '#999',
+    textAlign: 'center',
+  },
+  rescanButton: {
+    backgroundColor: '#8CDBED',
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 16,
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  rescanButtonDisabled: {
+    backgroundColor: '#DDD',
+  },
+  rescanButtonText: {
+    color: '#333',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  rescanButtonTextDisabled: {
+    color: '#999',
+  },
+  
+  // Enhanced Scanning Styles
+  scanningHeader: {
+    alignItems: 'center',
+    paddingVertical: 20,
+    paddingHorizontal: 16,
+    backgroundColor: '#FAFAFA',
+    borderRadius: 12,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#E5E5E5',
+  },
+  scanningIconContainer: {
+    position: 'relative',
+    marginBottom: 12,
+  },
+  pulsingDot: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: '#007AFF',
+    opacity: 0.8,
+  },
+  scanningHeaderText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#666',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  scanningActiveText: {
+    color: '#007AFF',
+  },
+  scanningProgress: {
+    width: '100%',
+    height: 4,
+    backgroundColor: '#E5E5E5',
+    borderRadius: 2,
+    overflow: 'hidden',
+  },
+  progressBar: {
+    height: '100%',
+    backgroundColor: '#007AFF',
+    borderRadius: 2,
+    width: '100%',
+  },
+  
+  emptyIcon: {
+    marginBottom: 16,
+  },
+  actionButtons: {
+    marginTop: 16,
+    width: '100%',
+  },
+  buttonIcon: {
+    marginRight: 8,
+  },
+  debugText: {
+    fontSize: 12,
+    color: '#FF6B6B',
+    textAlign: 'center',
+    padding: 8,
+    backgroundColor: '#FFE5E5',
+    borderRadius: 4,
+    marginBottom: 8,
+  },
+  listHeader: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#333',
+    padding: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E5E5',
+    backgroundColor: '#F8F9FA',
   },
 });

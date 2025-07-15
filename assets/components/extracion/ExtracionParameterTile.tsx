@@ -54,7 +54,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   value: {
-    fontSize: 18, // Increased from 14 to 18
+    fontSize: 30, // Increased from 14 to 18
     fontWeight: '700', // Made bolder
     color: '#8CDBED',
     textAlign: 'center',
