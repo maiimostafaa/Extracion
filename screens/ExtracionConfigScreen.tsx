@@ -44,8 +44,15 @@ const ExtracionConfigScreen: React.FC = () => {
   };
 
   const handleCoffeeBeansAndWaterPress = () => {
-    // Navigate to the same page for both coffee beans and water selection
-    // It will navigate to the same adjustment page
+    // Navigate to the coffee and water adjustment screen
+    navigation.navigate('ExtracionCoffeeToWaterScreen', {
+      coffeeBeans,
+      water,
+      onUpdate: (newCoffeeBeans: string, newWater: string) => {
+        setCoffeeBeans(newCoffeeBeans);
+        setWater(newWater);
+      }
+    });
   };
 
   const handleDropdownToggle = () => {
