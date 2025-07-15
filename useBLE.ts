@@ -145,10 +145,10 @@ function useBLE() {
         bytes[i] = binaryString.charCodeAt(i);
       }
       
-      // Convert bytes to float (little-endian)
+      // Try interpreting as 32-bit integer first (little-endian)
       const view = new DataView(bytes.buffer);
-      const floatValue = view.getFloat32(0, true); // true for little-endian
-      return floatValue / 100; // Real temperature = data / 100
+      const intValue = view.getUint32(0, true); // true for little-endian
+      return intValue / 100; // Real temperature = data / 100
     } catch (error) {
       console.log('Temperature parse error:', error);
       return 0;
