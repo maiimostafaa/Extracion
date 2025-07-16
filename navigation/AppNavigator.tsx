@@ -45,6 +45,7 @@ import ShopItemDetailScreen from "../screens/ShopItemDetailScreen";
 import CafeFinderScreen from "../screens/CafeFinderScreen";
 import { newsletterItem } from "../assets/types/newsletter-item";
 import NewsletterDetailScreen from "../screens/NewsletterDetailScreen";
+import ExtracionCoffeeToWaterScreen from "../screens/ExtracionCoffeeToWaterScreen";
 import ExtracionPour from "../screens/ExtracionPour";
 
 export type RootStackParamList = {
@@ -84,6 +85,11 @@ export type RootStackParamList = {
   ExtracionConfigScreen: undefined;
   ExtracionCoffeeBeanListScreen: undefined;
   ExtracionCoffeeBeanInputScreen: undefined;
+  ExtracionCoffeeToWaterScreen: {
+    coffeeBeans: string;
+    water: string;
+    onUpdate: (coffeeBeans: string, water: string) => void;
+  };
   ShopItemDetail: { item: ShopItem };
 };
 
@@ -225,7 +231,6 @@ export default function AppNavigator() {
       <Stack.Screen
         name="BrewLogDetailScreen"
         component={BrewLogDetailScreen}
-        options={{ headerShown: false }}
       />
       <Stack.Screen
         name="BrewLogEditScreen"
@@ -233,18 +238,15 @@ export default function AppNavigator() {
         options={{
           presentation: "modal",
           gestureEnabled: false,
-          headerShown: false,
         }}
       />
       <Stack.Screen
         name="ExtracionConfigScreen"
         component={ExtracionConfigScreen}
-        options={{ headerShown: false }}
       />
       <Stack.Screen
         name="ExtracionCoffeeBeanListScreen"
         component={ExtracionCoffeeBeanListScreen}
-        options={{ headerShown: false }}
       />
       <Stack.Screen
         name="ExtracionCoffeeBeanInputScreen"
@@ -252,8 +254,11 @@ export default function AppNavigator() {
         options={{
           presentation: "fullScreenModal",
           gestureEnabled: true,
-          headerShown: false,
         }}
+      />
+      <Stack.Screen
+        name="ExtracionCoffeeToWaterScreen"
+        component={ExtracionCoffeeToWaterScreen}
       />
       <Stack.Screen name="ExtracionPour" component={ExtracionPour} />
       <Stack.Screen name="ShopScreen" component={ShopScreen} />
@@ -262,7 +267,6 @@ export default function AppNavigator() {
         name="CafeFinderScreen"
         component={CafeFinderScreen}
         options={{
-          headerShown: false,
           animation: "fade",
           animationDuration: 300,
         }}

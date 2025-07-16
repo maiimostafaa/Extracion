@@ -69,20 +69,20 @@ const brewingMethods: BrewingMethod[] = [
 
 export default function ExtractionScreen() {
   const navigation = useNavigation<NavigationProp>();
-  const [showBLEModal, setShowBLEModal] = useState(true);
+  const [show
+         
+         Modal, setShowBLEModal] = useState(true);
+  const [modalState, setModalState] = useState<'initial' | 'searching' | 'deviceList' | 'connecting' | 'connected'>('initial');
+  const [connectingDevice, setConnectingDevice] = useState<any>(null);
+  const [justDisconnected, setJustDisconnected] = useState(false);
   const [showDeviceList, setShowDeviceList] = useState(false);
-
-  // console.log(
-  //   "ExtractionScreen render - showBLEModal:",
-  //   showBLEModal,
-  //   "showDeviceList:",
-  //   showDeviceList
-  // );
-  // console.log("Modal should be visible:", showBLEModal);
-  // console.log("Device list should be shown:", showDeviceList);
-
-  // Animation for pulsing dot
+  
+  console.log('ExtractionScreen render - showBLEModal:', showBLEModal, 'modalState:', modalState);
+  
+  // Animation for pulsing dot and loading
   const pulseAnim = new Animated.Value(1);
+  const spinAnim = new Animated.Value(0);
+  
 
   const {
     requestPermissions,
@@ -110,7 +110,7 @@ export default function ExtractionScreen() {
 
   // Pulse animation effect
   useEffect(() => {
-    if (isScanning) {
+    if (isScanning || modalState === 'searching') {
       const pulse = () => {
         Animated.sequence([
           Animated.timing(pulseAnim, {
@@ -124,32 +124,51 @@ export default function ExtractionScreen() {
             useNativeDriver: true,
           }),
         ]).start(() => {
-          if (isScanning) pulse();
+          if (isScanning || modalState === 'searching') pulse();
         });
       };
       pulse();
     }
-  }, [isScanning, pulseAnim]);
+  }, [isScanning, modalState, pulseAnim]);
+
+  // Spinning animation for connecting state
+  useEffect(() => {
+    if (modalState === 'connecting') {
+      const spin = () => {
+        Animated.timing(spinAnim, {
+          toValue: 1,
+          duration: 2000,
+          useNativeDriver: true,
+        }).start(() => {
+          spinAnim.setValue(0);
+          if (modalState === 'connecting') spin();
+        });
+      };
+      spin();
+    }
+  }, [modalState, spinAnim]);
 
   const handleMethodSelect = (method: BrewingMethod) => {
     if (connectedDevice) {
       navigation.navigate("ExtracionConfigScreen");
     } else {
-      // Alert.alert("Device Required", "Please connect to a BLE device first", [
-      //   { text: "OK", onPress: () => setShowBLEModal(true) },
-      // ]);
-      navigation.navigate("ExtracionConfigScreen");
+      Alert.alert('Device Required', 'Please connect to a BLE device first', [
+        { text: 'OK', onPress: () => {
+          setShowBLEModal(true);
+          setModalState('initial');
+        }}
+      ]);
     }
   };
 
   const handleBLEModalClose = () => {
     setShowBLEModal(false);
+    setModalState('initial');
   };
 
   const handleContinue = async () => {
-    console.log(
-      "Continue button pressed - checking permissions and showing modal"
-    );
+    console.log('Continue button pressed - checking permissions and starting search');
+
     if (connectedDevice) {
       setShowBLEModal(false);
       return;
@@ -157,10 +176,23 @@ export default function ExtractionScreen() {
 
     const hasPermissions = await requestPermissions();
     if (hasPermissions) {
-      console.log("Permissions granted - showing device list modal");
-      setShowDeviceList(true);
-      console.log("Starting BLE scan...");
-      scanForPeripherals();
+      console.log('Permissions granted - starting search');
+      setModalState('searching');
+      console.log('Starting BLE scan...');
+      
+      // Use forceDelay if we just disconnected from a STM32WB device
+      if (justDisconnected) {
+        console.log('Using force delay for STM32WB device after disconnect');
+        scanForPeripherals(true); // true = forceDelay
+        setJustDisconnected(false); // Reset the flag
+      } else {
+        scanForPeripherals(); // Normal scan
+      }
+      
+      // After scanning starts, show device list after a delay
+      setTimeout(() => {
+        setModalState('deviceList');
+      }, 2000);
     } else {
       console.log("Permissions denied");
       Alert.alert("Permissions Required", "Bluetooth permissions are required");
@@ -168,28 +200,43 @@ export default function ExtractionScreen() {
   };
 
   const handleDeviceConnect = async (device: any) => {
-    await connectToDevice(device);
-    setShowDeviceList(false);
+    setConnectingDevice(device);
+    setModalState('connecting');
+    
+    try {
+      await connectToDevice(device);
+      setModalState('connected');
+    } catch (error) {
+      setModalState('deviceList');
+      setConnectingDevice(null);
+      Alert.alert('Connection Failed', 'Failed to connect to device');
+    }
+
   };
 
-  const handleDisconnect = () => {
+  const handleDisconnect = async () => {
     Alert.alert(
       "Disconnect Device",
       "Are you sure you want to disconnect from the BLE device?",
       [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Disconnect",
-          style: "destructive",
-          onPress: () => {
-            disconnectFromDevice();
-            setShowDeviceList(false);
-          },
-        },
+        { text: 'Cancel', style: 'cancel' },
+        { 
+          text: 'Disconnect', 
+          style: 'destructive',
+          onPress: async () => {
+            await disconnectFromDevice();
+            setJustDisconnected(true);
+            setModalState('initial');
+            
+            // Log disconnect completion for STM32WB device
+            console.log('Disconnected from STM32WB - device should restart advertising after 3 seconds');
+          }
+        }
       ]
     );
   };
 
+  // Legacy render function - keeping for reference
   const renderDevice = ({ item }: { item: any }) => {
     console.log(
       "Rendering device:",
@@ -201,12 +248,8 @@ export default function ExtractionScreen() {
         style={styles.deviceItem}
         onPress={() => handleDeviceConnect(item)}
       >
-        <View style={styles.deviceInfo}>
-          <Text style={styles.deviceName}>
-            {item.name || item.localName || "Unknown Device"}
-          </Text>
-          <Text style={styles.deviceId}>{item.id}</Text>
-        </View>
+        <Text style={styles.deviceName}>{item.name || item.localName || 'Unknown Device'}</Text>
+
         <Ionicons name="chevron-forward" size={20} color="#666" />
       </TouchableOpacity>
     );
@@ -301,220 +344,114 @@ export default function ExtractionScreen() {
             {/* Close Button - Fixed position outside ScrollView */}
 
             {/* Scrollable Content */}
-            <ScrollView
-              style={styles.modalScrollView}
-              contentContainerStyle={styles.modalScrollContent}
-              showsVerticalScrollIndicator={true}
-              bounces={true}
-            >
-              {/* Debug: Test that modal content is rendering */}
-              <TouchableOpacity
-                style={styles.closeButton}
-                onPress={handleBLEModalClose}
-              >
-                <Ionicons name="close" size={40} color="#666666" />
-              </TouchableOpacity>
-              {/* <Text
-                style={{
-                  fontSize: 24,
-                  color: "red",
-                  textAlign: "center",
-                  backgroundColor: "yellow",
-                  padding: 10,
-                  margin: 10,
-                }}
-              >
-                DEBUG: MODAL IS RENDERING
-              </Text> */}
+            <View style={styles.modalBody}>
               {/* French Press Icon */}
               <Image
-                source={require("../assets/nonclickable-visual-elements/extracion_coffeeMachine.png")}
+                source={require('../assets/nonclickable-visual-elements/coffee press unfilled.png')}
                 style={styles.frenchPressModalIcon}
               />
 
-              {/* Title */}
-              <Text style={styles.modalTitle}>
-                {connectedDevice
-                  ? "Device Connected!"
-                  : showDeviceList
-                    ? "Select BLE Device"
-                    : "Turn on your device"}
-              </Text>
-
-              {/* Subtitle */}
-              <Text style={styles.modalSubtitle}>
-                {connectedDevice
-                  ? `Connected to ${connectedDevice.name || connectedDevice.localName || "Device"} - Ready to brew!`
-                  : showDeviceList
-                    ? "Choose any BLE device from the list below (testing mode):"
-                    : "Continue to scan for BLE devices."}
-              </Text>
-
-              {/* Device List or Continue Button */}
-              {showDeviceList && !connectedDevice ? (
-                <View style={styles.deviceListContainer}>
-                  {/* Scanning Status Header */}
-                  <View style={styles.scanningHeader}>
-                    <View style={styles.scanningIconContainer}>
-                      {isScanning ? (
-                        <>
-                          <Animated.View
-                            style={[
-                              styles.pulsingDot,
-                              { transform: [{ scale: pulseAnim }] },
-                            ]}
-                          />
-                          <Ionicons
-                            name="bluetooth"
-                            size={24}
-                            color="#007AFF"
-                          />
-                        </>
-                      ) : (
-                        <Ionicons name="bluetooth" size={24} color="#666" />
-                      )}
-                    </View>
-                    <Text
-                      style={[
-                        styles.scanningHeaderText,
-                        isScanning && styles.scanningActiveText,
-                      ]}
-                    >
-                      {isScanning
-                        ? "Scanning for BLE devices..."
-                        : `Found ${allDevices.length} device${allDevices.length !== 1 ? "s" : ""}`}
-                    </Text>
-                    {isScanning && (
-                      <View style={styles.scanningProgress}>
-                        <View style={styles.progressBar} />
-                      </View>
-                    )}
-                  </View>
-
-                  {/* Device List - Fixed Height and Scrollable */}
-                  <View style={styles.deviceListWrapper}>
-                    <Text style={styles.debugText}>
-                      Debug: {allDevices.length} devices in array
-                    </Text>
-                    {allDevices.length > 0 ? (
-                      <>
-                        <Text style={styles.listHeader}>
-                          Available Devices:
-                        </Text>
-                        <FlatList
-                          data={allDevices}
-                          renderItem={renderDevice}
-                          keyExtractor={(item) => item.id}
-                          style={styles.deviceList}
-                          contentContainerStyle={styles.deviceListContent}
-                          showsVerticalScrollIndicator={true}
-                          scrollEnabled={true}
-                          nestedScrollEnabled={true}
-                          bounces={true}
-                        />
-                      </>
-                    ) : (
-                      <>
-                        {/* Test with mock data to verify list works */}
-                        <Text style={styles.listHeader}>
-                          Test Devices (if no real devices):
-                        </Text>
-                        <FlatList
-                          data={[
-                            {
-                              id: "test1",
-                              name: "Test Device 1",
-                              localName: "TestBLE1",
-                            },
-                            {
-                              id: "test2",
-                              name: "Test Device 2",
-                              localName: "TestBLE2",
-                            },
-                            { id: "test3", name: null, localName: "TestBLE3" },
-                            {
-                              id: "test4",
-                              name: "Test Device 4",
-                              localName: "TestBLE4",
-                            },
-                            {
-                              id: "test5",
-                              name: "Test Device 5",
-                              localName: "TestBLE5",
-                            },
-                          ]}
-                          renderItem={renderDevice}
-                          keyExtractor={(item) => item.id}
-                          style={styles.deviceList}
-                          contentContainerStyle={styles.deviceListContent}
-                          showsVerticalScrollIndicator={true}
-                          scrollEnabled={true}
-                          nestedScrollEnabled={true}
-                          bounces={true}
-                        />
-                        <View style={styles.emptyList}>
-                          <Ionicons
-                            name={
-                              isScanning ? "bluetooth" : "bluetooth-outline"
-                            }
-                            size={48}
-                            color={isScanning ? "#007AFF" : "#CCC"}
-                            style={styles.emptyIcon}
-                          />
-                          <Text style={styles.emptyText}>
-                            {isScanning
-                              ? "Searching for BLE devices..."
-                              : "Real devices will replace test data above"}
-                          </Text>
-                          <Text style={styles.emptySubtext}>
-                            {isScanning
-                              ? "This may take a few seconds"
-                              : 'Tap "Scan Again" to search for real devices'}
-                          </Text>
-                        </View>
-                      </>
-                    )}
-                  </View>
-
-                  {/* Action Buttons */}
-                  <View style={styles.actionButtons}>
-                    <TouchableOpacity
-                      style={[
-                        styles.rescanButton,
-                        isScanning && styles.rescanButtonDisabled,
-                      ]}
-                      onPress={scanForPeripherals}
-                      disabled={isScanning}
-                    >
-                      <Ionicons
-                        name="refresh"
-                        size={16}
-                        color={isScanning ? "#999" : "#333"}
-                        style={styles.buttonIcon}
-                      />
-                      <Text
-                        style={[
-                          styles.rescanButtonText,
-                          isScanning && styles.rescanButtonTextDisabled,
-                        ]}
-                      >
-                        {isScanning ? "Scanning..." : "Scan Again"}
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              ) : (
-                /* Continue Button */
-                <TouchableOpacity
-                  style={styles.continueButton}
-                  onPress={handleContinue}
-                >
-                  <Text style={styles.continueButtonText}>
-                    {connectedDevice ? "continue" : "find device"}
-                  </Text>
-                </TouchableOpacity>
+              {modalState === 'initial' && (
+                <>
+                  <Text style={styles.modalTitle}>Turn on your Extracion</Text>
+                  <Text style={styles.modalSubtitle}>Continue when it's on.</Text>
+                  <TouchableOpacity style={styles.continueButton} onPress={handleContinue}>
+                    <Text style={styles.continueButtonText}>continue</Text>
+                  </TouchableOpacity>
+                </>
               )}
-            </ScrollView>
+
+              {modalState === 'searching' && (
+                <>
+                  <Animated.View 
+                    style={[
+                      styles.loadingSpinner,
+                      { transform: [{ rotate: spinAnim.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: ['0deg', '360deg']
+                      }) }] }
+                    ]}
+                  >
+                    <View style={styles.spinnerCircle} />
+                  </Animated.View>
+                  <Text style={styles.modalTitle}>Searching...</Text>
+                  <Text style={styles.modalSubtitle}>Make sure your machine is turned on.</Text>
+                </>
+              )}
+
+              {modalState === 'deviceList' && (
+                <>
+                  <Text style={styles.modalTitle}>Let's connect to Extracion</Text>
+                  <Text style={styles.modalSubtitle}>Choose your Extracion to continue.</Text>
+                  
+                  <View style={styles.deviceListContainer}>
+                    {allDevices.length > 0 ? (
+                      allDevices.map((device, index) => (
+                        <TouchableOpacity
+                          key={device.id}
+                          style={styles.deviceItem}
+                          onPress={() => handleDeviceConnect(device)}
+                        >
+                          <View style={styles.wifiIcon}>
+                            <Ionicons name="wifi" size={20} color="#333" />
+                          </View>
+                          <Text style={styles.deviceName}>
+                            {device.name || device.localName || 'STM32WB Device'}
+
+                          </Text>
+                          <Ionicons name="chevron-forward" size={20} color="#666" />
+                        </TouchableOpacity>
+                      ))
+                    ) : (
+                      <Text style={styles.noDevicesText}>No STM32WB devices found</Text>
+                    )}
+                  </View>
+
+
+                  <TouchableOpacity style={styles.continueButton} onPress={handleContinue}>
+                    <Text style={styles.continueButtonText}>continue</Text>
+                  </TouchableOpacity>
+                </>
+              )}
+
+              {modalState === 'connecting' && (
+                <>
+                  <Animated.View 
+                    style={[
+                      styles.loadingSpinner,
+                      { transform: [{ rotate: spinAnim.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: ['0deg', '360deg']
+                      }) }] }
+                    ]}
+                  >
+                    <View style={styles.spinnerCircle} />
+                  </Animated.View>
+                  <Text style={styles.modalTitle}>Connecting...</Text>
+                  <Text style={styles.modalSubtitle}>Just a moment more, please.</Text>
+                  <TouchableOpacity style={styles.cancelButton} onPress={() => setModalState('deviceList')}>
+                    <Text style={styles.cancelButtonText}>cancel</Text>
+                  </TouchableOpacity>
+                </>
+
+              )}
+
+              {modalState === 'connected' && (
+                <>
+                  <Text style={styles.modalTitle}>Extracion is ready to use</Text>
+                  <Text style={styles.modalSubtitle}>Let's brew some magic!</Text>
+                  <TouchableOpacity 
+                    style={styles.continueButton} 
+                    onPress={() => {
+                      setShowBLEModal(false);
+                      setModalState('initial');
+                    }}
+                  >
+                    <Text style={styles.continueButtonText}>finish</Text>
+                  </TouchableOpacity>
+                </>
+              )}
+            </View>
           </View>
         </View>
       </Modal>
@@ -638,135 +575,144 @@ const styles = StyleSheet.create({
     flexDirection: "column",
   },
   modalContent: {
-    backgroundColor: "#F5F5F5",
-    borderTopLeftRadius: 30,
-    borderTopRightRadius: 30,
-    width: "100%",
-    height: "90%", // Changed from maxHeight to height
-    minHeight: 500, // Added minimum height
-    position: "relative",
-    borderWidth: 3, // Debug: Add visible border
-    borderColor: "red", // Debug: Make border highly visible
-    flexDirection: "column",
+
+    backgroundColor: '#FFFFFF',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    width: '100%',
+    maxHeight: '70%',
+    minHeight: '50%',
+    position: 'relative',
+
   },
-  modalScrollView: {
-    width: "100%",
-    flexDirection: "column",
-  },
-  modalScrollContent: {
+  modalBody: {
     paddingHorizontal: 40,
     flexDirection: "column",
     paddingBottom: 40,
-    alignItems: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
+    flex: 1,
   },
   closeButton: {
-    position: "absolute",
-    top: 20,
-    left: 30,
-    width: 40,
-    height: 40,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#000",
+    position: 'absolute',
+    top: 15,
+    left: 20,
+    width: 30,
+    height: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 10,
   },
   statusBar: {
-    width: 60,
-    height: 6,
-    backgroundColor: "#D1D1D1",
-    borderRadius: 3,
-    marginBottom: 40,
-    position: "absolute",
-    top: 15,
-    flexDirection: "column",
+    width: 40,
+    height: 4,
+    backgroundColor: '#E5E5E5',
+    borderRadius: 2,
+    position: 'absolute',
+    top: 10,
+    alignSelf: 'center',
+    left: '50%',
+    marginLeft: -20,
+
   },
   frenchPressModalIcon: {
-    width: 100,
-    height: 100,
+    width: 80,
+    height: 80,
     marginBottom: 30,
-    resizeMode: "contain",
+
+    resizeMode: 'contain',
+    tintColor: '#666666',
   },
   modalTitle: {
-    fontSize: 24,
-    fontWeight: "600",
-    color: "#333333",
-    textAlign: "center",
-    marginBottom: 12,
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#333333',
+    textAlign: 'center',
+    marginBottom: 8,
   },
   modalSubtitle: {
-    fontSize: 16,
-    color: "#999999",
-    textAlign: "center",
-    marginBottom: 30,
-    lineHeight: 22,
+    fontSize: 14,
+    color: '#999999',
+    textAlign: 'center',
+    marginBottom: 40,
+    lineHeight: 18,
   },
   continueButton: {
-    backgroundColor: "#8CDBED",
-    paddingVertical: 16,
-    paddingHorizontal: 60,
-    borderRadius: 50,
-    width: "100%",
-    alignItems: "center",
+    backgroundColor: '#8CDBED',
+    paddingVertical: 14,
+    paddingHorizontal: 50,
+    borderRadius: 25,
+    alignItems: 'center',
+    minWidth: 200,
   },
   continueButtonText: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#333333",
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#333333',
+  },
+  cancelButton: {
+    backgroundColor: '#E5E5E5',
+    paddingVertical: 14,
+    paddingHorizontal: 50,
+    borderRadius: 25,
+    alignItems: 'center',
+    minWidth: 200,
+  },
+  cancelButtonText: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#333333',
+  },
+  loadingSpinner: {
+    width: 40,
+    height: 40,
+    marginBottom: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  spinnerCircle: {
+    width: 30,
+    height: 30,
+    borderWidth: 3,
+    borderColor: '#E5E5E5',
+    borderTopColor: '#8CDBED',
+    borderRadius: 15,
   },
 
   // Device List Styles
   deviceListContainer: {
-    width: "100%",
-    minHeight: 400, // Use minHeight instead of maxHeight
-  },
-  deviceListWrapper: {
-    minHeight: 300, // Use min height instead of fixed height
-    backgroundColor: "#FFFFFF",
-    borderRadius: 12,
-    paddingVertical: 8,
-    borderWidth: 2,
-    borderColor: "#007AFF",
-    marginBottom: 20, // Add margin for spacing
-  },
-  deviceList: {
-    flex: 1,
-    paddingHorizontal: 8,
-  },
-  deviceListContent: {
-    paddingBottom: 10,
+    width: '100%',
+    marginBottom: 30,
   },
   deviceItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 16,
-    borderWidth: 2,
-    borderColor: "#00FF00", // Bright green border for debugging
-    backgroundColor: "#FFFFFF",
-    marginVertical: 4,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E5E5E5',
     borderRadius: 8,
-    marginHorizontal: 8,
-    minHeight: 60, // Ensure minimum height
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 1,
+    marginBottom: 8,
   },
-  deviceInfo: {
-    flex: 1,
+  wifiIcon: {
+    marginRight: 12,
   },
   deviceName: {
+    flex: 1,
+    fontSize: 16,
+    color: '#333333',
+  },
+  noDevicesText: {
     fontSize: 14,
-    fontWeight: "600",
-    color: "#333",
+    color: '#999999',
+    textAlign: 'center',
+    fontStyle: 'italic',
+    marginVertical: 20,
+
   },
-  deviceId: {
-    fontSize: 10,
-    color: "#666",
-    marginTop: 2,
-  },
+  
+  // Legacy styles (to be cleaned up)
   emptyList: {
     padding: 20,
     alignItems: "center",
