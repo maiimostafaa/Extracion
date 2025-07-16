@@ -7,6 +7,8 @@ import {
   TouchableOpacity,
   StatusBar,
   Image,
+  Modal,
+  ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -24,7 +26,7 @@ const ExtracionConfigScreen: React.FC = () => {
   // State for parameter values
   const [coffeeBeans, setCoffeeBeans] = useState('18g');
   const [water, setWater] = useState('270ml');
-  const [grind, setGrind] = useState('Medium');
+  const [grind, setGrind] = useState('coarse');
   const [brewTime, setBrewTime] = useState('4:00');
   const [cupCount, setCupCount] = useState(1);
 
@@ -32,8 +34,60 @@ const ExtracionConfigScreen: React.FC = () => {
   const [selectedMode, setSelectedMode] = useState('brew guide');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
+  // State for grind modal
+  const [isGrindModalOpen, setIsGrindModalOpen] = useState(false);
+
+  // State for brew time modal
+  const [isBrewTimeModalOpen, setIsBrewTimeModalOpen] = useState(false);
+
   // State for tutorial navigation
   const [tutorialStep, setTutorialStep] = useState(0);
+
+  // Grind size options
+  const grindOptions = [
+    { 
+      id: 'extra-coarse', 
+      name: 'extra-coarse', 
+      feelsLike: 'rock salt',
+      icon: require('../assets/icons/extracion/grindSizeIcons/extra-coarse.png'),
+    },
+    { 
+      id: 'coarse', 
+      name: 'coarse', 
+      feelsLike: 'sea salt',
+      icon: require('../assets/icons/extracion/grindSizeIcons/coarse.png'),
+    },
+    { 
+      id: 'medium-coarse', 
+      name: 'medium-coarse', 
+      feelsLike: 'rough sand',
+      icon: require('../assets/icons/extracion/grindSizeIcons/medium-coarse.png'),
+    },
+    { 
+      id: 'medium', 
+      name: 'medium', 
+      feelsLike: 'sand',
+      icon: require('../assets/icons/extracion/grindSizeIcons/medium.png'),
+    },
+    { 
+      id: 'medium-fine', 
+      name: 'medium-fine', 
+      feelsLike: 'table salt',
+      icon: require('../assets/icons/extracion/grindSizeIcons/medium-fine.png'),
+    },
+    { 
+      id: 'fine', 
+      name: 'fine', 
+      feelsLike: 'sugar',
+      icon: require('../assets/icons/extracion/grindSizeIcons/fine.png'),
+    },
+    { 
+      id: 'extra-fine', 
+      name: 'extra-fine', 
+      feelsLike: 'flour',
+      icon: require('../assets/icons/extracion/grindSizeIcons/extra-fine.png'),
+    },
+  ];
 
   const handleBack = () => {
     navigation.goBack();
@@ -81,9 +135,36 @@ const ExtracionConfigScreen: React.FC = () => {
   };
 
   const handleTilePress = (tileType: string) => {
-    // Handle tile press - for now just log
-    console.log(`Pressed ${tileType} tile`);
+    if (tileType === 'grind') {
+      setIsGrindModalOpen(true);
+    } else if (tileType === 'brewTime') {
+      setIsBrewTimeModalOpen(true);
+    } else {
+      // Handle other tile presses
+      console.log(`Pressed ${tileType} tile`);
+    }
   };
+
+  const handleGrindSelect = (selectedGrind: string) => {
+    setGrind(selectedGrind);
+  };
+
+  const handleGrindModalClose = () => {
+    setIsGrindModalOpen(false);
+  };
+
+  const handleBrewTimeModalClose = () => {
+    setIsBrewTimeModalOpen(false);
+  };
+
+  const handleBrewTimeChange = (minutes: number, seconds: number) => {
+    const formattedTime = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    setBrewTime(formattedTime);
+  };
+
+  // Get current time values for display
+  const getCurrentMinutes = () => parseInt(brewTime.split(':')[0]);
+  const getCurrentSeconds = () => parseInt(brewTime.split(':')[1]);
 
   const handleCupCountChange = (increment: boolean) => {
     if (increment) {
@@ -287,31 +368,43 @@ const ExtracionConfigScreen: React.FC = () => {
 
             {tutorialStep === 2 && (
               <>
-                <Text style={styles.thingsNeededTitle}>Step 2: Brew</Text>
-                <View style={styles.requirementsList}>
-                  <Text style={styles.requirementItem}>• Add ground coffee to French Press</Text>
-                  <Text style={styles.requirementItem}>• Pour hot water slowly over coffee</Text>
-                  <Text style={styles.requirementItem}>• Stir gently with spoon</Text>
-                  <Text style={styles.requirementItem}>• Place lid on top, don't press yet</Text>
-                </View>
+                <Image
+                  source={require('../assets/nonclickable-visual-elements/extracion_grinder.png')}
+                  style={styles.kettleIcon}
+                />
+                <Text style={styles.kettleTitle}>Weigh out the coffee and{'\n'}grind it</Text>
+                <Text style={styles.kettleInstructions}>
+                  Make sure you adjust the grinder first{'\n'}to get the right grind size.
+                </Text>
               </>
             )}
 
             {tutorialStep === 3 && (
               <>
-                <Text style={styles.thingsNeededTitle}>Step 3: Wait & Serve</Text>
-                <View style={styles.requirementsList}>
-                  <Text style={styles.requirementItem}>• Let coffee steep for 4 minutes</Text>
-                  <Text style={styles.requirementItem}>• Slowly press the plunger down</Text>
-                  <Text style={styles.requirementItem}>• Pour immediately into your cup</Text>
-                  <Text style={styles.requirementItem}>• Enjoy your French Press coffee!</Text>
-                </View>
+               <Image
+                  source={require('../assets/nonclickable-visual-elements/extracion_takeOutFilter.png')}
+                  style={styles.takeOutFilter}
+                />
+                <Text style={styles.kettleTitle}>Take out the filter part of{'\n'}the vessel</Text>
+              </>
+            )}
+
+            {tutorialStep === 4 && (
+              <>
+                <Image
+                  source={require('../assets/nonclickable-visual-elements/extracion_checkMark.png')}
+                  style={styles.kettleIcon}
+                />
+                <Text style={styles.kettleTitle}>Turn on Extracion</Text>
+                <Text style={styles.kettleInstructions}>
+                  Make sure your Extracion is on{'\n'}and you are all set!
+                </Text>
               </>
             )}
           </View>
           
           {/* Next Button - Hide on last step */}
-          {tutorialStep < 3 && (
+          {tutorialStep < 4 && (
             <View style={styles.nextButtonContainer}>
               <TouchableOpacity style={styles.nextButton} onPress={handleNextTutorial}>
                 <Ionicons name="chevron-forward" size={24} color="#FFFFFF" />
@@ -320,6 +413,208 @@ const ExtracionConfigScreen: React.FC = () => {
           )}
         </View>
       )}
+      
+      {/* Grind Size Modal */}
+      <Modal
+        visible={isGrindModalOpen}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={handleGrindModalClose}
+      >
+        <View style={styles.grindModalOverlay}>
+          <View style={styles.grindModalContent}>
+            {/* Modal Header */}
+            <View style={styles.grindModalHeader}>
+              <View style={styles.grindModalIndicator} />
+            </View>
+            
+            {/* Modal Content */}
+            <View style={styles.grindContent}>
+              {/* Header Row */}
+              <View style={styles.grindHeaderRow}>
+                <View style={styles.grindOptionLeft}>
+                  <Text style={styles.grindColumnHeader}>Grind size</Text>
+                </View>
+                <View style={styles.grindOptionCenter}>
+                  <Text style={styles.grindColumnHeader}>Feels like</Text>
+                </View>
+                <View style={styles.grindOptionRight}>
+                  <Text style={styles.grindColumnHeader}>Best for</Text>
+                </View>
+              </View>
+              
+              {/* Grind Options */}
+              {grindOptions.map((option) => (
+                <View key={option.id} style={styles.grindOptionRow}>
+                  <View style={styles.grindOptionLeft}>
+                    <TouchableOpacity
+                      style={[
+                        styles.grindSizeButton,
+                        grind === option.name && styles.grindSizeButtonSelected
+                      ]}
+                      onPress={() => handleGrindSelect(option.name)}
+                    >
+                      <Text style={[
+                        styles.grindOptionName,
+                        grind === option.name && styles.grindOptionNameSelected
+                      ]}>
+                        {option.name}
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                  
+                  <View style={styles.grindOptionCenter}>
+                    <Text style={styles.grindOptionFeels}>
+                      {option.feelsLike}
+                    </Text>
+                  </View>
+                  
+                  <View style={styles.grindOptionRight}>
+                    {/* Grind size icon */}
+                    <Image 
+                      source={option.icon} 
+                      style={styles.grindSizeIcon}
+                    />
+                  </View>
+                </View>
+              ))}
+            </View>
+            
+            {/* Save Button */}
+            <View style={styles.grindSaveContainer}>
+              <TouchableOpacity 
+                style={styles.grindSaveButton} 
+                onPress={handleGrindModalClose}
+              >
+                <Text style={styles.grindSaveButtonText}>save changes</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+      
+      {/* Brew Time Modal */}
+      <Modal
+        visible={isBrewTimeModalOpen}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={handleBrewTimeModalClose}
+      >
+        <View style={styles.timeModalOverlay}>
+          <View style={styles.timeModalContent}>
+            {/* Modal Header */}
+            <View style={styles.timeModalHeader}>
+              <View style={styles.timeModalIndicator} />
+            </View>
+            
+            {/* Modal Content */}
+            <View style={styles.timeModalBody}>
+              {/* Time Picker */}
+              <View style={styles.timePickerContainer}>
+                {/* Minutes Column */}
+                <View style={styles.timeColumn}>
+                  <View style={styles.pickerColumn}>
+                    <ScrollView 
+                      style={styles.timeScrollView}
+                      contentContainerStyle={styles.timeScrollContent}
+                      showsVerticalScrollIndicator={false}
+                      snapToInterval={40}
+                      snapToAlignment="start"
+                      decelerationRate="fast"
+                      contentOffset={{ x: 0, y: (getCurrentMinutes() - 1) * 40 }}
+                      onMomentumScrollEnd={(event) => {
+                        const offsetY = event.nativeEvent.contentOffset.y;
+                        const index = Math.round(offsetY / 40);
+                        const minute = Math.max(1, Math.min(8, index + 1));
+                        handleBrewTimeChange(minute, getCurrentSeconds());
+                      }}
+                    >
+                      {Array.from({ length: 8 }, (_, i) => i + 1).map((minute) => (
+                        <TouchableOpacity
+                          key={minute}
+                          style={styles.timeOption}
+                          onPress={() => handleBrewTimeChange(minute, getCurrentSeconds())}
+                        >
+                          <Text style={[
+                            styles.timeOptionText,
+                            getCurrentMinutes() === minute && styles.timeOptionTextSelected
+                          ]}>
+                            {minute}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </ScrollView>
+                    
+                    {/* Selection Indicator */}
+                    <View style={styles.selectionIndicator}>
+                      <View style={styles.separatorLine} />
+                      <View style={styles.selectionArea}>
+                        <Text style={styles.selectionLabel}>min</Text>
+                      </View>
+                      <View style={styles.separatorLine} />
+                    </View>
+                  </View>
+                </View>
+                
+                {/* Seconds Column */}
+                <View style={styles.timeColumn}>
+                  <View style={styles.pickerColumn}>
+                    <ScrollView 
+                      style={styles.timeScrollView}
+                      contentContainerStyle={styles.timeScrollContent}
+                      showsVerticalScrollIndicator={false}
+                      snapToInterval={40}
+                      snapToAlignment="start"
+                      decelerationRate="fast"
+                      contentOffset={{ x: 0, y: (getCurrentSeconds() / 5) * 40 }}
+                      onMomentumScrollEnd={(event) => {
+                        const offsetY = event.nativeEvent.contentOffset.y;
+                        const index = Math.round(offsetY / 40);
+                        const second = Math.max(0, Math.min(55, index * 5));
+                        handleBrewTimeChange(getCurrentMinutes(), second);
+                      }}
+                    >
+                      {Array.from({ length: 12 }, (_, i) => i * 5).map((second) => (
+                        <TouchableOpacity
+                          key={second}
+                          style={styles.timeOption}
+                          onPress={() => handleBrewTimeChange(getCurrentMinutes(), second)}
+                        >
+                          <Text style={[
+                            styles.timeOptionText,
+                            getCurrentSeconds() === second && styles.timeOptionTextSelected
+                          ]}>
+                            {second.toString().padStart(2, '0')}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </ScrollView>
+                    
+                    {/* Selection Indicator */}
+                    <View style={styles.selectionIndicator}>
+                      <View style={styles.separatorLine} />
+                      <View style={styles.selectionArea}>
+                        <Text style={styles.selectionLabel}>sec</Text>
+                      </View>
+                      <View style={styles.separatorLine} />
+                    </View>
+                  </View>
+                </View>
+              </View>
+            </View>
+            
+            {/* Save Button */}
+            <View style={styles.timeSaveContainer}>
+              <TouchableOpacity 
+                style={styles.timeSaveButton} 
+                onPress={handleBrewTimeModalClose}
+              >
+                <Text style={styles.timeSaveButtonText}>save changes</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -595,6 +890,13 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
     marginTop: 50,
   },
+  takeOutFilter: {
+    width: 120,
+    height: 170,
+    marginBottom: 30,
+    resizeMode: 'contain',
+    marginTop: 0
+  },
   kettleTitle: {
     fontSize: 24,
     fontWeight: '500',
@@ -660,6 +962,300 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 8,
+  },
+  
+  // Grind Modal Styles
+  grindModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  grindModalContent: {
+    backgroundColor: '#FFFFFF',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    height: '75%',
+  },
+  grindModalHeader: {
+    alignItems: 'center',
+    paddingVertical: 12,
+  },
+  grindModalIndicator: {
+    width: 40,
+    height: 4,
+    backgroundColor: '#E5E5E5',
+    borderRadius: 2,
+  },
+  grindContent: {
+    flex: 1,
+    paddingHorizontal: 20,
+    paddingBottom: 30,
+  },
+  grindScrollView: {
+    flex: 1,
+  },
+  grindScrollContent: {
+    paddingBottom: 20,
+  },
+  grindHeaderRow: {
+    flexDirection: 'row',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F0F0F0',
+    marginBottom: 8,
+  },
+  grindColumnHeader: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#666666',
+    textAlign: 'center',
+  },
+  grindOptionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 10,
+    marginVertical: 3,
+  },
+  grindOptionSelected: {
+    backgroundColor: '#F0F8FF',
+    borderRadius: 8,
+  },
+  grindOptionLeft: {
+    width: '50%',
+    alignItems: 'center',
+  },
+  grindSizeButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#E5E5E5',
+    backgroundColor: '#FFFFFF',
+    minWidth: 150,
+    maxWidth: 150,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  grindSizeButtonSelected: {
+    backgroundColor: '#8CDBED',
+    borderColor: '#8CDBED',
+  },
+  grindOptionName: {
+    fontSize: 14,
+    fontWeight: '400',
+    color: '#333333',
+  },
+  grindOptionNameSelected: {
+    fontWeight: '400',
+    color: '#333333',
+  },
+  grindOptionCenter: {
+    width: '28%',
+    alignItems: 'center',
+  },
+  grindOptionFeels: {
+    fontSize: 12,
+    color: '#666666',
+    textAlign: 'center',
+  },
+  grindOptionRight: {
+    width: '22%',
+    alignItems: 'center',
+  },
+  grindIconPlaceholder: {
+    width: 24,
+    height: 24,
+    backgroundColor: '#F0F0F0',
+    borderRadius: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  grindSizeIcon: {
+    width: 40,
+    height: 40,
+    resizeMode: 'contain',
+  },
+  grindIconText: {
+    fontSize: 12,
+  },
+  grindSaveContainer: {
+    paddingHorizontal: 20,
+    paddingVertical: 20,
+    paddingBottom: 30,
+    backgroundColor: '#FFFFFF',
+    borderTopWidth: 1,
+    borderTopColor: '#F0F0F0',
+  },
+  grindSaveButton: {
+    backgroundColor: '#8CDBED',
+    borderRadius: 25,
+    paddingVertical: 16,
+    alignItems: 'center',
+  },
+  grindSaveButtonText: {
+    fontSize: 18,
+    fontWeight: '400',
+    color: '#333333',
+  },
+  
+  // Brew Time Modal Styles
+  timePickerContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    flex: 1,
+  },
+  timeColumn: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  timeColumnHeader: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#666666',
+    marginBottom: 15,
+    textAlign: 'center',
+  },
+  pickerColumn: {
+    position: 'relative',
+    height: 150,
+    width: '100%',
+  },
+  timeScrollView: {
+    height: 150,
+    width: '100%',
+  },
+  timeScrollContent: {
+    paddingVertical: 55, // Center the first and last items
+    alignItems: 'center',
+  },
+  timeOption: {
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%',
+  },
+  timeOptionSelected: {
+    backgroundColor: 'transparent',
+  },
+  timeOptionText: {
+    fontSize: 24,
+    fontWeight: '300',
+    color: '#CCCCCC',
+    textAlign: 'center',
+  },
+  timeOptionTextSelected: {
+    color: '#333333',
+    fontWeight: '600',
+    fontSize: 24,
+  },
+  selectionIndicator: {
+    position: 'absolute',
+    top: '50%',
+    left: 0,
+    right: 0,
+    transform: [{ translateY: -20 }],
+    height: 40,
+    justifyContent: 'space-between',
+    pointerEvents: 'none',
+  },
+  selectionArea: {
+    height: 38,
+    backgroundColor: 'transparent',
+    justifyContent: 'center',
+    alignItems: 'flex-end',
+    paddingRight: 10,
+  },
+  selectionLabel: {
+    fontSize: 20,
+    fontWeight: '400',
+    color: '#333333',
+  },
+  selectedTimeOverlay: {
+    position: 'absolute',
+    top: '50%',
+    left: 10,
+    right: 10,
+    transform: [{ translateY: -12 }],
+    alignItems: 'center',
+    justifyContent: 'center',
+    pointerEvents: 'none',
+  },
+  selectedTimeRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    width: '100%',
+    paddingHorizontal: 40,
+    paddingVertical: 6,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+  },
+  separatorLine: {
+    height: 1,
+    backgroundColor: '#C7C7CC',
+    width: '100%',
+    marginVertical: 0,
+  },
+  selectedTimeContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 15,
+    flex: 1,
+  },
+  selectedTimeText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333333',
+    marginVertical: 0,
+  },
+
+  // Brew Time Modal Specific Styles
+  timeModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  timeModalContent: {
+    backgroundColor: '#FFFFFF',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    height: '35%',
+  },
+  timeModalHeader: {
+    alignItems: 'center',
+    paddingVertical: 8,
+  },
+  timeModalIndicator: {
+    width: 40,
+    height: 4,
+    backgroundColor: '#E5E5E5',
+    borderRadius: 2,
+  },
+  timeModalBody: {
+    flex: 1,
+    paddingHorizontal: 20,
+    paddingBottom: 15,
+  },
+  timeSaveContainer: {
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+    paddingBottom: 20,
+    backgroundColor: '#FFFFFF',
+    borderTopWidth: 1,
+    borderTopColor: '#F0F0F0',
+  },
+  timeSaveButton: {
+    backgroundColor: '#8CDBED',
+    borderRadius: 25,
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  timeSaveButtonText: {
+    fontSize: 16,
+    fontWeight: '400',
+    color: '#333333',
   },
 });
 

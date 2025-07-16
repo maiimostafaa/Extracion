@@ -6,6 +6,7 @@ import {
   SafeAreaView,
   TouchableOpacity,
   StatusBar,
+  Image,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -27,7 +28,7 @@ const ExtracionCoffeeToWaterScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute();
   const { coffeeBeans, water, onUpdate } = route.params as RouteParams;
-  const [ratio, setRatio] = React.useState(20); // I am setting it at 20 for now
+  const [ratio, setRatio] = React.useState(20); // Default to middle of range (10-30)
 
   const handleBack = () => {
     navigation.goBack();
@@ -54,21 +55,39 @@ const ExtracionCoffeeToWaterScreen: React.FC = () => {
 
       {/* Content */}
       <View style={styles.content}>
-
         <ExtracionCoffeeToWaterInstructionBanner text="Step 1: Adjust your coffee to water ratio" />
-        {/* <Text>Ratio: 1 : {ratio}</Text> */}
-        <CoffeeRatioSlider ratio={ratio} onChange={setRatio}
-        />
-        <ExtracionCoffeeToWaterInstructionBanner text={"Step 2: Pour the coffee beans \n to get your water volume"} />
-        <Text style={styles.placeholderText}>
-          Coffee to Water Adjustment Screen
-        </Text>
-        <Text style={styles.valueText}>
-          Current Coffee: {coffeeBeans}
-        </Text>
-        <Text style={styles.valueText}>
-          Current Water: {water}
-        </Text>
+        
+        <CoffeeRatioSlider ratio={ratio} onChange={setRatio} />
+        
+        <ExtracionCoffeeToWaterInstructionBanner text={"Step 2: Pour the coffee beans\nto get your water volume"} />
+        
+        {/* Coffee and Water Display */}
+        <View style={styles.measurementContainer}>
+          <View style={styles.measurementItem}>
+            <Image 
+              source={require('../assets/icons/extracion_coffeebean.png')} 
+              style={styles.iconImage}
+            />
+            <Text style={styles.measurementValue}>1g</Text>
+          </View>
+          
+          <View style={styles.divider} />
+          
+          <View style={styles.measurementItem}>
+            <Image 
+              source={require('../assets/icons/extracion_water.png')} 
+              style={styles.iconImage}
+            />
+            <Text style={styles.measurementValue}>{ratio}ml</Text>
+          </View>
+        </View>
+        
+        {/* Save Button */}
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity style={styles.saveButton} onPress={handleBack}>
+            <Text style={styles.saveButtonText}>save changes</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );
@@ -109,8 +128,57 @@ const styles = StyleSheet.create({
     padding: 30,
     alignItems: 'center',
     justifyContent: 'flex-start',
-    borderWidth: 1.5,
-    borderColor: "#FF00FF"
+  },
+  measurementContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 32,
+    marginVertical: 32,
+    width: '100%',
+    maxWidth: 320,
+    minHeight: 120,
+  },
+  measurementItem: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  iconImage: {
+    width: 40,
+    height: 40,
+    marginBottom: 12,
+    resizeMode: 'contain',
+    tintColor: '#58595B', // Coffee brown color to match the bean slider
+  },
+  measurementValue: {
+    fontSize: 24,
+    fontWeight: '300',
+    color: '#2C2C2C',
+    letterSpacing: 1,
+  },
+  divider: {
+    width: 2,
+    height: 80,
+    backgroundColor: '#D1D5DB',
+    marginHorizontal: 24,
+  },
+  buttonContainer: {
+    width: '100%',
+    marginTop: 'auto',
+    marginBottom: 40,
+  },
+  saveButton: {
+    backgroundColor: '#8CDBED',
+    borderRadius: 25,
+    paddingVertical: 16,
+    paddingHorizontal: 32,
+    alignItems: 'center',
+    width: '100%',
+  },
+  saveButtonText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333333',
   },
   placeholderText: {
     fontSize: 20,
