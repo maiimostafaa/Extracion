@@ -45,6 +45,7 @@ import ShopItemDetailScreen from "../screens/ShopItemDetailScreen";
 import CafeFinderScreen from "../screens/CafeFinderScreen";
 import { newsletterItem } from "../assets/types/newsletter-item";
 import NewsletterDetailScreen from "../screens/NewsletterDetailScreen";
+import ExtracionPour from "../screens/ExtracionPour";
 
 export type RootStackParamList = {
   Landing: undefined;
@@ -71,6 +72,7 @@ export type RootStackParamList = {
   ShopScreen: undefined;
   CafeFinderScreen: undefined;
   NewsletterDetail: { item: newsletterItem };
+  ExtracionPour: undefined;
   BrewLogDetailScreen: { brewLogEntry: brewLogEntry };
   BrewLogEditScreen: { brewLogEntry: brewLogEntry };
   fullCoupon: { coupon: coupon };
@@ -253,6 +255,7 @@ export default function AppNavigator() {
           headerShown: false,
         }}
       />
+      <Stack.Screen name="ExtracionPour" component={ExtracionPour} />
       <Stack.Screen name="ShopScreen" component={ShopScreen} />
       <Stack.Screen name="ShopItemDetail" component={ShopItemDetailScreen} />
       <Stack.Screen

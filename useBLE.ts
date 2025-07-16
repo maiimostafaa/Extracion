@@ -109,7 +109,7 @@ function useBLE() {
   const scanForPeripherals = () => {
     setIsScanning(true);
     setAllDevices([]);
-    
+
     bleManager.startDeviceScan(null, null, (error, device) => {
       if (error) {
         console.log(error);
@@ -118,8 +118,12 @@ function useBLE() {
       }
 
       // Show ALL BLE devices for testing purposes
-      if (device) {
-        console.log('Found device:', device.name || device.localName || 'Unknown', device.id);
+      if (device && (device.name || device.localName)) {
+        console.log(
+          "Found device:",
+          device.name || device.localName || "Unknown",
+          device.id
+        );
         setAllDevices((prevState: Device[]) => {
           if (!isDuplicateDevice(prevState, device)) {
             return [...prevState, device];
@@ -136,7 +140,6 @@ function useBLE() {
     }, 15000);
   };
 
-  // Helper function to parse temperature data (4 bytes float, divide by 100)
   const parseTemperature = (base64Data: string): number => {
     try {
       const binaryString = atob(base64Data);
@@ -144,13 +147,13 @@ function useBLE() {
       for (let i = 0; i < binaryString.length && i < 4; i++) {
         bytes[i] = binaryString.charCodeAt(i);
       }
-      
-      // Convert bytes to float (little-endian)
+
+      // Try interpreting as 32-bit integer first (little-endian)
       const view = new DataView(bytes.buffer);
-      const floatValue = view.getFloat32(0, true); // true for little-endian
-      return floatValue / 100; // Real temperature = data / 100
+      const intValue = view.getUint32(0, true); // true for little-endian
+      return intValue / 100; // Real temperature = data / 100
     } catch (error) {
-      console.log('Temperature parse error:', error);
+      console.log("Temperature parse error:", error);
       return 0;
     }
   };
@@ -160,16 +163,16 @@ function useBLE() {
     try {
       const binaryString = atob(base64Data);
       if (binaryString.length < 3) return 0;
-      
+
       // Ignore first byte, use bytes 1 and 2 as uint16
       const byte1 = binaryString.charCodeAt(1);
       const byte2 = binaryString.charCodeAt(2);
-      
+
       // Combine bytes as uint16 (little-endian)
       const uint16Value = byte1 | (byte2 << 8);
       return uint16Value / 20; // Real weight = data / 20
     } catch (error) {
-      console.log('Weight parse error:', error);
+      console.log("Weight parse error:", error);
       return 0;
     }
   };
@@ -179,7 +182,7 @@ function useBLE() {
     characteristic: Characteristic | null
   ) => {
     if (error) {
-      console.log('Temperature error:', error);
+      console.log("Temperature error:", error);
       return;
     } else if (!characteristic?.value) {
       console.log("No temperature data received");
@@ -187,7 +190,7 @@ function useBLE() {
     }
 
     const temp = parseTemperature(characteristic.value);
-    console.log('Temperature received:', temp, '°C');
+    // console.log("Temperature received:", temp, "°C");
     setTemperature(temp);
   };
 
@@ -196,7 +199,7 @@ function useBLE() {
     characteristic: Characteristic | null
   ) => {
     if (error) {
-      console.log('Weight error:', error);
+      console.log("Weight error:", error);
       return;
     } else if (!characteristic?.value) {
       console.log("No weight data received");
@@ -204,7 +207,7 @@ function useBLE() {
     }
 
     const weightValue = parseWeight(characteristic.value);
-    console.log('Weight received:', weightValue, 'g');
+    // console.log("Weight received:", weightValue, "g");
     setWeight(weightValue);
   };
 
@@ -225,7 +228,7 @@ function useBLE() {
           onWeightUpdate
         );
       } catch (error) {
-        console.log('Monitoring error:', error);
+        console.log("Monitoring error:", error);
       }
     } else {
       console.log("No Device Connected");
@@ -234,8 +237,11 @@ function useBLE() {
 
   useEffect(() => {
     const subscription = bleManager.onStateChange((state) => {
-      if (state === 'PoweredOff') {
-        Alert.alert('Bluetooth', 'Please turn on Bluetooth to connect to your thePong device');
+      if (state === "PoweredOff") {
+        Alert.alert(
+          "Bluetooth",
+          "Please turn on Bluetooth to connect to your thePong device"
+        );
       }
     }, true);
 
