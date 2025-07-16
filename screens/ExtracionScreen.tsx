@@ -14,15 +14,16 @@ import {
   Alert,
   Animated,
 } from "react-native";
-import type { ImageSourcePropType } from 'react-native';
+import type { ImageSourcePropType } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../navigation/AppNavigator";
 import Header from "../navigation/Header";
 import BrewingMethodCard from "../assets/components/extracion/BrewingMethodCard";
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons } from "@expo/vector-icons";
 
 import useBLE from "../useBLE";
+import { useBLEContext } from "../context/BLEContext";
 
 // Import images for each brewing method
 const frenchPressImage = require("../assets/nonclickable-visual-elements/extracion_coffeeMachine.png");
@@ -68,10 +69,13 @@ const brewingMethods: BrewingMethod[] = [
 
 export default function ExtractionScreen() {
   const navigation = useNavigation<NavigationProp>();
-  const [showBLEModal, setShowBLEModal] = useState(true);
+  const [show
+         
+         Modal, setShowBLEModal] = useState(true);
   const [modalState, setModalState] = useState<'initial' | 'searching' | 'deviceList' | 'connecting' | 'connected'>('initial');
   const [connectingDevice, setConnectingDevice] = useState<any>(null);
   const [justDisconnected, setJustDisconnected] = useState(false);
+  const [showDeviceList, setShowDeviceList] = useState(false);
   
   console.log('ExtractionScreen render - showBLEModal:', showBLEModal, 'modalState:', modalState);
   
@@ -79,6 +83,7 @@ export default function ExtractionScreen() {
   const pulseAnim = new Animated.Value(1);
   const spinAnim = new Animated.Value(0);
   
+
   const {
     requestPermissions,
     scanForPeripherals,
@@ -89,13 +94,16 @@ export default function ExtractionScreen() {
     isScanning,
     temperature,
     weight,
-  } = useBLE();
+  } = useBLEContext();
 
   useEffect(() => {
     // Request permissions when component mounts
     requestPermissions().then((granted) => {
       if (!granted) {
-        Alert.alert('Permissions Required', 'Bluetooth permissions are required to scan for BLE devices');
+        Alert.alert(
+          "Permissions Required",
+          "Bluetooth permissions are required to scan for BLE devices"
+        );
       }
     });
   }, []);
@@ -142,7 +150,7 @@ export default function ExtractionScreen() {
 
   const handleMethodSelect = (method: BrewingMethod) => {
     if (connectedDevice) {
-      navigation.navigate('ExtracionConfigScreen');
+      navigation.navigate("ExtracionConfigScreen");
     } else {
       Alert.alert('Device Required', 'Please connect to a BLE device first', [
         { text: 'OK', onPress: () => {
@@ -160,11 +168,12 @@ export default function ExtractionScreen() {
 
   const handleContinue = async () => {
     console.log('Continue button pressed - checking permissions and starting search');
+
     if (connectedDevice) {
       setShowBLEModal(false);
       return;
     }
-    
+
     const hasPermissions = await requestPermissions();
     if (hasPermissions) {
       console.log('Permissions granted - starting search');
@@ -185,8 +194,8 @@ export default function ExtractionScreen() {
         setModalState('deviceList');
       }, 2000);
     } else {
-      console.log('Permissions denied');
-      Alert.alert('Permissions Required', 'Bluetooth permissions are required');
+      console.log("Permissions denied");
+      Alert.alert("Permissions Required", "Bluetooth permissions are required");
     }
   };
 
@@ -197,18 +206,18 @@ export default function ExtractionScreen() {
     try {
       await connectToDevice(device);
       setModalState('connected');
-      // Removed auto-close - user now manually dismisses with "finish" button
     } catch (error) {
       setModalState('deviceList');
       setConnectingDevice(null);
       Alert.alert('Connection Failed', 'Failed to connect to device');
     }
+
   };
 
   const handleDisconnect = async () => {
     Alert.alert(
-      'Disconnect Device',
-      'Are you sure you want to disconnect from the BLE device?',
+      "Disconnect Device",
+      "Are you sure you want to disconnect from the BLE device?",
       [
         { text: 'Cancel', style: 'cancel' },
         { 
@@ -229,13 +238,18 @@ export default function ExtractionScreen() {
 
   // Legacy render function - keeping for reference
   const renderDevice = ({ item }: { item: any }) => {
-    console.log('Rendering device:', item.name || item.localName || 'Unknown', item.id);
+    console.log(
+      "Rendering device:",
+      item.name || item.localName || "Unknown",
+      item.id
+    );
     return (
       <TouchableOpacity
         style={styles.deviceItem}
         onPress={() => handleDeviceConnect(item)}
       >
         <Text style={styles.deviceName}>{item.name || item.localName || 'Unknown Device'}</Text>
+
         <Ionicons name="chevron-forward" size={20} color="#666" />
       </TouchableOpacity>
     );
@@ -261,7 +275,7 @@ export default function ExtractionScreen() {
       <View style={styles.content}>
         <View style={styles.methodsContainer}>
           <Text style={styles.sectionTitle}>choose your brewing method</Text>
-          
+
           {/* Connection Status and Data */}
           {connectedDevice && (
             <View style={styles.deviceStatus}>
@@ -270,15 +284,20 @@ export default function ExtractionScreen() {
                   <Ionicons name="bluetooth" size={16} color="#4CAF50" />
                   <Text style={styles.connectedText}>BLE Device Connected</Text>
                 </View>
-                <TouchableOpacity onPress={handleDisconnect} style={styles.disconnectButton}>
+                <TouchableOpacity
+                  onPress={handleDisconnect}
+                  style={styles.disconnectButton}
+                >
                   <Text style={styles.disconnectText}>Disconnect</Text>
                 </TouchableOpacity>
               </View>
-              
+
               <View style={styles.dataRow}>
                 <View style={styles.dataItem}>
                   <Text style={styles.dataLabel}>Temperature</Text>
-                  <Text style={styles.dataValue}>{temperature.toFixed(1)}°C</Text>
+                  <Text style={styles.dataValue}>
+                    {temperature.toFixed(1)}°C
+                  </Text>
                 </View>
                 <View style={styles.dataItem}>
                   <Text style={styles.dataLabel}>Weight</Text>
@@ -287,16 +306,16 @@ export default function ExtractionScreen() {
               </View>
             </View>
           )}
-          
-          <ScrollView 
-            horizontal 
+
+          <ScrollView
+            horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.carouselContent}
             style={styles.carousel}
           >
             {brewingMethods.map(renderBrewingMethodCard)}
           </ScrollView>
-          
+
           {/* Page indicators */}
           {/* <View style={styles.pageIndicators}>
             {brewingMethods.map((_, index) => (
@@ -319,15 +338,10 @@ export default function ExtractionScreen() {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             {/* Status Bar - Fixed position outside ScrollView */}
+
             <View style={styles.statusBar} />
-            
+
             {/* Close Button - Fixed position outside ScrollView */}
-            <TouchableOpacity 
-              style={styles.closeButton}
-              onPress={handleBLEModalClose}
-            >
-              <Ionicons name="close" size={28} color="#666666" />
-            </TouchableOpacity>
 
             {/* Scrollable Content */}
             <View style={styles.modalBody}>
@@ -383,6 +397,7 @@ export default function ExtractionScreen() {
                           </View>
                           <Text style={styles.deviceName}>
                             {device.name || device.localName || 'STM32WB Device'}
+
                           </Text>
                           <Ionicons name="chevron-forward" size={20} color="#666" />
                         </TouchableOpacity>
@@ -391,6 +406,7 @@ export default function ExtractionScreen() {
                       <Text style={styles.noDevicesText}>No STM32WB devices found</Text>
                     )}
                   </View>
+
 
                   <TouchableOpacity style={styles.continueButton} onPress={handleContinue}>
                     <Text style={styles.continueButtonText}>continue</Text>
@@ -417,6 +433,7 @@ export default function ExtractionScreen() {
                     <Text style={styles.cancelButtonText}>cancel</Text>
                   </TouchableOpacity>
                 </>
+
               )}
 
               {modalState === 'connected' && (
@@ -472,91 +489,93 @@ const styles = StyleSheet.create({
   },
   cardContainer: {
     marginHorizontal: 10,
-    width: Dimensions.get('window').width * 0.8,
+    width: Dimensions.get("window").width * 0.8,
   },
   pageIndicators: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
     marginTop: 30,
   },
   pageIndicator: {
     width: 12,
     height: 12,
     borderRadius: 6,
-    backgroundColor: '#E5E5E5',
+    backgroundColor: "#E5E5E5",
     marginHorizontal: 6,
   },
   activePageIndicator: {
-    backgroundColor: '#333',
+    backgroundColor: "#333",
   },
-  
+
   // Device Status Styles
   deviceStatus: {
-    backgroundColor: '#F8F9FA',
+    backgroundColor: "#F8F9FA",
     borderRadius: 12,
     padding: 16,
     marginBottom: 20,
-    width: '100%',
+    width: "100%",
     borderWidth: 1,
-    borderColor: '#E8F5E8',
+    borderColor: "#E8F5E8",
   },
   statusHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 12,
   },
   connectedIndicator: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   connectedText: {
     marginLeft: 8,
-    color: '#4CAF50',
+    color: "#4CAF50",
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   disconnectButton: {
     paddingHorizontal: 12,
     paddingVertical: 6,
-    backgroundColor: '#FFF3F3',
+    backgroundColor: "#FFF3F3",
     borderRadius: 6,
     borderWidth: 1,
-    borderColor: '#FFE6E6',
+    borderColor: "#FFE6E6",
   },
   disconnectText: {
-    color: '#E53E3E',
+    color: "#E53E3E",
     fontSize: 12,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   dataRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
+    flexDirection: "row",
+    justifyContent: "space-around",
   },
   dataItem: {
-    alignItems: 'center',
+    alignItems: "center",
     flex: 1,
   },
   dataLabel: {
     fontSize: 12,
-    color: '#666',
+    color: "#666",
     marginBottom: 4,
   },
   dataValue: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
+    fontWeight: "600",
+    color: "#333",
   },
 
   // Modal Styles
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
-    alignItems: 'center',
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "flex-end",
+    alignItems: "center",
+    flexDirection: "column",
   },
   modalContent: {
+
     backgroundColor: '#FFFFFF',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
@@ -564,10 +583,11 @@ const styles = StyleSheet.create({
     maxHeight: '70%',
     minHeight: '50%',
     position: 'relative',
+
   },
   modalBody: {
     paddingHorizontal: 40,
-    paddingTop: 40,
+    flexDirection: "column",
     paddingBottom: 40,
     alignItems: 'center',
     justifyContent: 'center',
@@ -593,11 +613,13 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     left: '50%',
     marginLeft: -20,
+
   },
   frenchPressModalIcon: {
     width: 80,
     height: 80,
     marginBottom: 30,
+
     resizeMode: 'contain',
     tintColor: '#666666',
   },
@@ -687,120 +709,121 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontStyle: 'italic',
     marginVertical: 20,
+
   },
   
   // Legacy styles (to be cleaned up)
   emptyList: {
     padding: 20,
-    alignItems: 'center',
+    alignItems: "center",
   },
   emptyText: {
     fontSize: 14,
-    color: '#666',
-    textAlign: 'center',
+    color: "#666",
+    textAlign: "center",
     marginBottom: 8,
   },
   emptySubtext: {
     fontSize: 12,
-    color: '#999',
-    textAlign: 'center',
+    color: "#999",
+    textAlign: "center",
   },
   rescanButton: {
-    backgroundColor: '#8CDBED',
+    backgroundColor: "#8CDBED",
     padding: 12,
     borderRadius: 8,
-    alignItems: 'center',
+    alignItems: "center",
     marginTop: 16,
-    flexDirection: 'row',
-    justifyContent: 'center',
+    flexDirection: "row",
+    justifyContent: "center",
   },
   rescanButtonDisabled: {
-    backgroundColor: '#DDD',
+    backgroundColor: "#DDD",
   },
   rescanButtonText: {
-    color: '#333',
+    color: "#333",
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   rescanButtonTextDisabled: {
-    color: '#999',
+    color: "#999",
   },
-  
+
   // Enhanced Scanning Styles
   scanningHeader: {
-    alignItems: 'center',
+    alignItems: "center",
     paddingVertical: 20,
     paddingHorizontal: 16,
-    backgroundColor: '#FAFAFA',
+    backgroundColor: "#FAFAFA",
     borderRadius: 12,
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: '#E5E5E5',
+    borderColor: "#E5E5E5",
   },
   scanningIconContainer: {
-    position: 'relative',
+    position: "relative",
     marginBottom: 12,
   },
   pulsingDot: {
-    position: 'absolute',
+    position: "absolute",
     top: -4,
     right: -4,
     width: 12,
     height: 12,
     borderRadius: 6,
-    backgroundColor: '#007AFF',
+    backgroundColor: "#007AFF",
     opacity: 0.8,
   },
   scanningHeaderText: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#666',
-    textAlign: 'center',
+    fontWeight: "600",
+    color: "#666",
+    textAlign: "center",
     marginBottom: 8,
   },
   scanningActiveText: {
-    color: '#007AFF',
+    color: "#007AFF",
   },
   scanningProgress: {
-    width: '100%',
+    width: "100%",
     height: 4,
-    backgroundColor: '#E5E5E5',
+    backgroundColor: "#E5E5E5",
     borderRadius: 2,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   progressBar: {
-    height: '100%',
-    backgroundColor: '#007AFF',
+    height: "100%",
+    backgroundColor: "#007AFF",
     borderRadius: 2,
-    width: '100%',
+    width: "100%",
   },
-  
+
   emptyIcon: {
     marginBottom: 16,
   },
   actionButtons: {
     marginTop: 16,
-    width: '100%',
+    width: "100%",
   },
   buttonIcon: {
     marginRight: 8,
   },
   debugText: {
     fontSize: 12,
-    color: '#FF6B6B',
-    textAlign: 'center',
+    color: "#FF6B6B",
+    textAlign: "center",
     padding: 8,
-    backgroundColor: '#FFE5E5',
+    backgroundColor: "#FFE5E5",
     borderRadius: 4,
     marginBottom: 8,
   },
   listHeader: {
     fontSize: 14,
-    fontWeight: '600',
-    color: '#333',
+    fontWeight: "600",
+    color: "#333",
     padding: 8,
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E5E5',
-    backgroundColor: '#F8F9FA',
+    borderBottomColor: "#E5E5E5",
+    backgroundColor: "#F8F9FA",
   },
 });
