@@ -6,6 +6,7 @@ import { useFonts } from "expo-font";
 import { Text } from "react-native";
 import { useEffect } from "react";
 import * as SplashScreen from "expo-splash-screen";
+import { BLEProvider } from "./context/BLEContext";
 
 enableScreens();
 
@@ -37,8 +38,10 @@ export default function App() {
   if (!fontsLoaded) return null;
 
   return (
-    <NavigationContainer>
-      <AppNavigator />
-    </NavigationContainer>
+    <BLEProvider>
+      <NavigationContainer>
+        <AppNavigator />
+      </NavigationContainer>
+    </BLEProvider>
   );
 }
