@@ -69,9 +69,7 @@ const brewingMethods: BrewingMethod[] = [
 
 export default function ExtractionScreen() {
   const navigation = useNavigation<NavigationProp>();
-  const [show
-         
-         Modal, setShowBLEModal] = useState(true);
+  const [showBLEModal, setShowBLEModal] = useState(false); // Changed to false - modal won't show automatically
   const [modalState, setModalState] = useState<'initial' | 'searching' | 'deviceList' | 'connecting' | 'connected'>('initial');
   const [connectingDevice, setConnectingDevice] = useState<any>(null);
   const [justDisconnected, setJustDisconnected] = useState(false);
@@ -149,16 +147,8 @@ export default function ExtractionScreen() {
   }, [modalState, spinAnim]);
 
   const handleMethodSelect = (method: BrewingMethod) => {
-    if (connectedDevice) {
-      navigation.navigate("ExtracionConfigScreen");
-    } else {
-      Alert.alert('Device Required', 'Please connect to a BLE device first', [
-        { text: 'OK', onPress: () => {
-          setShowBLEModal(true);
-          setModalState('initial');
-        }}
-      ]);
-    }
+    // Allow navigation to config screen regardless of BLE connection status
+    navigation.navigate("ExtracionConfigScreen");
   };
 
   const handleBLEModalClose = () => {
@@ -276,6 +266,21 @@ export default function ExtractionScreen() {
         <View style={styles.methodsContainer}>
           <Text style={styles.sectionTitle}>choose your brewing method</Text>
 
+          {/* BLE Connection Button - Show when no device connected */}
+          {!connectedDevice && (
+            <TouchableOpacity 
+              style={styles.connectButton}
+              onPress={() => {
+                setShowBLEModal(true);
+                setModalState('initial');
+              }}
+            >
+              <Ionicons name="bluetooth" size={20} color="#8CDBED" />
+              <Text style={styles.connectButtonText}>Connect to Extracion Device</Text>
+              <Text style={styles.connectButtonSubtext}>Optional - for live data</Text>
+            </TouchableOpacity>
+          )}
+
           {/* Connection Status and Data */}
           {connectedDevice && (
             <View style={styles.deviceStatus}>
@@ -338,10 +343,18 @@ export default function ExtractionScreen() {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             {/* Status Bar - Fixed position outside ScrollView */}
-
             <View style={styles.statusBar} />
 
             {/* Close Button - Fixed position outside ScrollView */}
+            <TouchableOpacity 
+              style={styles.closeButton}
+              onPress={() => {
+                setShowBLEModal(false);
+                setModalState('initial');
+              }}
+            >
+              <Ionicons name="close" size={24} color="#666" />
+            </TouchableOpacity>
 
             {/* Scrollable Content */}
             <View style={styles.modalBody}>
@@ -354,10 +367,21 @@ export default function ExtractionScreen() {
               {modalState === 'initial' && (
                 <>
                   <Text style={styles.modalTitle}>Turn on your Extracion</Text>
-                  <Text style={styles.modalSubtitle}>Continue when it's on.</Text>
-                  <TouchableOpacity style={styles.continueButton} onPress={handleContinue}>
-                    <Text style={styles.continueButtonText}>continue</Text>
-                  </TouchableOpacity>
+                  <Text style={styles.modalSubtitle}>Connect for live temperature and weight data, or skip to continue without a device.</Text>
+                  <View style={styles.buttonContainer}>
+                    <TouchableOpacity style={styles.continueButton} onPress={handleContinue}>
+                      <Text style={styles.continueButtonText}>connect</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity 
+                      style={styles.skipButton} 
+                      onPress={() => {
+                        setShowBLEModal(false);
+                        setModalState('initial');
+                      }}
+                    >
+                      <Text style={styles.skipButtonText}>skip for now</Text>
+                    </TouchableOpacity>
+                  </View>
                 </>
               )}
 
@@ -376,6 +400,15 @@ export default function ExtractionScreen() {
                   </Animated.View>
                   <Text style={styles.modalTitle}>Searching...</Text>
                   <Text style={styles.modalSubtitle}>Make sure your machine is turned on.</Text>
+                  <TouchableOpacity 
+                    style={styles.skipButton} 
+                    onPress={() => {
+                      setShowBLEModal(false);
+                      setModalState('initial');
+                    }}
+                  >
+                    <Text style={styles.skipButtonText}>cancel search</Text>
+                  </TouchableOpacity>
                 </>
               )}
 
@@ -408,9 +441,20 @@ export default function ExtractionScreen() {
                   </View>
 
 
-                  <TouchableOpacity style={styles.continueButton} onPress={handleContinue}>
-                    <Text style={styles.continueButtonText}>continue</Text>
-                  </TouchableOpacity>
+                  <View style={styles.buttonContainer}>
+                    <TouchableOpacity style={styles.continueButton} onPress={handleContinue}>
+                      <Text style={styles.continueButtonText}>search again</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity 
+                      style={styles.skipButton} 
+                      onPress={() => {
+                        setShowBLEModal(false);
+                        setModalState('initial');
+                      }}
+                    >
+                      <Text style={styles.skipButtonText}>continue without device</Text>
+                    </TouchableOpacity>
+                  </View>
                 </>
               )}
 
@@ -475,6 +519,30 @@ const styles = StyleSheet.create({
     fontSize: 24,
     color: "#333",
     marginBottom: 24,
+  },
+  
+  // Connect Button Styles
+  connectButton: {
+    backgroundColor: "#F8F9FA",
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 20,
+    width: "100%",
+    borderWidth: 1,
+    borderColor: "#E5E5E5",
+    alignItems: "center",
+    flexDirection: "column",
+  },
+  connectButtonText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#333",
+    marginTop: 8,
+    marginBottom: 4,
+  },
+  connectButtonSubtext: {
+    fontSize: 12,
+    color: "#666",
   },
   methodsContainer: {
     flex: 1,
@@ -644,11 +712,29 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     alignItems: 'center',
     minWidth: 200,
+    marginBottom: 12,
   },
   continueButtonText: {
     fontSize: 16,
     fontWeight: '500',
     color: '#333333',
+  },
+  buttonContainer: {
+    width: '100%',
+    alignItems: 'center',
+  },
+  skipButton: {
+    backgroundColor: 'transparent',
+    paddingVertical: 14,
+    paddingHorizontal: 50,
+    borderRadius: 25,
+    alignItems: 'center',
+    minWidth: 200,
+  },
+  skipButtonText: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#666666',
   },
   cancelButton: {
     backgroundColor: '#E5E5E5',
