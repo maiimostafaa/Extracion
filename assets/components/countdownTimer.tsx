@@ -8,27 +8,41 @@ import Svg, {
   RadialGradient,
 } from "react-native-svg";
 
-const CIRCLE_RADIUS = 100;
-const STROKE_WIDTH = 30;
+const BASE_CIRCLE_RADIUS = 100;
+const BASE_STROKE_WIDTH = 30;
+const BASE_SIZE = 230;
 const MAX_TEMP = 110;
 
 const getTempColor = (temp: number) => {
   if (temp >= 90) return "#e60000";
   if (temp >= 70) return "#ff6600";
-  if (temp >= 40) return "#ffcc00";
-  return "#3399ff";
+  if (temp >= 0) return "#ffcc00";
+};
+
+const formatTime = (seconds: number) => {
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = seconds % 60;
+  return `${minutes.toString().padStart(2, "0")}:${remainingSeconds.toString().padStart(2, "0")}`;
 };
 
 interface TimerTemperatureRingProps {
   initialTime: number; // seconds
   temp: number; // live value from BLE
+  size?: number; // optional size prop, defaults to 230
 }
 
 const TimerTemperatureRing: React.FC<TimerTemperatureRingProps> = ({
   initialTime,
   temp,
+  size = BASE_SIZE,
 }) => {
   const [timeLeft, setTimeLeft] = useState(initialTime);
+
+  // Calculate scale factor based on size
+  const scale = size / BASE_SIZE;
+  const CIRCLE_RADIUS = BASE_CIRCLE_RADIUS * scale;
+  const STROKE_WIDTH = BASE_STROKE_WIDTH * scale;
+  const svgCenter = size / 2;
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -39,7 +53,11 @@ const TimerTemperatureRing: React.FC<TimerTemperatureRingProps> = ({
 
   const timeProgress = 1 - timeLeft / initialTime;
   const tempProgress = Math.min(temp / MAX_TEMP, 1);
-  const circleCircumference = 2 * Math.PI * CIRCLE_RADIUS;
+  const timeCircumference = 2 * Math.PI * CIRCLE_RADIUS;
+  const tempRadius = CIRCLE_RADIUS - STROKE_WIDTH / 2 - 8 * scale;
+  const tempCircumference = 2 * Math.PI * tempRadius;
+
+  const styles = getStyles(size, scale);
 
   return (
     <View style={styles.container}>
@@ -47,7 +65,7 @@ const TimerTemperatureRing: React.FC<TimerTemperatureRingProps> = ({
       <View style={styles.shadowContainer}>
         {/* Main circle container with inner shadow */}
         <View style={styles.circleContainer}>
-          <Svg height="250" width="250" style={styles.svgContainer}>
+          <Svg height={size} width={size} style={styles.svgContainer}>
             <Defs>
               {/* Enhanced gradient for the outer ring (time) with more prominent shadows */}
               <LinearGradient
@@ -119,14 +137,14 @@ const TimerTemperatureRing: React.FC<TimerTemperatureRingProps> = ({
             </Defs>
 
             {/* Center background with gradient */}
-            <Circle fill="none" cx="125" cy="125" r="70" />
+            <Circle fill="none" cx={svgCenter} cy={svgCenter} r={70 * scale} />
 
             {/* Time Ring Background */}
             <Circle
               stroke="url(#timeGradient)"
               fill="none"
-              cx="126"
-              cy="126"
+              cx={svgCenter}
+              cy={svgCenter}
               r={CIRCLE_RADIUS}
               strokeWidth={STROKE_WIDTH}
               opacity={0.4}
@@ -136,14 +154,14 @@ const TimerTemperatureRing: React.FC<TimerTemperatureRingProps> = ({
             <Circle
               stroke="url(#timeShadowGradient)"
               fill="none"
-              cx="127"
-              cy="127"
+              cx={svgCenter}
+              cy={svgCenter}
               r={CIRCLE_RADIUS}
               strokeWidth={STROKE_WIDTH}
-              strokeDasharray={circleCircumference}
-              strokeDashoffset={circleCircumference * (1 - timeProgress)}
+              strokeDasharray={timeCircumference}
+              strokeDashoffset={timeCircumference * (1 - timeProgress)}
               strokeLinecap="round"
-              transform="rotate(-90 127 127)"
+              transform={`rotate(-90 ${svgCenter} ${svgCenter})`}
               opacity={0.4}
             />
 
@@ -151,14 +169,14 @@ const TimerTemperatureRing: React.FC<TimerTemperatureRingProps> = ({
             <Circle
               stroke="url(#timeGradient)"
               fill="none"
-              cx="125"
-              cy="125"
+              cx={svgCenter}
+              cy={svgCenter}
               r={CIRCLE_RADIUS}
               strokeWidth={STROKE_WIDTH}
-              strokeDasharray={circleCircumference}
-              strokeDashoffset={circleCircumference * (1 - timeProgress)}
+              strokeDasharray={timeCircumference}
+              strokeDashoffset={timeCircumference * (1 - timeProgress)}
               strokeLinecap="round"
-              transform="rotate(-90 125 125)"
+              transform={`rotate(-90 ${svgCenter} ${svgCenter})`}
               opacity={0.9}
             />
 
@@ -166,10 +184,10 @@ const TimerTemperatureRing: React.FC<TimerTemperatureRingProps> = ({
             <Circle
               stroke="url(#tempGradient)"
               fill="none"
-              cx="126.5"
-              cy="126.25"
-              r={CIRCLE_RADIUS - STROKE_WIDTH / 2 - 10}
-              strokeWidth={STROKE_WIDTH - 10}
+              cx={svgCenter + 0.2 * scale}
+              cy={svgCenter}
+              r={CIRCLE_RADIUS - STROKE_WIDTH / 2 - 10 * scale}
+              strokeWidth={STROKE_WIDTH - 10 * scale}
               opacity={0.4}
             />
 
@@ -177,14 +195,14 @@ const TimerTemperatureRing: React.FC<TimerTemperatureRingProps> = ({
             <Circle
               stroke="url(#tempShadowGradient)"
               fill="none"
-              cx="126.5"
-              cy="126.25"
-              r={CIRCLE_RADIUS - STROKE_WIDTH / 2 - 10}
-              strokeWidth={STROKE_WIDTH - 10}
-              strokeDasharray={circleCircumference}
-              strokeDashoffset={circleCircumference * (1 - tempProgress)}
+              cx={svgCenter + 0.2 * scale}
+              cy={svgCenter}
+              r={CIRCLE_RADIUS - STROKE_WIDTH / 2 - 10 * scale}
+              strokeWidth={STROKE_WIDTH - 10 * scale}
+              strokeDasharray={tempCircumference}
+              strokeDashoffset={tempCircumference * (1 - tempProgress)}
               strokeLinecap="round"
-              transform="rotate(-90 127 127)"
+              transform={`rotate(-90 ${svgCenter} ${svgCenter})`}
               opacity={0.7}
             />
 
@@ -192,23 +210,21 @@ const TimerTemperatureRing: React.FC<TimerTemperatureRingProps> = ({
             <Circle
               stroke="url(#tempGradient)"
               fill="none"
-              cx="126.5"
-              cy="126.25"
-              r={CIRCLE_RADIUS - STROKE_WIDTH / 2 - 10}
-              strokeWidth={STROKE_WIDTH - 10}
-              strokeDasharray={circleCircumference}
-              strokeDashoffset={circleCircumference * (1 - tempProgress)}
+              cx={svgCenter + 0.2 * scale}
+              cy={svgCenter}
+              r={CIRCLE_RADIUS - STROKE_WIDTH / 2 - 10 * scale}
+              strokeWidth={STROKE_WIDTH - 10 * scale}
+              strokeDasharray={tempCircumference}
+              strokeDashoffset={tempCircumference * (1 - tempProgress)}
               strokeLinecap="round"
-              transform="rotate(-90 125 125)"
+              transform={`rotate(-90 ${svgCenter} ${svgCenter})`}
               opacity={0.9}
             />
           </Svg>
 
           {/* Center Text */}
           <View style={styles.centerText}>
-            <Text style={styles.timeText}>
-              {`00:${timeLeft < 10 ? `0${timeLeft}` : timeLeft}`}
-            </Text>
+            <Text style={styles.timeText}>{formatTime(timeLeft)}</Text>
             <Text style={styles.tempText}>{`${temp}°C`}</Text>
           </View>
         </View>
@@ -216,74 +232,71 @@ const TimerTemperatureRing: React.FC<TimerTemperatureRingProps> = ({
     </View>
   );
 };
+
+const getStyles = (size: number, scale: number) =>
+  StyleSheet.create({
+    container: {
+      alignItems: "center",
+      justifyContent: "center",
+      flex: 1,
+    },
+    shadowContainer: {
+      shadowColor: "#f0f0f0",
+      shadowOffset: {
+        width: 0,
+        height: 2 * scale,
+      },
+      shadowOpacity: 0.25,
+      shadowRadius: 12 * scale,
+      elevation: 15,
+      borderRadius: 140 * scale,
+      backgroundColor: "transparent",
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      width: size,
+      height: size,
+    },
+    circleContainer: {
+      shadowColor: "#000",
+      shadowOffset: {
+        width: 0,
+        height: -2 * scale,
+      },
+      shadowOpacity: 0.15,
+      shadowRadius: 6 * scale,
+      elevation: Platform.OS === "android" ? 5 : 0,
+      borderRadius: 160 * scale,
+      backgroundColor: "#ffffff",
+      width: size,
+      height: size,
+      borderWidth: Platform.OS === "android" ? 1 * scale : 0,
+      borderColor: "#e0e0e0",
+    },
+    svgContainer: {
+      backgroundColor: "transparent",
+    },
+    centerText: {
+      position: "absolute",
+      ...(Platform.OS === "ios" && {
+        top: 90 * scale,
+        left: 85 * scale,
+      }),
+      ...(Platform.OS === "android" && {
+        top: 85 * scale,
+        left: 85 * scale,
+      }),
+      alignItems: "center",
+    },
+    timeText: {
+      fontSize: 24 * scale,
+      fontWeight: "600",
+      color: "#333",
+    },
+    tempText: {
+      fontSize: 22 * scale,
+      color: "#333",
+    },
+  });
+
 export default TimerTemperatureRing;
-
-const styles = StyleSheet.create({
-  container: {
-    alignItems: "center",
-    justifyContent: "center",
-
-    flex: 1,
-  },
-  shadowContainer: {
-    // Outer shadow (drop shadow)
-    shadowColor: "#f0f0f0",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 12,
-    // Android shadow
-    elevation: 15,
-
-    // Make it circular for better shadow rendering
-    borderRadius: 140,
-    backgroundColor: "transparent",
-  },
-  circleContainer: {
-    // Inner shadow effect
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: -2,
-    },
-    shadowOpacity: 0.15,
-    shadowRadius: 6,
-    // Android inner shadow simulation
-    elevation: Platform.OS === "android" ? 5 : 0,
-
-    borderRadius: 125,
-    backgroundColor: "#ffffff",
-    width: 250,
-    height: 250,
-
-    // Additional styling for depth
-    borderWidth: Platform.OS === "android" ? 1 : 0,
-    borderColor: "#e0e0e0",
-  },
-  svgContainer: {
-    backgroundColor: "transparent",
-  },
-  centerText: {
-    position: "absolute",
-    ...(Platform.OS === "ios" && {
-      top: 100,
-      left: 95,
-    }),
-    ...(Platform.OS === "android" && {
-      top: 95,
-      left: 95,
-    }),
-    alignItems: "center",
-  },
-  timeText: {
-    fontSize: 24,
-    fontWeight: "600",
-    color: "#333",
-  },
-  tempText: {
-    fontSize: 22,
-    color: "#333",
-  },
-});

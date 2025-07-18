@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   View,
   Text,
@@ -7,11 +7,11 @@ import {
   TouchableOpacity,
   StatusBar,
   Image,
-} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import type { RootStackParamList } from '../navigation/AppNavigator';
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import type { RootStackParamList } from "../navigation/AppNavigator";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -23,14 +23,14 @@ const ExtracionCoffeeBeanListScreen: React.FC = () => {
   };
 
   const handleAdd = () => {
-    console.log('Add coffee beans pressed');
-    navigation.navigate('ExtracionCoffeeBeanInputScreen');
+    console.log("Add coffee beans pressed");
+    navigation.navigate("ExtracionCoffeeBeanInputScreen");
   };
 
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#333333" />
-      
+
       {/* Header */}
       <View style={styles.header}>
         <SafeAreaView>
@@ -48,8 +48,8 @@ const ExtracionCoffeeBeanListScreen: React.FC = () => {
       <View style={styles.content}>
         {/* French Press Illustration */}
         <View style={styles.illustrationContainer}>
-          <Image 
-            source={require('../assets/nonclickable-visual-elements/coffee press unfilled.png')}
+          <Image
+            source={require("../assets/nonclickable-visual-elements/coffee press unfilled.png")}
             style={styles.frenchPressImage}
           />
         </View>
@@ -74,28 +74,28 @@ const ExtracionCoffeeBeanListScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: "#F5F5F5",
   },
   header: {
-    backgroundColor: '#333333',
+    backgroundColor: "#333333",
     paddingTop: 0,
   },
   headerContent: {
     height: 44,
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingHorizontal: 16,
   },
   backButton: {
     width: 40,
     height: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   headerTitle: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#FFFFFF',
+    fontWeight: "600",
+    color: "#FFFFFF",
     marginLeft: 8,
   },
   headerRight: {
@@ -103,8 +103,8 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     paddingHorizontal: 24,
   },
   illustrationContainer: {
@@ -113,39 +113,39 @@ const styles = StyleSheet.create({
   frenchPressImage: {
     width: 120,
     height: 120,
-    resizeMode: 'contain',
+    resizeMode: "contain",
   },
   textContainer: {
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 60,
   },
   title: {
     fontSize: 24,
-    fontWeight: '600',
-    color: '#666666',
+    fontWeight: "600",
+    color: "#666666",
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
-    color: '#999999',
-    textAlign: 'center',
+    color: "#999999",
+    textAlign: "center",
     lineHeight: 22,
   },
   addButtonContainer: {
-    width: '100%',
+    width: "100%",
     paddingHorizontal: 20,
   },
   addButton: {
-    backgroundColor: '#8CDBED',
+    backgroundColor: "#8CDBED",
     paddingVertical: 16,
     paddingHorizontal: 32,
     borderRadius: 50,
-    alignItems: 'center',
+    alignItems: "center",
   },
   addButtonText: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#000000',
+    fontWeight: "600",
+    color: "#000000",
   },
 });
 
