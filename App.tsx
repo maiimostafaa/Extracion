@@ -8,6 +8,14 @@ import { useEffect } from "react";
 import * as SplashScreen from "expo-splash-screen";
 import { BLEProvider } from "./context/BLEContext";
 
+// import { Buffer } from "buffer";
+// global.Buffer = Buffer;
+
+/* Import Apollo for shopify */
+import { ApolloProvider } from "@apollo/client";
+import shopifyClient from "./shopifyClient";
+import { ShopifyCheckoutSheetProvider } from '@shopify/checkout-sheet-kit';
+
 enableScreens();
 
 export default function App() {
@@ -38,10 +46,14 @@ export default function App() {
   if (!fontsLoaded) return null;
 
   return (
-    <BLEProvider>
-      <NavigationContainer>
-        <AppNavigator />
-      </NavigationContainer>
-    </BLEProvider>
+    <ShopifyCheckoutSheetProvider>
+      <ApolloProvider client={shopifyClient}>
+        <BLEProvider>
+          <NavigationContainer>
+            <AppNavigator />
+          </NavigationContainer>
+        </BLEProvider>
+      </ApolloProvider>
+    </ShopifyCheckoutSheetProvider>
   );
 }

@@ -70,9 +70,7 @@ const brewingMethods: BrewingMethod[] = [
 export default function ExtractionScreen() {
   const navigation = useNavigation<NavigationProp>();
   const [showBLEModal, setShowBLEModal] = useState(false); // Changed to false - modal won't show automatically
-  const [modalState, setModalState] = useState<
-    "initial" | "searching" | "deviceList" | "connecting" | "connected"
-  >("initial");
+  const [modalState, setModalState] = useState<'initial' | 'searching' | 'deviceList' | 'connecting' | 'connected'>('initial');
   const [connectingDevice, setConnectingDevice] = useState<any>(null);
   const [justDisconnected, setJustDisconnected] = useState(false);
   const [showDeviceList, setShowDeviceList] = useState(false);
@@ -279,20 +277,16 @@ export default function ExtractionScreen() {
 
           {/* BLE Connection Button - Show when no device connected */}
           {!connectedDevice && (
-            <TouchableOpacity
+            <TouchableOpacity 
               style={styles.connectButton}
               onPress={() => {
                 setShowBLEModal(true);
-                setModalState("initial");
+                setModalState('initial');
               }}
             >
               <Ionicons name="bluetooth" size={20} color="#8CDBED" />
-              <Text style={styles.connectButtonText}>
-                Connect to Extracion Device
-              </Text>
-              <Text style={styles.connectButtonSubtext}>
-                Optional - for live data
-              </Text>
+              <Text style={styles.connectButtonText}>Connect to Extracion Device</Text>
+              <Text style={styles.connectButtonSubtext}>Optional - for live data</Text>
             </TouchableOpacity>
           )}
 
@@ -361,11 +355,11 @@ export default function ExtractionScreen() {
             <View style={styles.statusBar} />
 
             {/* Close Button - Fixed position outside ScrollView */}
-            <TouchableOpacity
+            <TouchableOpacity 
               style={styles.closeButton}
               onPress={() => {
                 setShowBLEModal(false);
-                setModalState("initial");
+                setModalState('initial');
               }}
             >
               <Ionicons name="close" size={24} color="#666" />
@@ -398,6 +392,7 @@ export default function ExtractionScreen() {
                       onPress={() => {
                         setShowBLEModal(false);
                         setModalState("initial");
+
                       }}
                     >
                       <Text style={styles.skipButtonText}>skip for now</Text>
@@ -580,6 +575,8 @@ const styles = StyleSheet.create({
     color: "#333",
     marginBottom: 24,
   },
+
+
 
   // Connect Button Styles
   connectButton: {
@@ -792,6 +789,23 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "500",
     color: "#666666",
+  },
+  buttonContainer: {
+    width: '100%',
+    alignItems: 'center',
+  },
+  skipButton: {
+    backgroundColor: 'transparent',
+    paddingVertical: 14,
+    paddingHorizontal: 50,
+    borderRadius: 25,
+    alignItems: 'center',
+    minWidth: 200,
+  },
+  skipButtonText: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#666666',
   },
   cancelButton: {
     backgroundColor: "#E5E5E5",
