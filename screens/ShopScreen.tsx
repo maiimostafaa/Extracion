@@ -30,8 +30,12 @@ import { ShopItem } from "../assets/types/shop-item";
 import Header from "../navigation/Header";
 import BannerCarousel from "../assets/components/bannerCarousel";
 
+// Shopify Imports
+import { useQuery } from '@apollo/client';
+import { GET_PRODUCTS } from '../shopifyQueries';
+
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
-type FilterOptions = "featured" | "beans" | "tools" | "gift cards";
+type FilterOptions = "featured" | "beans" | "tools" | "gift cards"; // Added all as an option to display all wix store products
 
 const { width } = Dimensions.get("window");
 
@@ -53,6 +57,11 @@ export default function ShopScreen() {
   const filteredData = useMemo(() => {
     let filtered = mockShopItems;
     console.log(filteredData);
+
+    // Just to show all wix products DUH
+    // if (selectedFilter == "all") {
+    //   return filtered;
+    // }
 
     // Filter by category
     if (selectedFilter !== "featured") {
@@ -114,6 +123,10 @@ export default function ShopScreen() {
     </View>
   );
 
+  // Shopify constants
+  const { data, loading, error } = useQuery(GET_PRODUCTS);
+  const products = data?.products.edges ?? [];
+
   return (
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
@@ -173,6 +186,27 @@ export default function ShopScreen() {
             keyExtractor={(item) => item.id}
             horizontal
             showsHorizontalScrollIndicator={false}
+          />
+        </View>
+
+        <View style={styles.itemsContainer}>
+          <FlatList
+            data={products}
+            keyExtractor={(item) => item.node.id}
+            renderItem={({ item }) => {
+              const product = item.node;
+              const imageUrl = product.images.edges[0]?.node.url;
+
+              return (
+                <View style={styles.card}>
+                  <Image source={{ uri: imageUrl }} style={styles.image} />
+                  <Text style={styles.title}>{product.title}</Text>
+                  <Text style={styles.price}>
+                    {product.variants.edges[0].node.price.amount} {product.variants.edges[0].node.price.currencyCode}
+                  </Text>
+                </View>
+              )
+            }}
           />
         </View>
       </Animated.ScrollView>
@@ -272,5 +306,23 @@ const styles = StyleSheet.create({
   itemsRow: {
     justifyContent: "space-between",
     marginBottom: 16,
+  },
+  card: {
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+  },
+  image: {
+    height: 150,
+    width: '100%',
+    marginBottom: 8,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  price: {
+    fontSize: 16,
+    color: '#555',
   },
 });
