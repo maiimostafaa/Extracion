@@ -790,23 +790,23 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     color: "#666666",
   },
-  buttonContainer: {
-    width: '100%',
-    alignItems: 'center',
-  },
-  skipButton: {
-    backgroundColor: 'transparent',
-    paddingVertical: 14,
-    paddingHorizontal: 50,
-    borderRadius: 25,
-    alignItems: 'center',
-    minWidth: 200,
-  },
-  skipButtonText: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#666666',
-  },
+  // buttonContainer: {
+  //   width: '100%',
+  //   alignItems: 'center',
+  // },
+  // skipButton: {
+  //   backgroundColor: 'transparent',
+  //   paddingVertical: 14,
+  //   paddingHorizontal: 50,
+  //   borderRadius: 25,
+  //   alignItems: 'center',
+  //   minWidth: 200,
+  // },
+  // skipButtonText: {
+  //   fontSize: 16,
+  //   fontWeight: '500',
+  //   color: '#666666',
+  // },
   cancelButton: {
     backgroundColor: "#E5E5E5",
     paddingVertical: 14,

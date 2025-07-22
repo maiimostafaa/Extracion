@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
@@ -7,6 +7,7 @@ import { TouchableOpacity } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
 import { Image, View } from "react-native";
+import * as WebBrowser from 'expo-web-browser';
 
 import LandingScreen from "../screens/login&signup/Landing";
 import LoginScreen from "../screens/login&signup/LoginScreen";
@@ -158,6 +159,28 @@ function HomeStackScreen() {
 function MainTabs() {
   const navigation = useNavigation();
 
+  const openShop = async () => {
+    try {
+      await WebBrowser.openBrowserAsync('https://0hyx14-11.myshopify.com/', {
+        // iOS Safari View Controller options
+        presentationStyle: WebBrowser.WebBrowserPresentationStyle.FULL_SCREEN,
+        controlsColor: '#8CDBED',
+        
+        // Android Chrome Custom Tabs options
+        showTitle: true,
+        toolbarColor: '#ffffff',
+        secondaryToolbarColor: '#f5f5f5',
+        enableBarCollapsing: false,
+        
+        // Cross-platform options
+        enableDefaultShareMenuItem: true,
+        showInRecents: false,
+      });
+    } catch (error) {
+      console.log('Error opening browser:', error);
+    }
+  };
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -225,7 +248,16 @@ function MainTabs() {
       <Tab.Screen name="brew log" component={BrewLogScreen} />
       <Tab.Screen name="scan" component={CameraScreen} />
       <Tab.Screen name="extracion" component={ExtracionScreen} />
-      <Tab.Screen name="shop" component={ShopScreen} />
+      <Tab.Screen 
+        name="shop" 
+        component={ShopScreen}
+        listeners={{
+          tabPress: (e) => {
+            e.preventDefault();
+            openShop();
+          },
+        }}
+      />
     </Tab.Navigator>
   );
 }
