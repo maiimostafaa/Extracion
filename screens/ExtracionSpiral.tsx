@@ -28,7 +28,7 @@ interface RouteParams {
   time: number;
 }
 
-export default function ExtracionPour() {
+export default function ExtracionSpiral() {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute();
   const windowWidth = Dimensions.get("window").width;
@@ -40,8 +40,8 @@ export default function ExtracionPour() {
   // Extract numeric value from water amount (remove 'ml')
   const waterAmountNumeric = parseInt(waterAmount.replace("ml", ""));
 
-  // Calculate pour amount (e.g., 20% of total water)
-  const pourAmount = Math.round(waterAmountNumeric * 0.2); // 30% of total water for initial pour
+  // Calculate pour amount (e.g., 80% of total water)
+  const pourAmount = Math.round(waterAmountNumeric * 0.8); //
 
   const coffeeAmountNumeric = coffeeAmount
     ? parseInt(coffeeAmount.replace("g", ""))
@@ -63,7 +63,9 @@ export default function ExtracionPour() {
     weight,
   } = useBLEContext();
 
-  const zeroedOut = Math.abs(weight - coffeeAmountNumeric);
+  const zeroedOut = Math.abs(
+    weight - coffeeAmountNumeric - Math.round(waterAmountNumeric * 0.2)
+  );
 
   return (
     <SafeAreaView style={{ backgroundColor: "#333333" }}>
@@ -101,7 +103,7 @@ export default function ExtracionPour() {
 
       <ScrollView contentContainerStyle={styles.container}>
         <ExtracionCoffeeToWaterInstructionBanner
-          text={`Pour ${pourAmount}ml of water and evenly saturate the coffee`}
+          text={`Pour the remaining ${pourAmount}ml of water in a spiral motion`}
         />
 
         {/* Display brewing info */}
@@ -149,12 +151,6 @@ export default function ExtracionPour() {
           </View>
         </View>
 
-        {/* Uncomment if you want to use the timer */}
-        {/* <TimerTemperatureRing
-          initialTime={120}
-          temp={Number(temperature.toFixed(0))}
-          size={350}
-        /> */}
         <TouchableOpacity
           style={{
             width: "70%",
@@ -165,7 +161,7 @@ export default function ExtracionPour() {
             marginTop: 20,
           }}
           onPress={() =>
-            navigation.navigate("ExtracionBloom", {
+            navigation.navigate("ExtracionBrew", {
               waterAmount: waterAmount,
               coffeeAmount: coffeeAmount,
               ratio: ratio,

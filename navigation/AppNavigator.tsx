@@ -47,6 +47,9 @@ import { newsletterItem } from "../assets/types/newsletter-item";
 import NewsletterDetailScreen from "../screens/NewsletterDetailScreen";
 import ExtracionCoffeeToWaterScreen from "../screens/ExtracionCoffeeToWaterScreen";
 import ExtracionPour from "../screens/ExtracionPour";
+import ExtracionBloom from "../screens/ExtracionBloom";
+import ExtracionSpiral from "../screens/ExtracionSpiral";
+import ExtracionBrew from "../screens/ExtracionBrew";
 
 export type RootStackParamList = {
   Landing: undefined;
@@ -73,7 +76,30 @@ export type RootStackParamList = {
   ShopScreen: undefined;
   CafeFinderScreen: undefined;
   NewsletterDetail: { item: newsletterItem };
-  ExtracionPour: undefined;
+  ExtracionPour: {
+    waterAmount: string;
+    coffeeAmount?: string;
+    ratio?: number;
+    time: number;
+  };
+  ExtracionBloom: {
+    waterAmount: string;
+    coffeeAmount?: string;
+    ratio?: number;
+    time: number;
+  };
+  ExtracionSpiral: {
+    waterAmount: string;
+    coffeeAmount?: string;
+    ratio?: number;
+    time: number;
+  };
+  ExtracionBrew: {
+    waterAmount: string;
+    coffeeAmount?: string;
+    ratio?: number;
+    time: number;
+  };
   BrewLogDetailScreen: { brewLogEntry: brewLogEntry };
   BrewLogEditScreen: { brewLogEntry: brewLogEntry };
   fullCoupon: { coupon: coupon };
@@ -82,14 +108,20 @@ export type RootStackParamList = {
   ClassDetail: { classId: string };
   ToolDetail: { toolId: string };
   ItemDetail: { itemId: string };
-  ExtracionConfigScreen: undefined;
+  ExtracionConfigScreen:
+    | {
+        ratio?: number;
+      }
+    | undefined;
   ExtracionCoffeeBeanListScreen: undefined;
   ExtracionCoffeeBeanInputScreen: undefined;
   ExtracionCoffeeToWaterScreen: {
     coffeeBeans: string;
     water: string;
+    ratio: number;
     onUpdate: (coffeeBeans: string, water: string) => void;
   };
+  ExtracionScreen: undefined;
   ShopItemDetail: { item: ShopItem };
 };
 
@@ -240,6 +272,7 @@ export default function AppNavigator() {
           gestureEnabled: false,
         }}
       />
+      <Stack.Screen name="ExtracionScreen" component={ExtracionScreen} />
       <Stack.Screen
         name="ExtracionConfigScreen"
         component={ExtracionConfigScreen}
@@ -260,7 +293,10 @@ export default function AppNavigator() {
         name="ExtracionCoffeeToWaterScreen"
         component={ExtracionCoffeeToWaterScreen}
       />
+      <Stack.Screen name="ExtracionBloom" component={ExtracionBloom} />
       <Stack.Screen name="ExtracionPour" component={ExtracionPour} />
+      <Stack.Screen name="ExtracionSpiral" component={ExtracionSpiral} />
+      <Stack.Screen name="ExtracionBrew" component={ExtracionBrew} />
       <Stack.Screen name="ShopScreen" component={ShopScreen} />
       <Stack.Screen name="ShopItemDetail" component={ShopItemDetailScreen} />
       <Stack.Screen
