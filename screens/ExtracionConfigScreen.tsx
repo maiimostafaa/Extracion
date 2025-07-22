@@ -9,25 +9,33 @@ import {
   Image,
   Modal,
   ScrollView,
-} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import type { RootStackParamList } from '../navigation/AppNavigator';
-import ExtracionParameterTile from '../assets/components/extracion/ExtracionParameterTile';
-import ExtracionDualParameterTile from '../assets/components/extracion/ExtracionDualParameterTile';
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { useNavigation, useRoute } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import type { RootStackParamList } from "../navigation/AppNavigator";
+import ExtracionParameterTile from "../assets/components/extracion/ExtracionParameterTile";
+import ExtracionDualParameterTile from "../assets/components/extracion/ExtracionDualParameterTile";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 const ExtracionConfigScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
+  const route = useRoute();
+
+  // Get ratio from navigation params if provided
+  const params = route.params as { ratio?: number } | undefined;
+  const initialRatio = params?.ratio || 20;
 
   // State for parameter values
-  const [coffeeBeans, setCoffeeBeans] = useState('18g');
-  const [water, setWater] = useState('270ml');
-  const [grind, setGrind] = useState('coarse');
-  const [brewTime, setBrewTime] = useState('4:00');
+  const [coffeeBeans, setCoffeeBeans] = useState("0g");
+  const [water, setWater] = useState("0ml");
+  const [grind, setGrind] = useState("coarse");
+  const [brewTime, setBrewTime] = useState("4:00");
   const [cupCount, setCupCount] = useState(1);
+
+  // NEW: State for coffee to water ratio
+  const [coffeeToWaterRatio, setCoffeeToWaterRatio] = useState(initialRatio);
 
   // State for dropdown
   const [selectedMode, setSelectedMode] = useState("brew guide");
@@ -44,47 +52,47 @@ const ExtracionConfigScreen: React.FC = () => {
 
   // Grind size options
   const grindOptions = [
-    { 
-      id: 'extra-coarse', 
-      name: 'extra-coarse', 
-      feelsLike: 'rock salt',
-      icon: require('../assets/icons/extracion/grindSizeIcons/extra-coarse.png'),
+    {
+      id: "extra-coarse",
+      name: "extra-coarse",
+      feelsLike: "rock salt",
+      icon: require("../assets/icons/extracion/grindSizeIcons/extra-coarse.png"),
     },
-    { 
-      id: 'coarse', 
-      name: 'coarse', 
-      feelsLike: 'sea salt',
-      icon: require('../assets/icons/extracion/grindSizeIcons/coarse.png'),
+    {
+      id: "coarse",
+      name: "coarse",
+      feelsLike: "sea salt",
+      icon: require("../assets/icons/extracion/grindSizeIcons/coarse.png"),
     },
-    { 
-      id: 'medium-coarse', 
-      name: 'medium-coarse', 
-      feelsLike: 'rough sand',
-      icon: require('../assets/icons/extracion/grindSizeIcons/medium-coarse.png'),
+    {
+      id: "medium-coarse",
+      name: "medium-coarse",
+      feelsLike: "rough sand",
+      icon: require("../assets/icons/extracion/grindSizeIcons/medium-coarse.png"),
     },
-    { 
-      id: 'medium', 
-      name: 'medium', 
-      feelsLike: 'sand',
-      icon: require('../assets/icons/extracion/grindSizeIcons/medium.png'),
+    {
+      id: "medium",
+      name: "medium",
+      feelsLike: "sand",
+      icon: require("../assets/icons/extracion/grindSizeIcons/medium.png"),
     },
-    { 
-      id: 'medium-fine', 
-      name: 'medium-fine', 
-      feelsLike: 'table salt',
-      icon: require('../assets/icons/extracion/grindSizeIcons/medium-fine.png'),
+    {
+      id: "medium-fine",
+      name: "medium-fine",
+      feelsLike: "table salt",
+      icon: require("../assets/icons/extracion/grindSizeIcons/medium-fine.png"),
     },
-    { 
-      id: 'fine', 
-      name: 'fine', 
-      feelsLike: 'sugar',
-      icon: require('../assets/icons/extracion/grindSizeIcons/fine.png'),
+    {
+      id: "fine",
+      name: "fine",
+      feelsLike: "sugar",
+      icon: require("../assets/icons/extracion/grindSizeIcons/fine.png"),
     },
-    { 
-      id: 'extra-fine', 
-      name: 'extra-fine', 
-      feelsLike: 'flour',
-      icon: require('../assets/icons/extracion/grindSizeIcons/extra-fine.png'),
+    {
+      id: "extra-fine",
+      name: "extra-fine",
+      feelsLike: "flour",
+      icon: require("../assets/icons/extracion/grindSizeIcons/extra-fine.png"),
     },
   ];
 
@@ -96,16 +104,64 @@ const ExtracionConfigScreen: React.FC = () => {
     navigation.navigate("ExtracionCoffeeBeanListScreen");
   };
 
+  // UPDATED: Handle navigation to coffee to water screen with ratio state
   const handleCoffeeBeansAndWaterPress = () => {
-    // Navigate to the coffee and water adjustment screen
-    navigation.navigate('ExtracionCoffeeToWaterScreen', {
+    navigation.navigate("ExtracionCoffeeToWaterScreen", {
       coffeeBeans,
       water,
-      onUpdate: (newCoffeeBeans: string, newWater: string) => {
+      ratio: coffeeToWaterRatio, // Pass current ratio
+      onUpdate: (
+        newCoffeeBeans: string,
+        newWater: string,
+        newRatio?: number
+      ) => {
         setCoffeeBeans(newCoffeeBeans);
         setWater(newWater);
-      }
+
+        // Update ratio if provided
+        if (newRatio !== undefined) {
+          setCoffeeToWaterRatio(newRatio);
+        }
+      },
     });
+  };
+
+  // NEW: Function to calculate water amount based on coffee beans and ratio
+  const calculateWaterAmount = (
+    coffeeAmount: string,
+    ratio: number
+  ): string => {
+    // Extract numeric value from coffee amount (remove 'g')
+    const coffeeGrams = parseFloat(coffeeAmount.replace("g", ""));
+    if (isNaN(coffeeGrams)) return water; // Return current water if parsing fails
+
+    const waterMl = coffeeGrams * ratio;
+    return `${Math.round(waterMl)}ml`;
+  };
+
+  const brewTimeToSeconds = () => {
+    const minutes = getCurrentMinutes();
+    const seconds = getCurrentSeconds();
+    const convertedTime = minutes * 60 + seconds;
+    return convertedTime;
+  };
+
+  // NEW: Function to update water when cup count changes
+  const handleCupCountChange = (increment: boolean) => {
+    const newCupCount = increment
+      ? Math.min(cupCount + 1, 8)
+      : Math.max(cupCount - 1, 1);
+
+    setCupCount(newCupCount);
+
+    // Recalculate water based on new cup count and current ratio
+    const baseCoffeePerCup = 18; // Base coffee amount per cup in grams
+    const totalCoffee = baseCoffeePerCup * newCupCount;
+    const newCoffeeBeans = `${totalCoffee}g`;
+    const newWater = calculateWaterAmount(newCoffeeBeans, coffeeToWaterRatio);
+
+    setCoffeeBeans(newCoffeeBeans);
+    setWater(newWater);
   };
 
   const handleDropdownToggle = () => {
@@ -134,9 +190,9 @@ const ExtracionConfigScreen: React.FC = () => {
   };
 
   const handleTilePress = (tileType: string) => {
-    if (tileType === 'grind') {
+    if (tileType === "grind") {
       setIsGrindModalOpen(true);
-    } else if (tileType === 'brewTime') {
+    } else if (tileType === "brewTime") {
       setIsBrewTimeModalOpen(true);
     } else {
       // Handle other tile presses
@@ -157,26 +213,24 @@ const ExtracionConfigScreen: React.FC = () => {
   };
 
   const handleBrewTimeChange = (minutes: number, seconds: number) => {
-    const formattedTime = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    const formattedTime = `${minutes}:${seconds.toString().padStart(2, "0")}`;
     setBrewTime(formattedTime);
   };
 
   // Get current time values for display
-  const getCurrentMinutes = () => parseInt(brewTime.split(':')[0]);
-  const getCurrentSeconds = () => parseInt(brewTime.split(':')[1]);
-
-  const handleCupCountChange = (increment: boolean) => {
-    if (increment) {
-      setCupCount((prev) => Math.min(prev + 1, 8)); // Max 8 cups for French Press
-    } else {
-      setCupCount((prev) => Math.max(prev - 1, 1)); // Min 1 cup
-    }
-  };
+  const getCurrentMinutes = () => parseInt(brewTime.split(":")[0]);
+  const getCurrentSeconds = () => parseInt(brewTime.split(":")[1]);
 
   const handleStart = () => {
     console.log("Starting brewing process...");
-    navigation.navigate("ExtracionPour");
-    // Navigate to brewing screen or start process
+    const timeInSeconds = brewTimeToSeconds;
+    console.log(timeInSeconds);
+    navigation.navigate("ExtracionPour", {
+      waterAmount: water,
+      coffeeAmount: coffeeBeans,
+      ratio: coffeeToWaterRatio,
+      time: timeInSeconds(),
+    });
   };
 
   return (
@@ -328,6 +382,13 @@ const ExtracionConfigScreen: React.FC = () => {
               </View>
             </View>
 
+            {/* NEW: Display current ratio information */}
+            <View style={styles.ratioInfoContainer}>
+              <Text style={styles.ratioInfoText}>
+                Ratio: 1:{coffeeToWaterRatio} (coffee:water)
+              </Text>
+            </View>
+
             {/* Start Button */}
             <View style={styles.startButtonContainer}>
               <TouchableOpacity
@@ -340,7 +401,7 @@ const ExtracionConfigScreen: React.FC = () => {
           </View>
         </>
       ) : (
-        // Tutorial Guide Content
+        // Tutorial Guide Content (unchanged)
         <View style={styles.tutorialContent}>
           {/* Back Button - Only show if not on first step */}
           {tutorialStep > 0 && (
@@ -398,37 +459,41 @@ const ExtracionConfigScreen: React.FC = () => {
 
             {tutorialStep === 2 && (
               <>
-
                 <Image
-                  source={require('../assets/nonclickable-visual-elements/extracion_grinder.png')}
+                  source={require("../assets/nonclickable-visual-elements/extracion_grinder.png")}
                   style={styles.kettleIcon}
                 />
-                <Text style={styles.kettleTitle}>Weigh out the coffee and{'\n'}grind it</Text>
+                <Text style={styles.kettleTitle}>
+                  Weigh out the coffee and{"\n"}grind it
+                </Text>
                 <Text style={styles.kettleInstructions}>
-                  Make sure you adjust the grinder first{'\n'}to get the right grind size.
+                  Make sure you adjust the grinder first{"\n"}to get the right
+                  grind size.
                 </Text>
               </>
             )}
 
             {tutorialStep === 3 && (
               <>
-               <Image
-                  source={require('../assets/nonclickable-visual-elements/extracion_takeOutFilter.png')}
+                <Image
+                  source={require("../assets/nonclickable-visual-elements/extracion_takeOutFilter.png")}
                   style={styles.takeOutFilter}
                 />
-                <Text style={styles.kettleTitle}>Take out the filter part of{'\n'}the vessel</Text>
+                <Text style={styles.kettleTitle}>
+                  Take out the filter part of{"\n"}the vessel
+                </Text>
               </>
             )}
 
             {tutorialStep === 4 && (
               <>
                 <Image
-                  source={require('../assets/nonclickable-visual-elements/extracion_checkMark.png')}
+                  source={require("../assets/nonclickable-visual-elements/extracion_checkMark.png")}
                   style={styles.kettleIcon}
                 />
                 <Text style={styles.kettleTitle}>Turn on Extracion</Text>
                 <Text style={styles.kettleInstructions}>
-                  Make sure your Extracion is on{'\n'}and you are all set!
+                  Make sure your Extracion is on{"\n"}and you are all set!
                 </Text>
               </>
             )}
@@ -447,8 +512,8 @@ const ExtracionConfigScreen: React.FC = () => {
           )}
         </View>
       )}
-      
-      {/* Grind Size Modal */}
+
+      {/* Grind Size Modal (unchanged) */}
       <Modal
         visible={isGrindModalOpen}
         transparent={true}
@@ -461,7 +526,7 @@ const ExtracionConfigScreen: React.FC = () => {
             <View style={styles.grindModalHeader}>
               <View style={styles.grindModalIndicator} />
             </View>
-            
+
             {/* Modal Content */}
             <View style={styles.grindContent}>
               {/* Header Row */}
@@ -476,7 +541,7 @@ const ExtracionConfigScreen: React.FC = () => {
                   <Text style={styles.grindColumnHeader}>Best for</Text>
                 </View>
               </View>
-              
+
               {/* Grind Options */}
               {grindOptions.map((option) => (
                 <View key={option.id} style={styles.grindOptionRow}>
@@ -484,40 +549,40 @@ const ExtracionConfigScreen: React.FC = () => {
                     <TouchableOpacity
                       style={[
                         styles.grindSizeButton,
-                        grind === option.name && styles.grindSizeButtonSelected
+                        grind === option.name && styles.grindSizeButtonSelected,
                       ]}
                       onPress={() => handleGrindSelect(option.name)}
                     >
-                      <Text style={[
-                        styles.grindOptionName,
-                        grind === option.name && styles.grindOptionNameSelected
-                      ]}>
+                      <Text
+                        style={[
+                          styles.grindOptionName,
+                          grind === option.name &&
+                            styles.grindOptionNameSelected,
+                        ]}
+                      >
                         {option.name}
                       </Text>
                     </TouchableOpacity>
                   </View>
-                  
+
                   <View style={styles.grindOptionCenter}>
                     <Text style={styles.grindOptionFeels}>
                       {option.feelsLike}
                     </Text>
                   </View>
-                  
+
                   <View style={styles.grindOptionRight}>
                     {/* Grind size icon */}
-                    <Image 
-                      source={option.icon} 
-                      style={styles.grindSizeIcon}
-                    />
+                    <Image source={option.icon} style={styles.grindSizeIcon} />
                   </View>
                 </View>
               ))}
             </View>
-            
+
             {/* Save Button */}
             <View style={styles.grindSaveContainer}>
-              <TouchableOpacity 
-                style={styles.grindSaveButton} 
+              <TouchableOpacity
+                style={styles.grindSaveButton}
                 onPress={handleGrindModalClose}
               >
                 <Text style={styles.grindSaveButtonText}>save changes</Text>
@@ -526,8 +591,8 @@ const ExtracionConfigScreen: React.FC = () => {
           </View>
         </View>
       </Modal>
-      
-      {/* Brew Time Modal */}
+
+      {/* Brew Time Modal (unchanged) */}
       <Modal
         visible={isBrewTimeModalOpen}
         transparent={true}
@@ -540,7 +605,7 @@ const ExtracionConfigScreen: React.FC = () => {
             <View style={styles.timeModalHeader}>
               <View style={styles.timeModalIndicator} />
             </View>
-            
+
             {/* Modal Content */}
             <View style={styles.timeModalBody}>
               {/* Time Picker */}
@@ -548,14 +613,17 @@ const ExtracionConfigScreen: React.FC = () => {
                 {/* Minutes Column */}
                 <View style={styles.timeColumn}>
                   <View style={styles.pickerColumn}>
-                    <ScrollView 
+                    <ScrollView
                       style={styles.timeScrollView}
                       contentContainerStyle={styles.timeScrollContent}
                       showsVerticalScrollIndicator={false}
                       snapToInterval={40}
                       snapToAlignment="start"
                       decelerationRate="fast"
-                      contentOffset={{ x: 0, y: (getCurrentMinutes() - 1) * 40 }}
+                      contentOffset={{
+                        x: 0,
+                        y: (getCurrentMinutes() - 1) * 40,
+                      }}
                       onMomentumScrollEnd={(event) => {
                         const offsetY = event.nativeEvent.contentOffset.y;
                         const index = Math.round(offsetY / 40);
@@ -563,22 +631,29 @@ const ExtracionConfigScreen: React.FC = () => {
                         handleBrewTimeChange(minute, getCurrentSeconds());
                       }}
                     >
-                      {Array.from({ length: 8 }, (_, i) => i + 1).map((minute) => (
-                        <TouchableOpacity
-                          key={minute}
-                          style={styles.timeOption}
-                          onPress={() => handleBrewTimeChange(minute, getCurrentSeconds())}
-                        >
-                          <Text style={[
-                            styles.timeOptionText,
-                            getCurrentMinutes() === minute && styles.timeOptionTextSelected
-                          ]}>
-                            {minute}
-                          </Text>
-                        </TouchableOpacity>
-                      ))}
+                      {Array.from({ length: 8 }, (_, i) => i + 1).map(
+                        (minute) => (
+                          <TouchableOpacity
+                            key={minute}
+                            style={styles.timeOption}
+                            onPress={() =>
+                              handleBrewTimeChange(minute, getCurrentSeconds())
+                            }
+                          >
+                            <Text
+                              style={[
+                                styles.timeOptionText,
+                                getCurrentMinutes() === minute &&
+                                  styles.timeOptionTextSelected,
+                              ]}
+                            >
+                              {minute}
+                            </Text>
+                          </TouchableOpacity>
+                        )
+                      )}
                     </ScrollView>
-                    
+
                     {/* Selection Indicator */}
                     <View style={styles.selectionIndicator}>
                       <View style={styles.separatorLine} />
@@ -589,18 +664,21 @@ const ExtracionConfigScreen: React.FC = () => {
                     </View>
                   </View>
                 </View>
-                
+
                 {/* Seconds Column */}
                 <View style={styles.timeColumn}>
                   <View style={styles.pickerColumn}>
-                    <ScrollView 
+                    <ScrollView
                       style={styles.timeScrollView}
                       contentContainerStyle={styles.timeScrollContent}
                       showsVerticalScrollIndicator={false}
                       snapToInterval={40}
                       snapToAlignment="start"
                       decelerationRate="fast"
-                      contentOffset={{ x: 0, y: (getCurrentSeconds() / 5) * 40 }}
+                      contentOffset={{
+                        x: 0,
+                        y: (getCurrentSeconds() / 5) * 40,
+                      }}
                       onMomentumScrollEnd={(event) => {
                         const offsetY = event.nativeEvent.contentOffset.y;
                         const index = Math.round(offsetY / 40);
@@ -608,22 +686,29 @@ const ExtracionConfigScreen: React.FC = () => {
                         handleBrewTimeChange(getCurrentMinutes(), second);
                       }}
                     >
-                      {Array.from({ length: 12 }, (_, i) => i * 5).map((second) => (
-                        <TouchableOpacity
-                          key={second}
-                          style={styles.timeOption}
-                          onPress={() => handleBrewTimeChange(getCurrentMinutes(), second)}
-                        >
-                          <Text style={[
-                            styles.timeOptionText,
-                            getCurrentSeconds() === second && styles.timeOptionTextSelected
-                          ]}>
-                            {second.toString().padStart(2, '0')}
-                          </Text>
-                        </TouchableOpacity>
-                      ))}
+                      {Array.from({ length: 12 }, (_, i) => i * 5).map(
+                        (second) => (
+                          <TouchableOpacity
+                            key={second}
+                            style={styles.timeOption}
+                            onPress={() =>
+                              handleBrewTimeChange(getCurrentMinutes(), second)
+                            }
+                          >
+                            <Text
+                              style={[
+                                styles.timeOptionText,
+                                getCurrentSeconds() === second &&
+                                  styles.timeOptionTextSelected,
+                              ]}
+                            >
+                              {second.toString().padStart(2, "0")}
+                            </Text>
+                          </TouchableOpacity>
+                        )
+                      )}
                     </ScrollView>
-                    
+
                     {/* Selection Indicator */}
                     <View style={styles.selectionIndicator}>
                       <View style={styles.separatorLine} />
@@ -636,11 +721,11 @@ const ExtracionConfigScreen: React.FC = () => {
                 </View>
               </View>
             </View>
-            
+
             {/* Save Button */}
             <View style={styles.timeSaveContainer}>
-              <TouchableOpacity 
-                style={styles.timeSaveButton} 
+              <TouchableOpacity
+                style={styles.timeSaveButton}
                 onPress={handleBrewTimeModalClose}
               >
                 <Text style={styles.timeSaveButtonText}>save changes</Text>
@@ -859,6 +944,16 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     gap: 20,
   },
+  // NEW: Ratio info display styles
+  ratioInfoContainer: {
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  ratioInfoText: {
+    fontSize: 14,
+    color: "#666666",
+    fontStyle: "italic",
+  },
   startButtonContainer: {
     marginTop: "auto", // Push to bottom
     paddingBottom: 80,
@@ -925,8 +1020,8 @@ const styles = StyleSheet.create({
     width: 120,
     height: 170,
     marginBottom: 30,
-    resizeMode: 'contain',
-    marginTop: 0
+    resizeMode: "contain",
+    marginTop: 0,
   },
   kettleTitle: {
     fontSize: 24,
@@ -994,27 +1089,27 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 8,
   },
-  
+
   // Grind Modal Styles
   grindModalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "flex-end",
   },
   grindModalContent: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    height: '75%',
+    height: "75%",
   },
   grindModalHeader: {
-    alignItems: 'center',
+    alignItems: "center",
     paddingVertical: 12,
   },
   grindModalIndicator: {
     width: 40,
     height: 4,
-    backgroundColor: '#E5E5E5',
+    backgroundColor: "#E5E5E5",
     borderRadius: 2,
   },
   grindContent: {
@@ -1029,82 +1124,82 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   grindHeaderRow: {
-    flexDirection: 'row',
+    flexDirection: "row",
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#F0F0F0',
+    borderBottomColor: "#F0F0F0",
     marginBottom: 8,
   },
   grindColumnHeader: {
     fontSize: 14,
-    fontWeight: '600',
-    color: '#666666',
-    textAlign: 'center',
+    fontWeight: "600",
+    color: "#666666",
+    textAlign: "center",
   },
   grindOptionRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingVertical: 10,
     marginVertical: 3,
   },
   grindOptionSelected: {
-    backgroundColor: '#F0F8FF',
+    backgroundColor: "#F0F8FF",
     borderRadius: 8,
   },
   grindOptionLeft: {
-    width: '50%',
-    alignItems: 'center',
+    width: "50%",
+    alignItems: "center",
   },
   grindSizeButton: {
     paddingVertical: 10,
     paddingHorizontal: 8,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#E5E5E5',
-    backgroundColor: '#FFFFFF',
+    borderColor: "#E5E5E5",
+    backgroundColor: "#FFFFFF",
     minWidth: 150,
     maxWidth: 150,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   grindSizeButtonSelected: {
-    backgroundColor: '#8CDBED',
-    borderColor: '#8CDBED',
+    backgroundColor: "#8CDBED",
+    borderColor: "#8CDBED",
   },
   grindOptionName: {
     fontSize: 14,
-    fontWeight: '400',
-    color: '#333333',
+    fontWeight: "400",
+    color: "#333333",
   },
   grindOptionNameSelected: {
-    fontWeight: '400',
-    color: '#333333',
+    fontWeight: "400",
+    color: "#333333",
   },
   grindOptionCenter: {
-    width: '28%',
-    alignItems: 'center',
+    width: "28%",
+    alignItems: "center",
   },
   grindOptionFeels: {
     fontSize: 12,
-    color: '#666666',
-    textAlign: 'center',
+    color: "#666666",
+    textAlign: "center",
   },
   grindOptionRight: {
-    width: '22%',
-    alignItems: 'center',
+    width: "22%",
+    alignItems: "center",
   },
   grindIconPlaceholder: {
     width: 24,
     height: 24,
-    backgroundColor: '#F0F0F0',
+    backgroundColor: "#F0F0F0",
     borderRadius: 6,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   grindSizeIcon: {
     width: 40,
     height: 40,
-    resizeMode: 'contain',
+    resizeMode: "contain",
   },
   grindIconText: {
     fontSize: 12,
@@ -1113,155 +1208,155 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 20,
     paddingBottom: 30,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
     borderTopWidth: 1,
-    borderTopColor: '#F0F0F0',
+    borderTopColor: "#F0F0F0",
   },
   grindSaveButton: {
-    backgroundColor: '#8CDBED',
+    backgroundColor: "#8CDBED",
     borderRadius: 25,
     paddingVertical: 16,
-    alignItems: 'center',
+    alignItems: "center",
   },
   grindSaveButtonText: {
     fontSize: 18,
-    fontWeight: '400',
-    color: '#333333',
+    fontWeight: "400",
+    color: "#333333",
   },
-  
+
   // Brew Time Modal Styles
   timePickerContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-around",
+    alignItems: "center",
     paddingVertical: 10,
     paddingHorizontal: 20,
     flex: 1,
   },
   timeColumn: {
     flex: 1,
-    alignItems: 'center',
+    alignItems: "center",
   },
   timeColumnHeader: {
     fontSize: 14,
-    fontWeight: '500',
-    color: '#666666',
+    fontWeight: "500",
+    color: "#666666",
     marginBottom: 15,
-    textAlign: 'center',
+    textAlign: "center",
   },
   pickerColumn: {
-    position: 'relative',
+    position: "relative",
     height: 150,
-    width: '100%',
+    width: "100%",
   },
   timeScrollView: {
     height: 150,
-    width: '100%',
+    width: "100%",
   },
   timeScrollContent: {
     paddingVertical: 55, // Center the first and last items
-    alignItems: 'center',
+    alignItems: "center",
   },
   timeOption: {
     height: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: '100%',
+    justifyContent: "center",
+    alignItems: "center",
+    width: "100%",
   },
   timeOptionSelected: {
-    backgroundColor: 'transparent',
+    backgroundColor: "transparent",
   },
   timeOptionText: {
     fontSize: 24,
-    fontWeight: '300',
-    color: '#CCCCCC',
-    textAlign: 'center',
+    fontWeight: "300",
+    color: "#CCCCCC",
+    textAlign: "center",
   },
   timeOptionTextSelected: {
-    color: '#333333',
-    fontWeight: '600',
+    color: "#333333",
+    fontWeight: "600",
     fontSize: 24,
   },
   selectionIndicator: {
-    position: 'absolute',
-    top: '50%',
+    position: "absolute",
+    top: "50%",
     left: 0,
     right: 0,
     transform: [{ translateY: -20 }],
     height: 40,
-    justifyContent: 'space-between',
-    pointerEvents: 'none',
+    justifyContent: "space-between",
+    pointerEvents: "none",
   },
   selectionArea: {
     height: 38,
-    backgroundColor: 'transparent',
-    justifyContent: 'center',
-    alignItems: 'flex-end',
+    backgroundColor: "transparent",
+    justifyContent: "center",
+    alignItems: "flex-end",
     paddingRight: 10,
   },
   selectionLabel: {
     fontSize: 20,
-    fontWeight: '400',
-    color: '#333333',
+    fontWeight: "400",
+    color: "#333333",
   },
   selectedTimeOverlay: {
-    position: 'absolute',
-    top: '50%',
+    position: "absolute",
+    top: "50%",
     left: 10,
     right: 10,
     transform: [{ translateY: -12 }],
-    alignItems: 'center',
-    justifyContent: 'center',
-    pointerEvents: 'none',
+    alignItems: "center",
+    justifyContent: "center",
+    pointerEvents: "none",
   },
   selectedTimeRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    width: '100%',
+    flexDirection: "row",
+    justifyContent: "space-around",
+    alignItems: "center",
+    width: "100%",
     paddingHorizontal: 40,
     paddingVertical: 6,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    backgroundColor: "rgba(255, 255, 255, 0.9)",
   },
   separatorLine: {
     height: 1,
-    backgroundColor: '#C7C7CC',
-    width: '100%',
+    backgroundColor: "#C7C7CC",
+    width: "100%",
     marginVertical: 0,
   },
   selectedTimeContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     paddingHorizontal: 15,
     flex: 1,
   },
   selectedTimeText: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#333333',
+    fontWeight: "600",
+    color: "#333333",
     marginVertical: 0,
   },
 
   // Brew Time Modal Specific Styles
   timeModalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "flex-end",
   },
   timeModalContent: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    height: '35%',
+    height: "35%",
   },
   timeModalHeader: {
-    alignItems: 'center',
+    alignItems: "center",
     paddingVertical: 8,
   },
   timeModalIndicator: {
     width: 40,
     height: 4,
-    backgroundColor: '#E5E5E5',
+    backgroundColor: "#E5E5E5",
     borderRadius: 2,
   },
   timeModalBody: {
@@ -1273,20 +1368,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 15,
     paddingBottom: 20,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
     borderTopWidth: 1,
-    borderTopColor: '#F0F0F0',
+    borderTopColor: "#F0F0F0",
   },
   timeSaveButton: {
-    backgroundColor: '#8CDBED',
+    backgroundColor: "#8CDBED",
     borderRadius: 25,
     paddingVertical: 12,
-    alignItems: 'center',
+    alignItems: "center",
   },
   timeSaveButtonText: {
     fontSize: 16,
-    fontWeight: '400',
-    color: '#333333',
+    fontWeight: "400",
+    color: "#333333",
   },
 });
 

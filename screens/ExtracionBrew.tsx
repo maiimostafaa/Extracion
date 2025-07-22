@@ -28,7 +28,7 @@ interface RouteParams {
   time: number;
 }
 
-export default function ExtracionPour() {
+export default function ExtracionBrew() {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute();
   const windowWidth = Dimensions.get("window").width;
@@ -100,9 +100,7 @@ export default function ExtracionPour() {
       </View>
 
       <ScrollView contentContainerStyle={styles.container}>
-        <ExtracionCoffeeToWaterInstructionBanner
-          text={`Pour ${pourAmount}ml of water and evenly saturate the coffee`}
-        />
+        <ExtracionCoffeeToWaterInstructionBanner text="Wait for coffee to brew" />
 
         {/* Display brewing info */}
         <View style={styles.brewingInfo}>
@@ -119,42 +117,13 @@ export default function ExtracionPour() {
             width: windowWidth - 50,
             justifyContent: "flex-end",
           }}
-        >
-          <DynamicThermometer temp={Number(temperature.toFixed(0))} />
-        </View>
-        <View style={{ alignItems: "center", width: "100%" }}>
-          <Image
-            source={require("../assets/nonclickable-visual-elements/fill-container.png")}
-            style={{
-              width: 206,
-              height: 250,
-              marginVertical: 10,
-              resizeMode: "contain",
-            }}
-          />
-          <View
-            style={{
-              flexDirection: "column",
-              position: "absolute",
-              top: 60,
-              left: windowWidth / 2 - 63,
-            }}
-          >
-            <Text
-              style={{ fontSize: 40, color: "#078CC9", borderBottomWidth: 1 }}
-            >
-              {zeroedOut.toFixed(0)}
-            </Text>
-            <Text style={{ fontSize: 20 }}>{pourAmount}ml</Text>
-          </View>
-        </View>
+        ></View>
 
-        {/* Uncomment if you want to use the timer */}
-        {/* <TimerTemperatureRing
-          initialTime={120}
+        <TimerTemperatureRing
+          initialTime={time}
           temp={Number(temperature.toFixed(0))}
           size={350}
-        /> */}
+        />
         <TouchableOpacity
           style={{
             width: "70%",
@@ -164,14 +133,7 @@ export default function ExtracionPour() {
             alignSelf: "center",
             marginTop: 20,
           }}
-          onPress={() =>
-            navigation.navigate("ExtracionBloom", {
-              waterAmount: waterAmount,
-              coffeeAmount: coffeeAmount,
-              ratio: ratio,
-              time: time,
-            })
-          }
+          onPress={() => navigation.navigate("ExtracionScreen")}
         >
           <Text style={{ fontSize: 30, textAlign: "center" }}>next</Text>
         </TouchableOpacity>
