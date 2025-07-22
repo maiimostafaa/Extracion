@@ -52,7 +52,13 @@
           "bluetoothAlwaysPermission": "Allow $(thePongLocalName) to connect to bluetooth devices."
         }
       ],
-      "expo-web-browser"
+      "expo-web-browser",
+      [
+        "expo-image-picker", {
+          "photosPermission": "Allows selecting coffee images",
+          "cameraPermission": "Allows taking coffee photos"
+        }
+      ]
     ],
     "extra": {
       "eas": {
