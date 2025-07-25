@@ -17,6 +17,7 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../navigation/AppNavigator";
 import { brewLogEntry } from "../../assets/types/BrewLog/brewLogEntry";
 import TastingWheel from "../../assets/components/brewLogComponents/TastingWheel";
+import { addBrewLog, loadBrewLogs, saveBrewLogs } from "../../brewLogStorage";
 
 type EditScreenRouteProp = RouteProp<RootStackParamList, "BrewLogEditScreen">;
 type EditScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, "BrewLogEditScreen">;
@@ -64,9 +65,54 @@ const BrewLogEditScreen: React.FC = () => {
     navigation.goBack();
   };
 
-  const handleSave = () => {
-    // TODO: Save logic when database is implemented
-    navigation.goBack();
+  const handleSave = async () => {
+    try {
+      // Create updated brew log entry from editable data
+      const updatedEntry: brewLogEntry = {
+        ...brewLogEntry,
+        name: editableData.name,
+        date: editableData.date,
+        coffeeBeanDetail: {
+          ...brewLogEntry.coffeeBeanDetail,
+          coffeeName: editableData.coffeeName,
+          origin: editableData.origin,
+          roasterDate: editableData.roasterDate,
+          roasterLevel: editableData.roasterLevel,
+          bagWeight: parseInt(editableData.bagWeight) || 0,
+        },
+        brewDetail: {
+          ...brewLogEntry.brewDetail,
+          grindSize: parseInt(editableData.grindSize) || 0,
+          beanWeight: parseInt(editableData.beanWeight) || 0,
+          waterAmount: parseInt(editableData.waterAmount) || 0,
+          ratio: parseInt(editableData.ratio) || 0,
+          brewTime: parseInt(editableData.brewTime) || 0,
+          temperature: parseInt(editableData.temperature) || 0,
+        },
+        rating: parseFloat(editableData.rating) || 0,
+      };
+
+      // Check if this is a new entry (by checking if ID exists in storage)
+      const existingLogs = await loadBrewLogs();
+      const isNewEntry = !existingLogs.some(log => log.id === brewLogEntry.id);
+      
+      if (isNewEntry) {
+        // Generate a proper ID for new entry
+        updatedEntry.id = Date.now();
+        await addBrewLog(updatedEntry);
+      } else {
+        // Update existing entry
+        const updatedLogs = existingLogs.map(log => 
+          log.id === brewLogEntry.id ? updatedEntry : log
+        );
+        await saveBrewLogs(updatedLogs);
+      }
+      
+      navigation.goBack();
+    } catch (error) {
+      console.error('Error saving brew log:', error);
+      // TODO: Show error alert to user
+    }
   };
 
   const updateField = (field: string, value: string) => {
