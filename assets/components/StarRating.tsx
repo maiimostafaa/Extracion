@@ -1,6 +1,6 @@
-import React from 'react';
-import { View, StyleSheet } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import React from "react";
+import { View, StyleSheet } from "react-native";
+import { AntDesign } from "@expo/vector-icons";
 
 interface StarRatingProps {
   rating: number; // Rating value (e.g., 4.4)
@@ -14,32 +14,32 @@ const StarRating: React.FC<StarRatingProps> = ({
   rating,
   maxStars = 5,
   size = 14,
-  color = '#FFD700',
-  outlineColor = '#E0E0E0'
+  color = "#FFD700",
+  outlineColor = "#E0E0E0",
 }) => {
   const renderStars = () => {
     const stars = [];
-    
+
     for (let i = 1; i <= maxStars; i++) {
-      let starName: 'star' | 'star-outline';
+      let starName: "star";
       let starColor: string;
-      
+
       if (i <= Math.floor(rating)) {
         // Full star
-        starName = 'star';
+        starName = "star";
         starColor = color;
-      } else if (i === Math.ceil(rating) && rating % 1 !== 0) {
+      } else if (i === Math.ceil(rating)) {
         // Partial star - for now we'll show as outline, but you could implement half-stars
-        starName = 'star-outline';
+        starName = "star";
         starColor = outlineColor;
       } else {
         // Empty star
-        starName = 'star-outline';
+        starName = "star";
         starColor = outlineColor;
       }
-      
+
       stars.push(
-        <Ionicons
+        <AntDesign
           key={i}
           name={starName}
           size={size}
@@ -48,21 +48,17 @@ const StarRating: React.FC<StarRatingProps> = ({
         />
       );
     }
-    
+
     return stars;
   };
 
-  return (
-    <View style={styles.container}>
-      {renderStars()}
-    </View>
-  );
+  return <View style={styles.container}>{renderStars()}</View>;
 };
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   star: {
     marginRight: 1,

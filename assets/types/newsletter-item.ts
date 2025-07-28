@@ -5,7 +5,7 @@ export interface newsletterItem {
   thumbnail: any; // URL or path to the thumbnail image
   date: string; // Date the item was created or published
   createdBy: string; // Author or creator of the item
-  category: "coffee recipe" | "KOL featuring" | "promotion";
+  category: "Coffee Recipe" | "KOL Featuring" | "Promotion";
   media_type?: "VIDEO" | "IMAGE" | "CAROUSEL_ALBUM"; // Type of media content
   media_types?: string[]; // Array of media types if multiple
   media_url: string; // URL to the media content (video, image, etc.)
