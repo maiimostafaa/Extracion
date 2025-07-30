@@ -18,7 +18,9 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.getthepong.extracion",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSLocationWhenInUseUsageDescription": "This app uses location to find nearby coffee shops and cafes.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "This app uses location to find nearby coffee shops and provide location-based coffee recommendations."
       }
     },
     "android": {
@@ -31,9 +33,8 @@
         "android.permission.BLUETOOTH",
         "android.permission.BLUETOOTH_ADMIN",
         "android.permission.BLUETOOTH_CONNECT",
-        "android.permission.BLUETOOTH",
-        "android.permission.BLUETOOTH_ADMIN",
-        "android.permission.BLUETOOTH_CONNECT"
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION"
       ],
       "package": "com.getthepong.extracion"
     },
@@ -42,6 +43,14 @@
     },
     "plugins": [
       "expo-font",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location to find nearby coffee shops and cafes.",
+          "locationAlwaysPermission": "Allow $(PRODUCT_NAME) to use your location to find nearby coffee shops and provide location-based coffee recommendations.",
+          "locationWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location to find nearby coffee shops and cafes."
+        }
+      ],
       [
         "react-native-ble-plx",
         {
@@ -52,6 +61,13 @@
           "bluetoothAlwaysPermission": "Allow $(thePongLocalName) to connect to bluetooth devices."
         }
       ],
+      "expo-web-browser",
+      [
+        "expo-image-picker", {
+          "photosPermission": "Allows selecting coffee images",
+          "cameraPermission": "Allows taking coffee photos"
+        }
+      ]
       "expo-video"
     ],
     "extra": {
