@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
     fontFamily: "cardRegular",
   },
   ratingContainer: {
-    marginVertical: 4,
+    marginVertical: 0,
   },
   bottomRow: {
     flexDirection: "row",

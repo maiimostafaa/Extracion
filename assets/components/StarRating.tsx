@@ -1,5 +1,5 @@
 import React from "react";
-import { View, StyleSheet } from "react-native";
+import { View, StyleSheet, Text, Platform } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
 
 interface StarRatingProps {
@@ -20,39 +20,54 @@ const StarRating: React.FC<StarRatingProps> = ({
   const renderStars = () => {
     const stars = [];
 
-    for (let i = 1; i <= maxStars; i++) {
-      let starName: "star";
-      let starColor: string;
-
-      if (i <= Math.floor(rating)) {
-        // Full star
-        starName = "star";
-        starColor = color;
-      } else if (i === Math.ceil(rating)) {
-        // Partial star - for now we'll show as outline, but you could implement half-stars
-        starName = "star";
-        starColor = outlineColor;
-      } else {
-        // Empty star
-        starName = "star";
-        starColor = outlineColor;
-      }
+    for (let i = 0; i < maxStars; i++) {
+      const fillPercent = Math.min(Math.max(rating - i, 0), 1); // value between 0 and 1
 
       stars.push(
-        <AntDesign
+        <View
           key={i}
-          name={starName}
-          size={size}
-          color={starColor}
-          style={styles.star}
-        />
+          style={{
+            position: "relative",
+            width: size,
+            height: size,
+            marginRight: 1,
+          }}
+        >
+          {/* Outline star */}
+          <AntDesign
+            name="star"
+            size={size}
+            color={outlineColor}
+            style={{ position: "absolute", top: 0, left: 0 }}
+          />
+
+          {/* Filled portion */}
+          {fillPercent > 0 && (
+            <View
+              style={{
+                width: size * fillPercent,
+                overflow: "hidden",
+                position: "absolute",
+                top: 0,
+                left: 0,
+              }}
+            >
+              <AntDesign name="star" size={size} color={color} />
+            </View>
+          )}
+        </View>
       );
     }
 
     return stars;
   };
 
-  return <View style={styles.container}>{renderStars()}</View>;
+  return (
+    <View style={styles.container}>
+      {renderStars()}
+      <Text style={styles.ratingText}> {rating.toFixed(1)}</Text>
+    </View>
+  );
 };
 
 const styles = StyleSheet.create({
@@ -60,8 +75,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
   },
-  star: {
-    marginRight: 1,
+  ratingText: {
+    fontFamily: "cardRegular",
+    color: "#58595B",
+    fontSize: 12,
+    marginLeft: 4,
   },
 });
 
