@@ -138,12 +138,9 @@ const BrewLogEditScreen: React.FC = () => {
               // Delete the entry first
               await deleteBrewLog(brewLogEntry.id);
               
-              // Navigate back to the main BrewLog screen properly
-              // Reset navigation stack to ensure we go back to the main list, not a modal
-              navigation.reset({
-                index: 0,
-                routes: [{ name: 'BrewLogScreen' }],
-              });
+              // Navigate back to the main BrewLog screen while preserving tab navigation
+              // Use popToTop to go back to the first screen in the stack, preserving tab context
+              navigation.popToTop();
             } catch (error) {
               console.error('Error deleting brew log:', error);
               Alert.alert('Error', 'Failed to delete brew log');
