@@ -249,7 +249,7 @@ export default function BrewLogScreen() {
   // Filtering Data
   const filteredData = useMemo(() => {
     if (selectedFilter === "All") {
-      return allBrewLogEntries;
+      return allBrewLogEntriesTest; // Use data from permanent storage, not mock data
     }
 
     return allBrewLogEntriesTest.filter(
