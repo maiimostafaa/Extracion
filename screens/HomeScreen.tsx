@@ -33,7 +33,7 @@ import mockNewsletters from "../assets/mock_data/mock-newsletter-items";
 import { newsletterItem } from "../assets/types/newsletter-item";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
-type filterOptions = "all" | "coffee recipe" | "KOL featuring" | "promotion";
+type filterOptions = "All" | "Coffee Recipe" | "KOL Featuring" | "Promotion";
 
 const { width } = Dimensions.get("window");
 const frames = [
@@ -56,7 +56,7 @@ export default function HomeScreen() {
 
   const scrollY = useRef(new Animated.Value(0)).current;
   const [animationFrame, setAnimationFrame] = useState(0);
-  const [selectedFilter, setSelectedFilter] = useState<filterOptions>("all");
+  const [selectedFilter, setSelectedFilter] = useState<filterOptions>("All");
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -97,7 +97,7 @@ export default function HomeScreen() {
         interface InstagramPost {
           id: string;
           caption?: string;
-          thumbnail_url: string;                                                                                        
+          thumbnail_url: string;
           media_url: string;
           permalink: string;
           timestamp: string;
@@ -146,7 +146,7 @@ export default function HomeScreen() {
               media_types,
               thumbnail: post.thumbnail_url || media_urls[0],
               createdBy: "getthepong",
-              category: "KOL featuring" as "KOL featuring",
+              category: "KOL Featuring" as "KOL Featuring",
               date: post.timestamp,
               permalink: post.permalink,
               like_count: post.like_count,
@@ -166,7 +166,7 @@ export default function HomeScreen() {
 
   const filteredData = useMemo(() => {
     const combined = [...instagramPosts, ...mockNewsletters];
-    if (selectedFilter === "all") return combined;
+    if (selectedFilter === "All") return combined;
     return combined.filter((entry) => entry.category === selectedFilter);
   }, [selectedFilter, instagramPosts]);
 
@@ -182,7 +182,6 @@ export default function HomeScreen() {
     <View style={{ flex: 1 }}>
       {/* Fixed Banner Header - Outside ScrollView */}
       <View style={[styles.header, { zIndex: 1000 }]}>
-
         <Image source={frames[animationFrame]} style={styles.headerImage} />
         <View style={styles.overlayContent}>
           <SafeAreaView
@@ -198,7 +197,6 @@ export default function HomeScreen() {
           </SafeAreaView>
 
           <View style={styles.textOverlayContainer}>
-
             <Text style={styles.greeting}>Hello Miss Wong</Text>
             <View style={styles.pointsContainer}>
               <View style={styles.border}>
@@ -252,7 +250,6 @@ export default function HomeScreen() {
         }
         stickyHeaderIndices={[1]} // Only make filter sticky (now index 1)
       >
-
         {/* Horizontal Scroll Content */}
         <View style={styles.scrollContent}>
           <ScrollView

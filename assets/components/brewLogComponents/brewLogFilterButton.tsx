@@ -63,6 +63,7 @@ const styles = StyleSheet.create({
     borderRadius: 2,
     tintColor: "#58595B",
     resizeMode: "contain",
+    marginBottom: 3,
   },
   label: {
     textAlign: "center",
@@ -70,6 +71,7 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: "500",
     fontFamily: "cardRegular",
+    lineHeight: 11,
   },
   containerSelected: {
     width: 60,

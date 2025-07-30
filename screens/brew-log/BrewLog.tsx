@@ -29,11 +29,11 @@ import {
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 type filterOptions =
-  | "all"
-  | "pour over"
-  | "cold brew"
-  | "brew bar"
-  | "french press";
+  | "All"
+  | "Pour Over"
+  | "Cold Brew"
+  | "Brew Bar"
+  | "French Press";
 
 const { width } = Dimensions.get("window");
 
@@ -41,14 +41,14 @@ export default function BrewLogScreen() {
   const navigation = useNavigation<NavigationProp>();
 
   // Mental note: This is similar to @State in SwiftUI
-  const [selectedFilter, setSelectedFilter] = useState<filterOptions>("all");
+  const [selectedFilter, setSelectedFilter] = useState<filterOptions>("All");
 
   const allBrewLogEntries: brewLogEntry[] = [
     {
       id: 1,
       date: new Date("2024-06-15"),
       name: "Morning Espresso Blend",
-      brewMethod: "pour over",
+      brewMethod: "Pour Over",
       image:
         "https://images.unsplash.com/photo-1447933601403-0c6688de566e?w=400&h=400&fit=crop",
       coffeeBeanDetail: {
@@ -84,13 +84,13 @@ export default function BrewLogScreen() {
         Sweet: 2,
         Salty: 0,
       },
-      rating: 2.2,
+      rating: 2.5,
     },
     {
       id: 2,
       date: new Date("2024-06-25"),
       name: "Cold Brew Concentrate",
-      brewMethod: "french press",
+      brewMethod: "French Press",
       image:
         "https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=400&h=400&fit=crop",
       coffeeBeanDetail: {
@@ -132,7 +132,7 @@ export default function BrewLogScreen() {
       id: 3,
       date: new Date("2024-06-20"),
       name: "Ethiopian Pour Over",
-      brewMethod: "pour over",
+      brewMethod: "Pour Over",
       image:
         "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400&h=400&fit=crop",
       coffeeBeanDetail: {
@@ -174,7 +174,7 @@ export default function BrewLogScreen() {
       id: 4,
       date: new Date("2024-06-18"),
       name: "Cold Brew Summer",
-      brewMethod: "cold brew",
+      brewMethod: "Cold Brew",
       image:
         "https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=400&h=400&fit=crop",
       coffeeBeanDetail: {
@@ -216,7 +216,7 @@ export default function BrewLogScreen() {
 
   // Filtering Data
   const filteredData = useMemo(() => {
-    if (selectedFilter === "all") {
+    if (selectedFilter === "All") {
       return allBrewLogEntries;
     }
 
@@ -232,7 +232,7 @@ export default function BrewLogScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Header tintColor="#000" />
+        <Header tintColor="#58595B" />
       </View>
 
       {/* Filter Options */}
@@ -271,13 +271,15 @@ const styles = StyleSheet.create({
     flex: 1,
     width: width,
     backgroundColor: "#F5F5F5",
+    marginTop: "10%",
   },
   header: {
     padding: 16,
   },
   filterOptionContainer: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+    marginTop: "-4%",
+    paddingHorizontal: 8,
+    paddingBottom: 8,
   },
 
   // FlatList Grid Styles

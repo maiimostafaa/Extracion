@@ -3,7 +3,7 @@ import { View, ScrollView, StyleSheet } from "react-native";
 import BrewLogFilterButton from "./brewLogComponents/brewLogFilterButton";
 import { brewLogFilter } from "../types/BrewLog/brewLogFilter";
 
-type filterOptions = "all" | "coffee recipe" | "KOL featuring" | "promotion";
+type filterOptions = "All" | "Coffee Recipe" | "KOL Featuring" | "Promotion";
 
 interface HomePageFilterSelectorProps {
   selectedFilter: filterOptions; // Current value stored on the screen
@@ -15,14 +15,14 @@ const HomePageFilterSelector: React.FC<HomePageFilterSelectorProps> = ({
   onFilterChange,
 }) => {
   const filterOptions: brewLogFilter[] = [
-    { id: 1, icon: require("../icons/all.png"), label: "all" },
+    { id: 1, icon: require("../icons/all.png"), label: "All" },
     {
       id: 2,
       icon: require("../icons/coffee-recipe.png"),
-      label: "coffee recipe",
+      label: "Coffee Recipe",
     },
-    { id: 3, icon: require("../icons/KOL.png"), label: "KOL featuring" },
-    { id: 4, icon: require("../icons/promotion.png"), label: "promotion" },
+    { id: 3, icon: require("../icons/KOL.png"), label: "KOL Featuring" },
+    { id: 4, icon: require("../icons/promotion.png"), label: "Promotion" },
   ];
 
   return (

@@ -1,4 +1,5 @@
 import DynamicThermometer from "../assets/components/thermometer";
+import WaterContainer from "../assets/components/waterContainer";
 import TimerTemperatureRing from "../assets/components/countdownTimer";
 import React, { useState } from "react";
 import {
@@ -123,7 +124,7 @@ export default function ExtracionPour() {
           <DynamicThermometer temp={Number(temperature.toFixed(0))} />
         </View>
         <View style={{ alignItems: "center", width: "100%" }}>
-          <Image
+          {/* <Image
             source={require("../assets/nonclickable-visual-elements/fill-container.png")}
             style={{
               width: 206,
@@ -146,7 +147,8 @@ export default function ExtracionPour() {
               {zeroedOut.toFixed(0)}
             </Text>
             <Text style={{ fontSize: 20 }}>{pourAmount}ml</Text>
-          </View>
+          </View> */}
+          <WaterContainer numerator={5} denominator={6} />
         </View>
 
         {/* Uncomment if you want to use the timer */}

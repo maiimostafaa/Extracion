@@ -12,7 +12,7 @@ import {
   FlatList,
   ViewToken,
 } from "react-native";
-import { Video, ResizeMode } from "expo-av";
+import { VideoView, useVideoPlayer } from "expo-video";
 import { RouteProp, useRoute, useNavigation } from "@react-navigation/native";
 import { Ionicons, EvilIcons } from "@expo/vector-icons";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -51,26 +51,6 @@ const NewsletterDetailScreen = () => {
     navigation.goBack();
   };
 
-  const handleVideoReadyForDisplay = (index: number) => {
-    // This callback fires when video is ready, but we need to use onLoad for dimensions
-    // We'll handle this in the onLoad callback instead
-  };
-
-  const handleVideoLoad = async (index: number, videoRef: any) => {
-    try {
-      if (videoRef.current) {
-        const status = await videoRef.current.getStatusAsync();
-        if (status.isLoaded) {
-          // For expo-av, we need to get dimensions from the video element itself
-          // We'll use a different approach with onReadyForDisplay
-          console.log('Video loaded for index:', index);
-        }
-      }
-    } catch (error) {
-      console.log('Error getting video status:', error);
-    }
-  };
-
   const handleImageLoad = (e: any, index: number) => {
     const { width: imgW, height: imgH } = e.nativeEvent.source;
     const scaledHeight = (width / imgW) * imgH;
@@ -81,8 +61,52 @@ const NewsletterDetailScreen = () => {
     });
   };
 
+  // Video component for FlatList items
+  const VideoItem = ({ uri, index }: { uri: string; index: number }) => {
+    const player = useVideoPlayer(uri, (player) => {
+      player.muted = false;
+      player.play();
+    });
+
+    // Use a consistent height for videos
+    const height = 700;
+
+    return (
+      <View style={{ width, height, backgroundColor: "#eee" }}>
+        <VideoView
+          style={{ width, height }}
+          player={player}
+          allowsFullscreen
+          allowsPictureInPicture
+          contentFit="cover"
+        />
+      </View>
+    );
+  };
+
+  // Single video component
+  const SingleVideo = ({ uri }: { uri: string }) => {
+    const player = useVideoPlayer(uri, (player) => {
+      player.muted = false;
+      player.play();
+    });
+
+    // Use a consistent height for videos
+    const height = 700;
+
+    return (
+      <VideoView
+        style={{ width, height }}
+        player={player}
+        allowsFullscreen
+        allowsPictureInPicture
+        contentFit="cover"
+      />
+    );
+  };
+
   return (
-    <SafeAreaView>
+    <SafeAreaView style={{ marginTop: "10%" }}>
       <Ionicons
         name="chevron-back"
         size={24}
@@ -106,31 +130,7 @@ const NewsletterDetailScreen = () => {
                 const height = mediaHeights[index] || 300;
 
                 if (mediaType === "VIDEO") {
-                  return (
-                    <View
-                      style={{ width, height, backgroundColor: "#eee" }}
-                    >
-                      <Video
-                        source={{ uri }}
-                        style={{ width, height }}
-                        useNativeControls
-                        resizeMode={ResizeMode.CONTAIN}
-                        shouldPlay
-                        isMuted={false}
-                        onReadyForDisplay={(readyForDisplayStatus) => {
-                          if (readyForDisplayStatus.naturalSize) {
-                            const { width: videoWidth, height: videoHeight } = readyForDisplayStatus.naturalSize;
-                            const scaledHeight = (width / videoWidth) * videoHeight;
-                            setMediaHeights((prev) => {
-                              const updated = [...prev];
-                              updated[index] = scaledHeight;
-                              return updated;
-                            });
-                          }
-                        }}
-                      />
-                    </View>
-                  );
+                  return <VideoItem uri={uri} index={index} />;
                 } else {
                   return (
                     <View style={{ width, height, backgroundColor: "#eee" }}>
@@ -160,21 +160,7 @@ const NewsletterDetailScreen = () => {
         ) : (
           <View style={{ width: "100%", backgroundColor: "#eee" }}>
             {item.media_types?.[0] === "VIDEO" ? (
-              <Video
-                source={{ uri: item.media_urls?.[0] ?? "" }}
-                style={{ width, height: mediaHeights[0] || 300 }}
-                useNativeControls
-                resizeMode={ResizeMode.CONTAIN}
-                shouldPlay
-                isMuted={false}
-                onReadyForDisplay={(readyForDisplayStatus) => {
-                  if (readyForDisplayStatus.naturalSize) {
-                    const { width: videoWidth, height: videoHeight } = readyForDisplayStatus.naturalSize;
-                    const scaledHeight = (width / videoWidth) * videoHeight;
-                    setMediaHeights([scaledHeight]);
-                  }
-                }}
-              />
+              <SingleVideo uri={item.media_urls?.[0] ?? ""} />
             ) : (
               <Image
                 source={{ uri: item.media_urls?.[0] ?? "" }}
@@ -186,21 +172,40 @@ const NewsletterDetailScreen = () => {
           </View>
         )}
 
-  {item.permalink && (
-         <TouchableOpacity style={{flexDirection: "row", paddingVertical: 10, paddingHorizontal: 5,}}   onPress={() => item.permalink && Linking.openURL(item.permalink)}
+        {item.permalink && (
+          <TouchableOpacity
+            style={{
+              flexDirection: "row",
+              paddingVertical: 10,
+              paddingHorizontal: 5,
+            }}
+            onPress={() => item.permalink && Linking.openURL(item.permalink)}
+          >
+            <EvilIcons name="heart" size={20} color="#000"></EvilIcons>
+            <Text
+              style={{ fontSize: 14, fontFamily: "cardBold", color: "#000" }}
             >
-          <EvilIcons name="heart" size={20} color="#000"></EvilIcons>
-          <Text style={{fontSize: 14, fontFamily: "cardBold", color: "#000"}}>{item.like_count}{"  "}</Text>
-        <EvilIcons name="comment" size={20} color="#000"></EvilIcons>
-          <Text style={{fontSize: 14, fontFamily: "cardBold", color: "#000"}}>{item.comments_count}</Text>
-         </TouchableOpacity>)}
+              {item.like_count}
+              {"  "}
+            </Text>
+            <EvilIcons name="comment" size={20} color="#000"></EvilIcons>
+            <Text
+              style={{ fontSize: 14, fontFamily: "cardBold", color: "#000" }}
+            >
+              {item.comments_count}
+            </Text>
+          </TouchableOpacity>
+        )}
 
         <View style={styles.content}>
-        
-
           {item.description && (
-           
-            <Text style={styles.body}><Text style={{fontFamily: "cardBold",}}>{item.createdBy}{": "}</Text>{item.description}</Text>
+            <Text style={styles.body}>
+              <Text style={{ fontFamily: "cardBold" }}>
+                {item.createdBy}
+                {": "}
+              </Text>
+              {item.description}
+            </Text>
           )}
 
           {item.permalink && (
@@ -260,12 +265,12 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
   dot: {
-    width: 8,                                                                                                         
+    width: 8,
     height: 8,
     borderRadius: 4,
     marginHorizontal: 4,
   },
-  activeDot: { 
+  activeDot: {
     backgroundColor: "#8CDBED",
   },
   inactiveDot: {

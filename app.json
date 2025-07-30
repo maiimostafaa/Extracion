@@ -51,7 +51,8 @@
           ],
           "bluetoothAlwaysPermission": "Allow $(thePongLocalName) to connect to bluetooth devices."
         }
-      ]
+      ],
+      "expo-video"
     ],
     "extra": {
       "eas": {

@@ -10,17 +10,19 @@ import {
   Modal,
   TouchableOpacity,
   Image,
+  ImageBackground,
   FlatList,
   Alert,
   Animated,
 } from "react-native";
 import type { ImageSourcePropType } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../navigation/AppNavigator";
 import Header from "../navigation/Header";
 import BrewingMethodCard from "../assets/components/extracion/BrewingMethodCard";
 import { Ionicons } from "@expo/vector-icons";
+import ExtracionCoffeeToWaterInstructionBanner from "../assets/components/extracion/ExtracionCoffeeToWaterInstructionBanner";
 
 import useBLE from "../useBLE";
 import { useBLEContext } from "../context/BLEContext";
@@ -43,25 +45,25 @@ interface BrewingMethod {
 const brewingMethods: BrewingMethod[] = [
   {
     id: "french_press",
-    name: "french press",
+    name: "French Press",
     icon: "cafe",
     image: frenchPressImage,
   },
   {
     id: "pour_over",
-    name: "pour over",
+    name: "Pour Over",
     icon: "water",
     image: pourOverImage,
   },
   {
     id: "cold_drip",
-    name: "cold drip",
+    name: "Cold Drip",
     icon: "snow",
     image: coldDripImage,
   },
   {
     id: "brew_bar",
-    name: "brew bar",
+    name: "Brew Bar",
     icon: "flask",
     image: brewBarImage,
   },
@@ -69,11 +71,16 @@ const brewingMethods: BrewingMethod[] = [
 
 export default function ExtractionScreen() {
   const navigation = useNavigation<NavigationProp>();
-  const [showBLEModal, setShowBLEModal] = useState(false); // Changed to false - modal won't show automatically
-  const [modalState, setModalState] = useState<'initial' | 'searching' | 'deviceList' | 'connecting' | 'connected'>('initial');
+  const [showBLEModal, setShowBLEModal] = useState(false);
+  const [modalState, setModalState] = useState<
+    "initial" | "searching" | "deviceList" | "connecting" | "connected"
+  >("initial");
   const [connectingDevice, setConnectingDevice] = useState<any>(null);
   const [justDisconnected, setJustDisconnected] = useState(false);
   const [showDeviceList, setShowDeviceList] = useState(false);
+  const [hasCheckedConnection, setHasCheckedConnection] = useState(false);
+  const [userDismissedModal, setUserDismissedModal] = useState(false);
+  const [modalSlideAnim] = useState(new Animated.Value(300)); // Start off-screen
 
   console.log(
     "ExtractionScreen render - showBLEModal:",
@@ -110,6 +117,44 @@ export default function ExtractionScreen() {
     });
   }, []);
 
+  // Auto-show BLE modal when screen is focused and no device is connected
+  useFocusEffect(
+    React.useCallback(() => {
+      // Add a small delay to ensure the screen is fully loaded
+      const timer = setTimeout(() => {
+        if (!connectedDevice && !hasCheckedConnection && !userDismissedModal) {
+          console.log(
+            "Screen focused - showing BLE modal (no device connected)"
+          );
+          setShowBLEModal(true);
+          setModalState("initial");
+          setHasCheckedConnection(true);
+        }
+      }, 500); // 500ms delay to ensure smooth navigation
+
+      // Cleanup function runs when screen loses focus
+      return () => {
+        clearTimeout(timer);
+        // Reset dismissal state when leaving the tab
+        if (userDismissedModal) {
+          console.log("Screen unfocused - resetting dismissal state");
+          setUserDismissedModal(false);
+          setHasCheckedConnection(false);
+        }
+      };
+    }, [connectedDevice, hasCheckedConnection, userDismissedModal])
+  );
+
+  // Reset the check flag when device disconnects, but keep user dismissal state
+  useEffect(() => {
+    if (!connectedDevice && hasCheckedConnection) {
+      // If we had a connection and now we don't, reset the flag
+      // but keep the userDismissedModal flag so modal shows again after disconnect
+      setHasCheckedConnection(false);
+      setUserDismissedModal(false); // Reset dismissal state when device disconnects
+    }
+  }, [connectedDevice, hasCheckedConnection]);
+
   // Pulse animation effect
   useEffect(() => {
     if (isScanning || modalState === "searching") {
@@ -133,7 +178,24 @@ export default function ExtractionScreen() {
     }
   }, [isScanning, modalState, pulseAnim]);
 
-  // Spinning animation for connecting state
+  // Animation for modal slide up/down
+  useEffect(() => {
+    if (showBLEModal) {
+      // Slide up
+      Animated.timing(modalSlideAnim, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+    } else {
+      // Slide down
+      Animated.timing(modalSlideAnim, {
+        toValue: 300,
+        duration: 250,
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [showBLEModal, modalSlideAnim]);
   useEffect(() => {
     if (modalState === "connecting") {
       const spin = () => {
@@ -158,6 +220,7 @@ export default function ExtractionScreen() {
   const handleBLEModalClose = () => {
     setShowBLEModal(false);
     setModalState("initial");
+    setUserDismissedModal(true); // Mark that user dismissed the modal
   };
 
   const handleContinue = async () => {
@@ -222,6 +285,7 @@ export default function ExtractionScreen() {
             await disconnectFromDevice();
             setJustDisconnected(true);
             setModalState("initial");
+            setHasCheckedConnection(false); // Reset so modal shows again
 
             // Log disconnect completion for STM32WB device
             console.log(
@@ -266,303 +330,258 @@ export default function ExtractionScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Header tintColor="#333" />
-      </View>
-
-      <View style={styles.content}>
-        <View style={styles.methodsContainer}>
-          <Text style={styles.sectionTitle}>choose your brewing method</Text>
-
-          {/* BLE Connection Button - Show when no device connected */}
-          {!connectedDevice && (
-            <TouchableOpacity 
-              style={styles.connectButton}
-              onPress={() => {
-                setShowBLEModal(true);
-                setModalState('initial');
-              }}
-            >
-              <Ionicons name="bluetooth" size={20} color="#8CDBED" />
-              <Text style={styles.connectButtonText}>Connect to Extracion Device</Text>
-              <Text style={styles.connectButtonSubtext}>Optional - for live data</Text>
-            </TouchableOpacity>
-          )}
-
-          {/* Connection Status and Data */}
-          {connectedDevice && (
-            <View style={styles.deviceStatus}>
-              <View style={styles.statusHeader}>
-                <View style={styles.connectedIndicator}>
-                  <Ionicons name="bluetooth" size={16} color="#4CAF50" />
-                  <Text style={styles.connectedText}>BLE Device Connected</Text>
-                </View>
-                <TouchableOpacity
-                  onPress={handleDisconnect}
-                  style={styles.disconnectButton}
-                >
-                  <Text style={styles.disconnectText}>Disconnect</Text>
-                </TouchableOpacity>
-              </View>
-
-              <View style={styles.dataRow}>
-                <View style={styles.dataItem}>
-                  <Text style={styles.dataLabel}>Temperature</Text>
-                  <Text style={styles.dataValue}>
-                    {temperature.toFixed(1)}°C
-                  </Text>
-                </View>
-                <View style={styles.dataItem}>
-                  <Text style={styles.dataLabel}>Weight</Text>
-                  <Text style={styles.dataValue}>{weight.toFixed(1)}g</Text>
-                </View>
-              </View>
-            </View>
-          )}
-
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.carouselContent}
-            style={styles.carousel}
-          >
-            {brewingMethods.map(renderBrewingMethodCard)}
-          </ScrollView>
-
-          {/* Page indicators */}
-          {/* <View style={styles.pageIndicators}>
-            {brewingMethods.map((_, index) => (
-              <View
-                key={index}
-                style={styles.pageIndicator}
-              />
-            ))}
-          </View> */}
+    <ImageBackground
+      style={styles.background}
+      source={require("../assets/backgrounds/bg-extracion.png")}
+    >
+      <SafeAreaView style={styles.container}>
+        <View style={styles.header}>
+          <Header tintColor="#58595B" />
         </View>
-      </View>
 
-      {/* BLE Connection Modal */}
-      <Modal
-        visible={showBLEModal}
-        transparent={true}
-        animationType="slide"
-        onRequestClose={handleBLEModalClose}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            {/* Status Bar - Fixed position outside ScrollView */}
-            <View style={styles.statusBar} />
+        <View style={styles.content}>
+          <View style={styles.methodsContainer}>
+            <ExtracionCoffeeToWaterInstructionBanner text="Choose your brewing method" />
 
-            {/* Close Button - Fixed position outside ScrollView */}
-            <TouchableOpacity 
-              style={styles.closeButton}
-              onPress={() => {
-                setShowBLEModal(false);
-                setModalState('initial');
-              }}
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.carouselContent}
+              style={styles.carousel}
             >
-              <Ionicons name="close" size={24} color="#666" />
-            </TouchableOpacity>
-
-            {/* Scrollable Content */}
-            <View style={styles.modalBody}>
-              {/* French Press Icon */}
-              <Image
-                source={require("../assets/nonclickable-visual-elements/coffee press unfilled.png")}
-                style={styles.frenchPressModalIcon}
-              />
-
-              {modalState === "initial" && (
-                <>
-                  <Text style={styles.modalTitle}>Turn on your Extracion</Text>
-                  <Text style={styles.modalSubtitle}>
-                    Connect for live temperature and weight data, or skip to
-                    continue without a device.
-                  </Text>
-                  <View style={styles.buttonContainer}>
-                    <TouchableOpacity
-                      style={styles.continueButton}
-                      onPress={handleContinue}
-                    >
-                      <Text style={styles.continueButtonText}>connect</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      style={styles.skipButton}
-                      onPress={() => {
-                        setShowBLEModal(false);
-                        setModalState("initial");
-
-                      }}
-                    >
-                      <Text style={styles.skipButtonText}>skip for now</Text>
-                    </TouchableOpacity>
-                  </View>
-                </>
-              )}
-
-              {modalState === "searching" && (
-                <>
-                  <Animated.View
-                    style={[
-                      styles.loadingSpinner,
-                      {
-                        transform: [
-                          {
-                            rotate: spinAnim.interpolate({
-                              inputRange: [0, 1],
-                              outputRange: ["0deg", "360deg"],
-                            }),
-                          },
-                        ],
-                      },
-                    ]}
-                  >
-                    <View style={styles.spinnerCircle} />
-                  </Animated.View>
-                  <Text style={styles.modalTitle}>Searching...</Text>
-                  <Text style={styles.modalSubtitle}>
-                    Make sure your machine is turned on.
-                  </Text>
-                  <TouchableOpacity
-                    style={styles.skipButton}
-                    onPress={() => {
-                      setShowBLEModal(false);
-                      setModalState("initial");
-                    }}
-                  >
-                    <Text style={styles.skipButtonText}>cancel search</Text>
-                  </TouchableOpacity>
-                </>
-              )}
-
-              {modalState === "deviceList" && (
-                <>
-                  <Text style={styles.modalTitle}>
-                    Let's connect to Extracion
-                  </Text>
-                  <Text style={styles.modalSubtitle}>
-                    Choose your Extracion to continue.
-                  </Text>
-
-                  <View style={styles.deviceListContainer}>
-                    {allDevices.length > 0 ? (
-                      allDevices.map((device, index) => (
-                        <TouchableOpacity
-                          key={device.id}
-                          style={styles.deviceItem}
-                          onPress={() => handleDeviceConnect(device)}
-                        >
-                          <View style={styles.wifiIcon}>
-                            <Ionicons name="wifi" size={20} color="#333" />
-                          </View>
-                          <Text style={styles.deviceName}>
-                            {device.name ||
-                              device.localName ||
-                              "STM32WB Device"}
-                          </Text>
-                          <Ionicons
-                            name="chevron-forward"
-                            size={20}
-                            color="#666"
-                          />
-                        </TouchableOpacity>
-                      ))
-                    ) : (
-                      <Text style={styles.noDevicesText}>
-                        No STM32WB devices found
-                      </Text>
-                    )}
-                  </View>
-
-                  <View style={styles.buttonContainer}>
-                    <TouchableOpacity
-                      style={styles.continueButton}
-                      onPress={handleContinue}
-                    >
-                      <Text style={styles.continueButtonText}>
-                        search again
-                      </Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      style={styles.skipButton}
-                      onPress={() => {
-                        setShowBLEModal(false);
-                        setModalState("initial");
-                      }}
-                    >
-                      <Text style={styles.skipButtonText}>
-                        continue without device
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                </>
-              )}
-
-              {modalState === "connecting" && (
-                <>
-                  <Animated.View
-                    style={[
-                      styles.loadingSpinner,
-                      {
-                        transform: [
-                          {
-                            rotate: spinAnim.interpolate({
-                              inputRange: [0, 1],
-                              outputRange: ["0deg", "360deg"],
-                            }),
-                          },
-                        ],
-                      },
-                    ]}
-                  >
-                    <View style={styles.spinnerCircle} />
-                  </Animated.View>
-                  <Text style={styles.modalTitle}>Connecting...</Text>
-                  <Text style={styles.modalSubtitle}>
-                    Just a moment more, please.
-                  </Text>
-                  <TouchableOpacity
-                    style={styles.cancelButton}
-                    onPress={() => setModalState("deviceList")}
-                  >
-                    <Text style={styles.cancelButtonText}>cancel</Text>
-                  </TouchableOpacity>
-                </>
-              )}
-
-              {modalState === "connected" && (
-                <>
-                  <Text style={styles.modalTitle}>
-                    Extracion is ready to use
-                  </Text>
-                  <Text style={styles.modalSubtitle}>
-                    Let's brew some magic!
-                  </Text>
-                  <TouchableOpacity
-                    style={styles.continueButton}
-                    onPress={() => {
-                      setShowBLEModal(false);
-                      setModalState("initial");
-                    }}
-                  >
-                    <Text style={styles.continueButtonText}>finish</Text>
-                  </TouchableOpacity>
-                </>
-              )}
-            </View>
+              {brewingMethods.map(renderBrewingMethodCard)}
+            </ScrollView>
           </View>
         </View>
-      </Modal>
-    </SafeAreaView>
+
+        {/* BLE Connection Modal */}
+        <Modal
+          visible={showBLEModal}
+          transparent={true}
+          animationType="slide"
+          onRequestClose={handleBLEModalClose}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              {/* Status Bar - Fixed position outside ScrollView */}
+              <View style={styles.statusBar} />
+
+              {/* Close Button - Fixed position outside ScrollView */}
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={() => {
+                  setShowBLEModal(false);
+                  setModalState("initial");
+                  setUserDismissedModal(true); // Mark that user dismissed the modal
+                }}
+              >
+                <Ionicons name="close" size={46} color="#666" />
+              </TouchableOpacity>
+
+              {/* Scrollable Content */}
+              <View style={styles.modalBody}>
+                {/* French Press Icon */}
+
+                {modalState === "initial" && (
+                  <>
+                    <View
+                      style={{
+                        width: "90%",
+                        height: 290,
+                        backgroundColor: "#58595B1A",
+                        borderRadius: 20,
+                        marginTop: 60,
+                      }}
+                    >
+                      <Image
+                        source={require("../assets/nonclickable-visual-elements/coffee press unfilled.png")}
+                        style={styles.frenchPressModalIcon}
+                      />
+                      <Text style={styles.modalTitle}>
+                        Turn on your Extracion
+                      </Text>
+                      <Text style={styles.modalSubtitle}>
+                        Continue when it's on.
+                      </Text>
+                    </View>
+
+                    <View style={styles.buttonContainer}>
+                      <TouchableOpacity
+                        style={styles.continueButton}
+                        onPress={handleContinue}
+                      >
+                        <Text style={styles.continueButtonText}>Continue</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </>
+                )}
+
+                {modalState === "searching" && (
+                  <>
+                    <View
+                      style={{
+                        width: "90%",
+                        height: "80%",
+                        backgroundColor: "#58595B1A",
+                        borderRadius: 20,
+                        marginTop: 60,
+                      }}
+                    >
+                      <Animated.View
+                        style={[
+                          styles.loadingSpinner,
+                          {
+                            transform: [
+                              {
+                                rotate: spinAnim.interpolate({
+                                  inputRange: [0, 1],
+                                  outputRange: ["0deg", "360deg"],
+                                }),
+                              },
+                            ],
+                          },
+                        ]}
+                      >
+                        <View style={styles.spinnerCircle} />
+                      </Animated.View>
+                      <Text style={styles.modalTitle}>Searching...</Text>
+                      <Text style={styles.modalSubtitle}>
+                        Make sure your machine is turned on.
+                      </Text>
+                    </View>
+                  </>
+                )}
+
+                {modalState === "deviceList" && (
+                  <>
+                    <Text style={styles.modalTitle}>
+                      Let's connect to Extracion
+                    </Text>
+                    <Text style={styles.modalSubtitle}>
+                      Choose your Extracion to continue.
+                    </Text>
+
+                    <View style={styles.deviceListContainer}>
+                      {allDevices.length > 0 ? (
+                        allDevices.map((device, index) => (
+                          <TouchableOpacity
+                            key={device.id}
+                            style={styles.deviceItem}
+                            onPress={() => handleDeviceConnect(device)}
+                          >
+                            <View style={styles.wifiIcon}>
+                              <Ionicons name="wifi" size={20} color="#333" />
+                            </View>
+                            <Text style={styles.deviceName}>
+                              {device.name ||
+                                device.localName ||
+                                "STM32WB Device"}
+                            </Text>
+                            <Ionicons
+                              name="chevron-forward"
+                              size={20}
+                              color="#666"
+                            />
+                          </TouchableOpacity>
+                        ))
+                      ) : (
+                        <Text style={styles.noDevicesText}>
+                          No STM32WB devices found
+                        </Text>
+                      )}
+                    </View>
+
+                    <View style={styles.buttonContainer}>
+                      <TouchableOpacity
+                        style={styles.continueButton}
+                        onPress={handleContinue}
+                      >
+                        <Text style={styles.continueButtonText}>
+                          search again
+                        </Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={styles.skipButton}
+                        onPress={() => {
+                          setShowBLEModal(false);
+                          setModalState("initial");
+                          setUserDismissedModal(true); // Mark that user dismissed the modal
+                        }}
+                      >
+                        <Text style={styles.skipButtonText}>
+                          continue without device
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  </>
+                )}
+
+                {modalState === "connecting" && (
+                  <>
+                    <Animated.View
+                      style={[
+                        styles.loadingSpinner,
+                        {
+                          transform: [
+                            {
+                              rotate: spinAnim.interpolate({
+                                inputRange: [0, 1],
+                                outputRange: ["0deg", "360deg"],
+                              }),
+                            },
+                          ],
+                        },
+                      ]}
+                    >
+                      <View style={styles.spinnerCircle} />
+                    </Animated.View>
+                    <Text style={styles.modalTitle}>Connecting...</Text>
+                    <Text style={styles.modalSubtitle}>
+                      Just a moment more, please.
+                    </Text>
+                    <TouchableOpacity
+                      style={styles.cancelButton}
+                      onPress={() => setModalState("deviceList")}
+                    >
+                      <Text style={styles.cancelButtonText}>cancel</Text>
+                    </TouchableOpacity>
+                  </>
+                )}
+
+                {modalState === "connected" && (
+                  <>
+                    <Text style={styles.modalTitle}>
+                      Extracion is ready to use
+                    </Text>
+                    <Text style={styles.modalSubtitle}>
+                      Let's brew some magic!
+                    </Text>
+                    <TouchableOpacity
+                      style={styles.continueButton}
+                      onPress={() => {
+                        setShowBLEModal(false);
+                        setModalState("initial");
+                      }}
+                    >
+                      <Text style={styles.continueButtonText}>finish</Text>
+                    </TouchableOpacity>
+                  </>
+                )}
+              </View>
+            </View>
+          </View>
+        </Modal>
+      </SafeAreaView>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    marginTop: "10%",
   },
+  background: { flex: 1, resizeMode: "cover" },
   header: {
     padding: 16,
   },
@@ -575,8 +594,6 @@ const styles = StyleSheet.create({
     color: "#333",
     marginBottom: 24,
   },
-
-
 
   // Connect Button Styles
   connectButton: {
@@ -693,19 +710,23 @@ const styles = StyleSheet.create({
 
   // Modal Styles
   modalOverlay: {
-    flex: 1,
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
     backgroundColor: "rgba(0, 0, 0, 0.5)",
     justifyContent: "flex-end",
     alignItems: "center",
     flexDirection: "column",
+    zIndex: 1000,
   },
   modalContent: {
     backgroundColor: "#FFFFFF",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     width: "100%",
-    maxHeight: "70%",
-    minHeight: "50%",
+    height: "65%",
     position: "relative",
   },
   modalBody: {
@@ -719,9 +740,9 @@ const styles = StyleSheet.create({
   closeButton: {
     position: "absolute",
     top: 15,
-    left: 20,
-    width: 30,
-    height: 30,
+    left: 15,
+    width: 40,
+    height: 40,
     justifyContent: "center",
     alignItems: "center",
     zIndex: 10,
@@ -738,19 +759,19 @@ const styles = StyleSheet.create({
     marginLeft: -20,
   },
   frenchPressModalIcon: {
-    width: 80,
-    height: 80,
-    marginBottom: 30,
-
+    width: 150,
+    height: 150,
+    marginVertical: 20,
+    alignSelf: "center",
     resizeMode: "contain",
     tintColor: "#666666",
   },
   modalTitle: {
     fontSize: 20,
-    fontWeight: "600",
+    fontFamily: "cardRegular",
     color: "#333333",
     textAlign: "center",
-    marginBottom: 8,
+    marginBottom: 18,
   },
   modalSubtitle: {
     fontSize: 14,
@@ -758,24 +779,33 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginBottom: 40,
     lineHeight: 18,
+    fontFamily: "cardRegular",
   },
   continueButton: {
     backgroundColor: "#8CDBED",
-    paddingVertical: 14,
-    paddingHorizontal: 50,
-    borderRadius: 25,
+    padding: 10,
+    borderRadius: 30,
     alignItems: "center",
-    minWidth: 200,
-    marginBottom: 12,
+    width: "100%", // Full width of the wrapper
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 3, // Reduced from 3 for better centering
+    },
+    shadowOpacity: 0.25, // Reduced for more subtle shadow
+    shadowRadius: 2, // Increased for softer shadow
+    elevation: 5, // Reduced elevation for Android
   },
   continueButtonText: {
-    fontSize: 16,
-    fontWeight: "500",
-    color: "#333333",
+    fontSize: 18,
+    fontFamily: "cardRegular",
+    color: "#58595B",
   },
   buttonContainer: {
-    width: "100%",
-    alignItems: "center",
+    width: "90%", // Match the button width
+    alignItems: "center", // Center the button
+    marginTop: 60,
+    marginBottom: 12,
   },
   skipButton: {
     backgroundColor: "transparent",
@@ -789,23 +819,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "500",
     color: "#666666",
-  },
-  buttonContainer: {
-    width: '100%',
-    alignItems: 'center',
-  },
-  skipButton: {
-    backgroundColor: 'transparent',
-    paddingVertical: 14,
-    paddingHorizontal: 50,
-    borderRadius: 25,
-    alignItems: 'center',
-    minWidth: 200,
-  },
-  skipButtonText: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#666666',
   },
   cancelButton: {
     backgroundColor: "#E5E5E5",
@@ -821,19 +834,21 @@ const styles = StyleSheet.create({
     color: "#333333",
   },
   loadingSpinner: {
-    width: 40,
-    height: 40,
+    width: 100,
+    height: 100,
     marginBottom: 20,
+    marginTop: 100,
     justifyContent: "center",
     alignItems: "center",
+    alignSelf: "center",
   },
   spinnerCircle: {
-    width: 30,
-    height: 30,
+    width: 100,
+    height: 100,
     borderWidth: 3,
-    borderColor: "#E5E5E5",
-    borderTopColor: "#8CDBED",
-    borderRadius: 15,
+    borderColor: "transparent",
+    borderTopColor: "#58595B",
+    borderRadius: 100,
   },
 
   // Device List Styles

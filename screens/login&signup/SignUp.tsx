@@ -11,11 +11,13 @@ import {
   Platform,
   ScrollView,
   ImageBackground,
+  Animated,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../../navigation/AppNavigator";
 import { Ionicons } from "@expo/vector-icons";
+import DropDownPicker from "react-native-dropdown-picker";
 
 type LoginScreenNavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -25,7 +27,36 @@ export default function SignUpScreen() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [name, setName] = useState("");
+  const [title, setTitle] = useState("");
+  const [open, setOpen] = useState(false);
+  const [items, setItems] = useState([
+    { label: "Miss", value: "Miss" },
+    { label: "Ms.", value: "Ms." },
+    { label: "Mr.", value: "Mr." },
+    { label: "Mrs.", value: "Mrs." },
+    { label: "Mx.", value: "Mx." },
+  ]);
   const [username, setUsername] = useState("");
+
+  // Animation value for smooth transitions
+  const animatedHeight = useState(new Animated.Value(0))[0];
+
+  // Handle dropdown open/close with animation
+  useEffect(() => {
+    if (open) {
+      Animated.timing(animatedHeight, {
+        toValue: 190, // Adjust this value based on your dropdown height
+        duration: 200,
+        useNativeDriver: false,
+      }).start();
+    } else {
+      Animated.timing(animatedHeight, {
+        toValue: 0,
+        duration: 200,
+        useNativeDriver: false,
+      }).start();
+    }
+  }, [open]);
 
   const handleLogin = () => {
     navigation.navigate("ConfirmEmail");
@@ -62,58 +93,116 @@ export default function SignUpScreen() {
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
         >
+          {/* Dropdown container with higher zIndex */}
+          <View style={styles.dropdownWrapper}>
+            <DropDownPicker
+              open={open}
+              value={title}
+              items={items}
+              setOpen={setOpen}
+              setValue={setTitle}
+              setItems={setItems}
+              placeholder="Title"
+              placeholderStyle={styles.input}
+              labelStyle={styles.input}
+              textStyle={styles.input}
+              style={styles.dropdown}
+              dropDownContainerStyle={styles.dropdownContainer}
+              arrowIconStyle={{
+                backgroundColor: "#8CDBED",
+                borderRadius: 10,
+              }}
+              listMode="SCROLLVIEW"
+            />
+
+            {/* Animated spacer that expands when dropdown is open */}
+            <Animated.View style={{ height: animatedHeight }} />
+          </View>
+
           <View style={styles.formContainer}>
-            <Text style={styles.label}> full name</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Jane Doe"
-              value={name}
-              onChangeText={setName}
-              keyboardType="default"
-              autoCapitalize="none"
-            />
-            <Text style={styles.label}> username</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="janedoecoffee"
-              value={username}
-              onChangeText={setUsername}
-              keyboardType="default"
-              autoCapitalize="none"
-            />
+            <View style={styles.inputWrapper}>
+              <TextInput
+                style={styles.input}
+                placeholder="First and Last Name"
+                placeholderTextColor={"#58595B"}
+                value={name}
+                onChangeText={setName}
+                keyboardType="default"
+                autoCapitalize="none"
+              />
+            </View>
 
-            <Text style={styles.label}> email</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Email"
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
-            />
-            <Text style={styles.label}> password</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Password"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-            />
-            <Text style={styles.label}> confirm password</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Password"
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-              secureTextEntry
-            />
+            <View style={styles.inputWrapper}>
+              <TextInput
+                style={styles.input}
+                placeholder="Username"
+                placeholderTextColor={"#58595B"}
+                value={username}
+                onChangeText={setUsername}
+                keyboardType="default"
+                autoCapitalize="none"
+              />
+            </View>
 
-            <TouchableOpacity style={styles.submitButton} onPress={handleLogin}>
-              <Text style={styles.submitButtonText}>Sign Up</Text>
-            </TouchableOpacity>
+            <View style={styles.inputWrapper}>
+              <TextInput
+                style={styles.input}
+                placeholder="email@domain.com"
+                placeholderTextColor={"#58595B"}
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
+              />
+            </View>
+
+            <View style={styles.inputWrapper}>
+              <TextInput
+                style={styles.input}
+                placeholder="Password"
+                placeholderTextColor={"#58595B"}
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+              />
+            </View>
+
+            <View style={styles.inputWrapper}>
+              <TextInput
+                style={styles.input}
+                placeholder="Confirm Password"
+                placeholderTextColor={"#58595B"}
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                secureTextEntry
+              />
+            </View>
+
+            <View style={styles.submitWrapper}>
+              <TouchableOpacity
+                style={styles.submitButton}
+                onPress={handleLogin}
+              >
+                <Text style={styles.submitButtonText}>Sign Up</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+      <View
+        style={{
+          width: "100%",
+          flexDirection: "column",
+          justifyContent: "flex-end",
+          padding: 70,
+          alignItems: "center",
+        }}
+      >
+        <Image
+          source={require("../../assets/nonclickable-visual-elements/extracion-logo.png")}
+          style={{ tintColor: "#58595B", resizeMode: "contain", height: 30 }}
+        />
+      </View>
     </ImageBackground>
   );
 }
@@ -136,34 +225,61 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#333",
   },
+  dropdownWrapper: {
+    zIndex: 1000,
+    elevation: 1000,
+    marginBottom: 0, // Remove margin since we're using animated spacer
+  },
   formContainer: {
     width: "100%",
     alignItems: "center",
   },
-  input: {
-    backgroundColor: "rgba(250, 250, 250, 0.75)",
-    padding: 10,
-    borderRadius: 30,
-    borderWidth: 1,
-    marginBottom: 30,
-    fontSize: 16,
+  inputWrapper: {
     width: "90%",
+    borderRadius: 30,
+    backgroundColor: "#CCCCCC",
+    marginBottom: 20,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 2,
+    elevation: 5,
+  },
+  input: {
+    padding: 10,
+    fontSize: 16,
+    borderRadius: 30,
+    fontFamily: "cardRegular",
+    color: "#58595B",
+  },
+  submitWrapper: {
+    width: "90%", // Match the button width
+    alignItems: "center", // Center the button
+
+    marginBottom: 12,
   },
   submitButton: {
-    backgroundColor: "rgba(140, 219, 237, 0.75)",
-    padding: 8,
+    backgroundColor: "#8CDBED",
+    padding: 10,
     borderRadius: 30,
-    borderWidth: 1,
     alignItems: "center",
-    width: "90%",
-    marginBottom: 12,
-    marginTop: 80,
+    width: "100%", // Full width of the wrapper
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 3, // Reduced from 3 for better centering
+    },
+    shadowOpacity: 0.25, // Reduced for more subtle shadow
+    shadowRadius: 2, // Increased for softer shadow
+    elevation: 5, // Reduced elevation for Android
   },
   submitButtonText: {
-    color: "#000000",
-    fontSize: 23,
-    fontWeight: "300",
-    letterSpacing: 1,
+    color: "#58595B",
+    fontSize: 18,
+    fontFamily: "cardRegular",
   },
   background: {
     flex: 1,
@@ -180,10 +296,8 @@ const styles = StyleSheet.create({
     marginRight: 12,
     padding: 8,
   },
-
   headerLogo: {
-    height: 35,
-
+    height: 30,
     marginTop: "1.5%",
     resizeMode: "contain",
     flex: 1,
@@ -212,29 +326,36 @@ const styles = StyleSheet.create({
     fontFamily: "cardRegular",
     flexDirection: "row",
   },
-  forgotPassword: {
-    fontSize: 16,
-    color: "#fff",
-    fontFamily: "cardRegular",
-    flexDirection: "row",
-  },
-  termsofServiceContainer: {
-    flex: 1,
-    flexDirection: "column",
-    justifyContent: "center",
-    marginTop: 20,
+  dropdown: {
+    width: "90%",
+    backgroundColor: "#CCCCCC",
+    borderRadius: 30,
+    borderWidth: 0,
     marginBottom: 20,
+    alignSelf: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 2,
+    elevation: 5,
   },
-  termsofService: {
-    fontSize: 14,
-    color: "#fff",
-    textAlign: "center",
-    fontFamily: "cardRegular",
-  },
-  termsofServiceBold: {
-    fontSize: 14,
-    color: "#fff",
-    textAlign: "center",
-    fontFamily: "cardMedium",
+  dropdownContainer: {
+    backgroundColor: "#f9f9f9",
+    borderRadius: 30,
+    borderWidth: 0,
+    width: "90%",
+    alignSelf: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 5,
+    elevation: 5,
+    overflow: "visible",
   },
 });

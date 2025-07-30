@@ -24,10 +24,10 @@ export default function Header({ tintColor = "#fff" }: CustomHeaderProps) {
         />
         <View style={styles.iconRow}>
           <TouchableOpacity style={styles.iconWrapper}>
-            <FontAwesome6 name="bell" size={24} color={tintColor} />
+            <FontAwesome6 name="bell" size={21} color={tintColor} />
           </TouchableOpacity>
           <TouchableOpacity style={styles.iconWrapper}>
-            <Entypo name="dots-three-horizontal" size={24} color={tintColor} />
+            <Entypo name="dots-three-horizontal" size={21} color={tintColor} />
           </TouchableOpacity>
         </View>
       </View>
@@ -47,8 +47,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   logo: {
-    width: 100,
-    height: 23,
+    width: 80,
+    height: 18,
+    resizeMode: "contain",
     // tintColor will be dynamically applied via inline style
   },
   iconRow: {
