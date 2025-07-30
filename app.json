@@ -7,9 +7,7 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "splash": {
       "image": "./assets/backgrounds/splash.png",
       "resizeMode": "contain"
@@ -55,19 +53,18 @@
         "react-native-ble-plx",
         {
           "isBackgroundEnabled": true,
-          "modes": [
-            "central"
-          ],
+          "modes": ["central"],
           "bluetoothAlwaysPermission": "Allow $(thePongLocalName) to connect to bluetooth devices."
         }
       ],
       "expo-web-browser",
       [
-        "expo-image-picker", {
+        "expo-image-picker",
+        {
           "photosPermission": "Allows selecting coffee images",
           "cameraPermission": "Allows taking coffee photos"
         }
-      ]
+      ],
       "expo-video"
     ],
     "extra": {

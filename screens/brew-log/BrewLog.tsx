@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useMemo,
+  useCallback,
+} from "react";
 import {
   StyleSheet,
   View,
@@ -216,7 +222,7 @@ export default function BrewLogScreen() {
   ];
 
   // Testing brew log's peristent store
-    // Fetches from permanent store every time the screen is shown (not mounted)
+  // Fetches from permanent store every time the screen is shown (not mounted)
   useFocusEffect(
     useCallback(() => {
       let isActive = true;
@@ -236,7 +242,9 @@ export default function BrewLogScreen() {
     }, [])
   );
 
-  const [allBrewLogEntriesTest, setAllBrewLogEntriesTest] = useState<brewLogEntry[]>([]);
+  const [allBrewLogEntriesTest, setAllBrewLogEntriesTest] = useState<
+    brewLogEntry[]
+  >([]);
 
   // Filtering Data
   const filteredData = useMemo(() => {
@@ -258,8 +266,9 @@ export default function BrewLogScreen() {
     id: Date.now(), // Temporary ID - will be replaced when saving
     date: new Date(),
     name: "New Brew Log",
-    brewMethod: "pour over",
-    image: "https://images.unsplash.com/photo-1447933601403-0c6688de566e?w=400&h=400&fit=crop",
+    brewMethod: "Pour Over",
+    image:
+      "https://images.unsplash.com/photo-1447933601403-0c6688de566e?w=400&h=400&fit=crop",
     coffeeBeanDetail: {
       coffeeName: "",
       origin: "",
@@ -329,9 +338,11 @@ export default function BrewLogScreen() {
       {/* Floating Action Button */}
       <TouchableOpacity
         style={styles.fab}
-        onPress={() => navigation.navigate('BrewLogEditScreen', { 
-          brewLogEntry: createNewBrewLogEntry()
-        })}
+        onPress={() =>
+          navigation.navigate("BrewLogEditScreen", {
+            brewLogEntry: createNewBrewLogEntry(),
+          })
+        }
         activeOpacity={0.8}
       >
         <Ionicons name="add" size={28} color="#FFFFFF" />
@@ -378,19 +389,19 @@ const styles = StyleSheet.create({
   separator: {
     height: 8, // Additional vertical spacing between rows
   },
-  
+
   // Floating Action Button
   fab: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 30,
     right: 20,
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: '#8CDBED',
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000000',
+    backgroundColor: "#8CDBED",
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
