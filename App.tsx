@@ -14,13 +14,11 @@ import { BLEProvider } from "./context/BLEContext";
 /* Import Apollo for shopify */
 import { ApolloProvider } from "@apollo/client";
 import shopifyClient from "./shopifyClient";
-import { ShopifyCheckoutSheetProvider } from '@shopify/checkout-sheet-kit';
 
 enableScreens();
 
 export default function App() {
   const [fontsLoaded] = useFonts({
-    main: require("./assets/fonts/main.otf"),
     second: require("./assets/fonts/second.ttf"),
     cardLight: require("./assets/fonts/card-light.ttf"),
     cardRegular: require("./assets/fonts/card-regular.ttf"),
@@ -46,14 +44,12 @@ export default function App() {
   if (!fontsLoaded) return null;
 
   return (
-    <ShopifyCheckoutSheetProvider>
-      <ApolloProvider client={shopifyClient}>
-        <BLEProvider>
-          <NavigationContainer>
-            <AppNavigator />
-          </NavigationContainer>
-        </BLEProvider>
-      </ApolloProvider>
-    </ShopifyCheckoutSheetProvider>
+    <ApolloProvider client={shopifyClient}>
+      <BLEProvider>
+        <NavigationContainer>
+          <AppNavigator />
+        </NavigationContainer>
+      </BLEProvider>
+    </ApolloProvider>
   );
 }

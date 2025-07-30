@@ -187,23 +187,23 @@ function MainTabs() {
         tabBarIcon: ({ focused, color, size }) => {
           let iconSource;
 
-          if (route.name === "home") {
+          if (route.name === "Home") {
             iconSource = focused
               ? require("../assets/icons/home.png")
               : require("../assets/icons/home.png");
-          } else if (route.name === "brew log") {
+          } else if (route.name === "Brew Log") {
             iconSource = focused
               ? require("../assets/icons/brew-log.png")
               : require("../assets/icons/brew-log.png");
-          } else if (route.name === "scan") {
+          } else if (route.name === "Scan") {
             iconSource = focused
               ? require("../assets/icons/scan.png")
               : require("../assets/icons/scan.png");
-          } else if (route.name === "extracion") {
+          } else if (route.name === "Extracion") {
             iconSource = focused
               ? require("../assets/icons/extracion-icon.png")
               : require("../assets/icons/extracion-icon.png");
-          } else if (route.name === "shop") {
+          } else if (route.name === "Shop") {
             iconSource = focused
               ? require("../assets/icons/shop.png")
               : require("../assets/icons/shop.png");
@@ -244,12 +244,12 @@ function MainTabs() {
         headerShown: false,
       })}
     >
-      <Tab.Screen name="home" component={HomeStackScreen} />
-      <Tab.Screen name="brew log" component={BrewLogScreen} />
-      <Tab.Screen name="scan" component={CameraScreen} />
-      <Tab.Screen name="extracion" component={ExtracionScreen} />
-      <Tab.Screen 
-        name="shop" 
+      <Tab.Screen name="Home" component={HomeStackScreen} />
+      <Tab.Screen name="Brew Log" component={BrewLogScreen} />
+      <Tab.Screen name="Scan" component={CameraScreen} />
+      <Tab.Screen name="Extracion" component={ExtracionScreen} />
+     <Tab.Screen 
+        name="Shop" 
         component={ShopScreen}
         listeners={{
           tabPress: (e) => {

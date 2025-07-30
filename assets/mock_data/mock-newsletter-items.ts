@@ -8,7 +8,7 @@ export const mockNewsletterItems: newsletterItem[] = [
     thumbnail: "https://picsum.photos/400/300?random=1",
     date: "2023-10-01",
     createdBy: "Coffee Co.",
-    category: "coffee recipe",
+    category: "Coffee Recipe",
 
     media_url: "https://example.com/videos/perfect-coffee.mp4",
   },
@@ -19,7 +19,7 @@ export const mockNewsletterItems: newsletterItem[] = [
     thumbnail: "https://picsum.photos/400/300?random=2",
     date: "2023-10-02",
     createdBy: "Latte Masters",
-    category: "coffee recipe",
+    category: "Coffee Recipe",
     media_url: "https://via.placeholder.com/300",
   },
   {
@@ -29,7 +29,7 @@ export const mockNewsletterItems: newsletterItem[] = [
     thumbnail: "https://picsum.photos/400/300?random=3",
     date: "2023-10-03",
     createdBy: "Coffee Co.",
-    category: "promotion",
+    category: "Promotion",
     media_url: "https://example.com/images/coffee-beans-sale.jpg",
   },
   {
@@ -39,7 +39,7 @@ export const mockNewsletterItems: newsletterItem[] = [
     thumbnail: "https://picsum.photos/400/300?random=4",
     date: "2023-10-04",
     createdBy: "Coffee Co.",
-    category: "KOL featuring",
+    category: "KOL Featuring",
     media_url: "https://example.com/videos/john-doe-coffee.mp4",
   },
   {
@@ -49,7 +49,7 @@ export const mockNewsletterItems: newsletterItem[] = [
     thumbnail: "https://picsum.photos/400/300?random=5",
     date: "2023-10-05",
     createdBy: "Coffee Co.",
-    category: "coffee recipe",
+    category: "Coffee Recipe",
     media_url: "https://via.placeholder.com/300",
   },
 ];
