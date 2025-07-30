@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -9,11 +9,12 @@ import {
   Image,
 } from "react-native";
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
+import { useNavigation, useRoute, RouteProp, useFocusEffect } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../navigation/AppNavigator";
 import { brewLogEntry } from "../../assets/types/BrewLog/brewLogEntry";
 import TastingWheel from "../../assets/components/brewLogComponents/TastingWheel";
+import { loadBrewLogs } from "../../brewLogStorage";
 
 type DetailScreenRouteProp = RouteProp<RootStackParamList, "BrewLogDetailScreen">;
 type DetailScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, "BrewLogDetailScreen">;
@@ -22,8 +23,37 @@ const BrewLogDetailScreen: React.FC = () => {
   const route = useRoute<DetailScreenRouteProp>();
   const navigation = useNavigation<DetailScreenNavigationProp>();
   
-  // Get brewLogEntry from route params - it's always required
-  const brewLogEntry = route.params?.brewLogEntry;
+  // Get initial brewLogEntry from route params
+  const initialBrewLogEntry = route.params?.brewLogEntry;
+  
+  // State to hold the current brew log entry (will be updated when screen comes into focus)
+  const [currentBrewLogEntry, setCurrentBrewLogEntry] = useState<brewLogEntry | undefined>(initialBrewLogEntry);
+
+  // Reload brew log data when screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      const reloadBrewLogData = async () => {
+        if (initialBrewLogEntry) {
+          try {
+            const allLogs = await loadBrewLogs();
+            const updatedEntry = allLogs.find(log => log.id === initialBrewLogEntry.id);
+            if (updatedEntry) {
+              setCurrentBrewLogEntry(updatedEntry);
+            } else {
+              // If entry not found, use the initial entry (might be a new unsaved entry)
+              setCurrentBrewLogEntry(initialBrewLogEntry);
+            }
+          } catch (error) {
+            console.error('Error reloading brew log data:', error);
+            // Fallback to initial data on error
+            setCurrentBrewLogEntry(initialBrewLogEntry);
+          }
+        }
+      };
+
+      reloadBrewLogData();
+    }, [initialBrewLogEntry])
+  );
 
   const formatDate = (date: Date) => {
     return date.toLocaleDateString("en-AU", {
@@ -49,13 +79,13 @@ const BrewLogDetailScreen: React.FC = () => {
   };
 
   const handleEdit = () => {
-    if (brewLogEntry) {
-      navigation.navigate('BrewLogEditScreen', { brewLogEntry });
+    if (currentBrewLogEntry) {
+      navigation.navigate('BrewLogEditScreen', { brewLogEntry: currentBrewLogEntry });
     }
   };
 
   // Early return if no brew log entry
-  if (!brewLogEntry) {
+  if (!currentBrewLogEntry) {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
@@ -95,86 +125,86 @@ const BrewLogDetailScreen: React.FC = () => {
         
         {/* Date */}
         <View style={styles.dateContainer}>
-          <Text style={styles.dateText}>{formatDate(brewLogEntry.date)}</Text>
+          <Text style={styles.dateText}>{formatDate(currentBrewLogEntry.date)}</Text>
         </View>
         
         {/* Drink Name */}
         <View style={styles.drinkNameContainer}>
-          <Text style={styles.drinkNameText}>{brewLogEntry.name}</Text>
+          <Text style={styles.drinkNameText}>{currentBrewLogEntry.name}</Text>
         </View>
         
         {/* Brew Log Image */}
         <View style={styles.imageContainer}>
           <Image
-            source={{ uri: brewLogEntry.image }}
+            source={{ uri: currentBrewLogEntry.image }}
             style={styles.brewImage}
           />
         </View>
         
         {/* Header Section */}
         <View style={styles.contentContainer}>
-          <Text style={styles.subtitle}>#{brewLogEntry.id}</Text>
+          <Text style={styles.subtitle}>#{currentBrewLogEntry.id}</Text>
         </View>
 
         {/* GENERAL SECTION - Coffee bean information */}
         <Text style={styles.sectionTitle}>general</Text>
         <View style={styles.infoRow}>
           <Text style={styles.label}>Coffee Name:</Text>
-          <Text style={styles.value}>{brewLogEntry.coffeeBeanDetail.coffeeName}</Text>
+          <Text style={styles.value}>{currentBrewLogEntry.coffeeBeanDetail.coffeeName}</Text>
         </View>
         <View style={styles.infoRow}>
           <Text style={styles.label}>Origin:</Text>
-          <Text style={styles.value}>{brewLogEntry.coffeeBeanDetail.origin}</Text>
+          <Text style={styles.value}>{currentBrewLogEntry.coffeeBeanDetail.origin}</Text>
         </View>
         <View style={styles.infoRow}>
           <Text style={styles.label}>Roaster Date:</Text>
-          <Text style={styles.value}>{brewLogEntry.coffeeBeanDetail.roasterDate}</Text>
+          <Text style={styles.value}>{currentBrewLogEntry.coffeeBeanDetail.roasterDate}</Text>
         </View>
         <View style={styles.infoRow}>
           <Text style={styles.label}>Roaster Level:</Text>
-          <Text style={styles.value}>{brewLogEntry.coffeeBeanDetail.roasterLevel}</Text>
+          <Text style={styles.value}>{currentBrewLogEntry.coffeeBeanDetail.roasterLevel}</Text>
         </View>
         <View style={styles.infoRow}>
           <Text style={styles.label}>Bag Weight:</Text>
-          <Text style={styles.value}>{brewLogEntry.coffeeBeanDetail.bagWeight}g</Text>
+          <Text style={styles.value}>{currentBrewLogEntry.coffeeBeanDetail.bagWeight}g</Text>
         </View>
 
         {/* BREW DATA SECTION - Brewing parameters */}
         <Text style={styles.sectionTitle}>brew data</Text>
         <View style={styles.infoRow}>
           <Text style={styles.label}>Grind Size:</Text>
-          <Text style={styles.value}>{brewLogEntry.brewDetail.grindSize}</Text>
+          <Text style={styles.value}>{currentBrewLogEntry.brewDetail.grindSize}</Text>
         </View>
         <View style={styles.infoRow}>
           <Text style={styles.label}>Coffee (Weight):</Text>
-          <Text style={styles.value}>{brewLogEntry.brewDetail.beanWeight}g</Text>
+          <Text style={styles.value}>{currentBrewLogEntry.brewDetail.beanWeight}g</Text>
         </View>
         <View style={styles.infoRow}>
           <Text style={styles.label}>Water (Weight):</Text>
-          <Text style={styles.value}>{brewLogEntry.brewDetail.waterAmount}ml</Text>
+          <Text style={styles.value}>{currentBrewLogEntry.brewDetail.waterAmount}ml</Text>
         </View>
         <View style={styles.infoRow}>
           <Text style={styles.label}>Ratio:</Text>
-          <Text style={styles.value}>1:{brewLogEntry.brewDetail.ratio}</Text>
+          <Text style={styles.value}>1:{currentBrewLogEntry.brewDetail.ratio}</Text>
         </View>
         <View style={styles.infoRow}>
           <Text style={styles.label}>Time:</Text>
-          <Text style={styles.value}>{formatBrewTime(brewLogEntry.brewDetail.brewTime)}</Text>
+          <Text style={styles.value}>{formatBrewTime(currentBrewLogEntry.brewDetail.brewTime)}</Text>
         </View>
         <View style={styles.infoRow}>
           <Text style={styles.label}>Temperature:</Text>
-          <Text style={styles.value}>{brewLogEntry.brewDetail.temperature}°C</Text>
+          <Text style={styles.value}>{currentBrewLogEntry.brewDetail.temperature}°C</Text>
         </View>
 
         {/* TASTING WHEEL SECTION - All taste profiles */}
         <Text style={styles.sectionTitle}>tasting wheel</Text>
-        <TastingWheel tasteRating={brewLogEntry.tasteRating} />
+        <TastingWheel tasteRating={currentBrewLogEntry.tasteRating} />
 
         {/* OVERALL RATING SECTION - Final rating */}
         <Text style={styles.sectionTitle}>overall rating</Text>
         <View style={styles.infoRow}>
           <Text style={styles.label}>Rating:</Text>
-          <Text style={styles.value}>{brewLogEntry.rating}/5</Text>
+          <Text style={styles.value}>{currentBrewLogEntry.rating}/5</Text>
         </View>
         
       </ScrollView>
@@ -218,6 +248,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "white",
     marginLeft: 8, // Add some space after the back button
+    fontFamily: 'cardRegular',
   },
   editButton: {
     paddingVertical: 6, // Reduced padding to match back button
@@ -232,6 +263,7 @@ const styles = StyleSheet.create({
     fontSize: 17, // Match iOS standard button text size
     color: "#8CDBED", // App's accent color instead of iOS blue
     fontWeight: "400", // Slightly lighter weight for iOS style
+    fontFamily: 'cardRegular',
   },
   scrollView: {
     flex: 1,
@@ -246,6 +278,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#8CDBED",
     fontWeight: "400",
+    fontFamily: 'cardRegular',
   },
   drinkNameContainer: {
     alignItems: "center",
@@ -255,6 +288,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: "white",
     fontWeight: "600",
+    fontFamily: 'cardRegular',
   },
   imageContainer: {
     alignItems: "center",
@@ -274,6 +308,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#666",
     fontWeight: "400",
+    fontFamily: 'cardRegular',
   },
   sectionTitle: {
     fontSize: 24,
@@ -283,6 +318,7 @@ const styles = StyleSheet.create({
     marginTop: 24,
     letterSpacing: 1.2,
     textAlign: "left",
+    fontFamily: 'cardRegular',
   },
   infoRow: {
     flexDirection: "row",
@@ -298,6 +334,7 @@ const styles = StyleSheet.create({
     color: "white",
     fontWeight: "500",
     flex: 1,
+    fontFamily: 'cardRegular',
   },
   value: {
     fontSize: 16,
@@ -305,6 +342,7 @@ const styles = StyleSheet.create({
     fontWeight: "400",
     flex: 1,
     textAlign: "right",
+    fontFamily: 'cardRegular',
   },
 });
 

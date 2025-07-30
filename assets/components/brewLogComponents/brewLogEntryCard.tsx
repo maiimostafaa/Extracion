@@ -1,6 +1,5 @@
 import React from "react";
 import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
-import { Ionicons } from '@expo/vector-icons';
 import { brewLogEntry } from "../../types/BrewLog/brewLogEntry"
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -48,14 +47,13 @@ const BrewLogEntryCard: React.FC<brewLogEntryCardProps> = ({ brewLogEntry }) => 
             
             <View style={styles.contentContainer}>
                 <View style={styles.textSection}>
-                    <Text style={styles.nameText} numberOfLines={2}>
+                    <Text style={styles.nameText} numberOfLines={1}>
                         {brewLogEntry.name}
                     </Text>
                     <Text style={styles.brewMethodText} numberOfLines={1}>
                         {brewLogEntry.brewMethod}
                     </Text>
                     
-                    {/* Star rating */}
                     <View style={styles.ratingContainer}>
                         <StarRating 
                             rating={brewLogEntry.rating} 
@@ -63,24 +61,27 @@ const BrewLogEntryCard: React.FC<brewLogEntryCardProps> = ({ brewLogEntry }) => 
                             color="#FFD700"
                             outlineColor="#E0E0E0"
                         />
+                        <Text style={styles.ratingText}>{brewLogEntry.rating}</Text>
                     </View>
-                </View>
-                
-                <View style={styles.bottomRow}>
+                    
                     <Text style={styles.dateText}>
                         {formatDate(new Date(brewLogEntry.date))}
                     </Text>
-                    
-                    <View style={styles.editButtonWrapper}>
-                        <TouchableOpacity 
-                            style={styles.iconButton}
-                            onPress={handleEditPress}
-                            activeOpacity={0.7}
-                        >
-                            <Ionicons name="pencil" size={16} color="#666" />
-                        </TouchableOpacity>
-                    </View>
                 </View>
+            </View>
+            
+            <View style={styles.editButtonWrapper}>
+                <TouchableOpacity 
+                    style={styles.iconButton}
+                    onPress={handleEditPress}
+                    activeOpacity={0.7}
+                >
+                    <Image 
+                        source={require('./icons/editIcon.png')} 
+                        style={styles.editIcon}
+                        resizeMode="contain"
+                    />
+                </TouchableOpacity>
             </View>
         </TouchableOpacity>
     );
@@ -88,10 +89,9 @@ const BrewLogEntryCard: React.FC<brewLogEntryCardProps> = ({ brewLogEntry }) => 
 
 const styles = StyleSheet.create({
     container: {
-        width: '100%',
-        aspectRatio: 190/300,
+        flex: 1, // Allow flex growth
+        aspectRatio: 190/300, // Maintain Figma proportions
         borderRadius: 10,
-        padding: 15,
         backgroundColor: '#ffffff',
         shadowColor: '#000',
         shadowOffset: {
@@ -100,78 +100,108 @@ const styles = StyleSheet.create({
         },
         shadowOpacity: 0.1,
         shadowRadius: 3.84,
-        elevation: 5, // Android shadow
-        overflow: 'hidden', // Prevent content from spilling out
+        elevation: 5,
+        overflow: 'hidden',
+        position: 'relative',
+        // Removed margin as grid handles spacing
     },
     image: {
-        width: '100%',
-        height: '55%', // Use percentage of container height instead of aspect ratio
-        borderRadius: 8,
-        maxWidth: 160,
-        alignSelf: 'center',
+        width: '84.21%', // Responsive width based on container
+        aspectRatio: 1, // Maintain square aspect ratio
+        top: '4.67%', // Percentage positioning
+        left: '7.89%', // Percentage positioning
+        borderRadius: 10,
+        position: 'absolute',
+        overflow: 'hidden',
     },
     contentContainer: {
-        height: '40%', // Fixed height for content area
-        marginTop: 8,
-        justifyContent: 'space-between',
+        height: '35%', // Percentage height for text content area
+        width: '75%', // Increased width to give more space for text
+        top: '61.33%', // Position below image using percentage
+        left: '7.89%', // Same left margin as image
+        position: 'absolute',
     },
     textSection: {
-        flex: 1,
-        minHeight: 0, // Allow text section to shrink if needed
+        height: '100%',
+        position: 'relative',
     },
     nameText: {
+        width: '100%', // Use full width of content container instead of fixed 77px
         fontSize: 16,
-        fontWeight: 'bold',
-        color: '#333',
-        lineHeight: 18,
-        marginBottom: 2,
+        letterSpacing: 0.3,
+        color: '#078cc9', // Blue color like Figma
+        lineHeight: 22,
+        fontFamily: 'cardRegular',
+        textAlign: 'left',
+        position: 'absolute',
+        top: '0%', // Percentage positioning
+        left: '0%',
     },
     brewMethodText: {
+        width: '100%', // Use full width of content container instead of fixed 55px
         fontSize: 12,
-        color: '#666',
-        lineHeight: 14,
-        marginBottom: 4,
+        color: '#58595b', // Gray color like Figma
+        lineHeight: 22,
+        fontFamily: 'cardRegular',
+        textAlign: 'left',
+        position: 'absolute',
+        top: '21.9%', // Percentage positioning
+        left: '0%',
     },
     ratingContainer: {
-        marginBottom: 4,
+        position: 'absolute',
+        top: 46, // Fixed positioning
+        left: 0,
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    ratingText: {
+        fontSize: 12,
+        lineHeight: 22,
+        fontFamily: 'cardRegular',
+        color: '#58595b',
+        textAlign: 'left',
+        marginLeft: 8, // Spacing between stars and number
     },
     bottomRow: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'flex-end',
-        height: 20, // Fixed height for bottom row
-        flexShrink: 0, // Don't let this shrink
     },
     dateText: {
+        width: '100%', // Use full width of content container instead of fixed 78px
         fontSize: 12,
-        color: '#888',
-        fontWeight: '500',
+        color: '#58595b', // Match Figma gray
+        lineHeight: 22,
+        fontFamily: 'cardRegular',
+        textAlign: 'left',
+        position: 'absolute',
+        top: '79.05%', // Percentage positioning
+        left: '0%',
     },
     editButtonWrapper: {
-        // Prevent touch events from bubbling to parent
+        position: 'absolute',
+        height: '12%', // Increased percentage height
+        width: '18%', // Increased percentage width
+        top: '83%', // Adjusted positioning slightly higher
+        right: '7.89%', // Match Figma positioning
         zIndex: 1,
     },
     iconButton: {
+        width: '100%',
+        height: '100%',
         justifyContent: 'center',
         alignItems: 'center',
-        width: 32,
-        height: 32,
-        borderRadius: 16,
-        backgroundColor: '#f8f8f8',
-        borderWidth: 1,
-        borderColor: '#e0e0e0',
-        // Increase touch area for better UX
-        minWidth: 36,
-        minHeight: 36,
-        // Add subtle shadow for better visibility
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 1,
-        },
-        shadowOpacity: 0.1,
-        shadowRadius: 2,
-        elevation: 2,
+        // Removed border, background, and shadow styling
+    },
+    editIcon: {
+        width: 20,
+        height: 20,
+        tintColor: '#8CDBED', // Light blue accent color
     },
     iconText: {
         fontSize: 18,

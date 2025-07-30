@@ -360,16 +360,17 @@ const styles = StyleSheet.create({
 
   // FlatList Grid Styles
   flatListContent: {
-    paddingHorizontal: 8, // Reduced padding since cards have their own spacing
-    paddingTop: 8,
+    paddingHorizontal: 18, // 18px from left and right sides
+    paddingTop: 24, // Small gap between filter buttons and cards, matching Figma
     paddingBottom: 20,
   },
   row: {
     justifyContent: "space-between", // Distributes cards evenly across the row
-    paddingHorizontal: 8,
+    gap: 25, // 25px gap between columns
   },
   cardWrapper: {
-    flex: 0.48, // Each card takes ~48% of row width (with gap between)
+    flex: 1, // Each card takes equal width
+    maxWidth: (width - 36 - 25) / 2, // Calculate card width: (screen width - left/right padding - gap) / 2
     marginBottom: 16, // Vertical spacing between rows
   },
   separator: {

@@ -10,14 +10,17 @@ import {
   TextInput,
   Modal,
   Platform,
+  Alert,
 } from "react-native";
 import DateTimePicker from '@react-native-community/datetimepicker';
+import * as ImagePicker from 'expo-image-picker';
+import * as FileSystem from 'expo-file-system';
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../navigation/AppNavigator";
 import { brewLogEntry } from "../../assets/types/BrewLog/brewLogEntry";
 import TastingWheel from "../../assets/components/brewLogComponents/TastingWheel";
-import { addBrewLog, loadBrewLogs, saveBrewLogs } from "../../brewLogStorage";
+import { addBrewLog, loadBrewLogs, saveBrewLogs, deleteBrewLog, storeImagePermanently } from "../../brewLogStorage";
 
 type EditScreenRouteProp = RouteProp<RootStackParamList, "BrewLogEditScreen">;
 type EditScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, "BrewLogEditScreen">;
@@ -36,6 +39,7 @@ const BrewLogEditScreen: React.FC = () => {
   const [editableData, setEditableData] = useState({
     name: brewLogEntry.name,
     date: brewLogEntry.date,
+    image: brewLogEntry.image, // Add image to editable data
     coffeeName: brewLogEntry.coffeeBeanDetail.coffeeName,
     origin: brewLogEntry.coffeeBeanDetail.origin,
     roasterDate: brewLogEntry.coffeeBeanDetail.roasterDate,
@@ -72,6 +76,7 @@ const BrewLogEditScreen: React.FC = () => {
         ...brewLogEntry,
         name: editableData.name,
         date: editableData.date,
+        image: editableData.image, // Include updated image
         coffeeBeanDetail: {
           ...brewLogEntry.coffeeBeanDetail,
           coffeeName: editableData.coffeeName,
@@ -89,6 +94,7 @@ const BrewLogEditScreen: React.FC = () => {
           brewTime: parseInt(editableData.brewTime) || 0,
           temperature: parseInt(editableData.temperature) || 0,
         },
+        tasteRating: tasteRating, // Include updated taste ratings
         rating: parseFloat(editableData.rating) || 0,
       };
 
@@ -113,6 +119,39 @@ const BrewLogEditScreen: React.FC = () => {
       console.error('Error saving brew log:', error);
       // TODO: Show error alert to user
     }
+  };
+
+  const handleDelete = async () => {
+    Alert.alert(
+      'Delete Brew Log',
+      'Are you sure you want to delete this brew log? This action cannot be undone.',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              // Delete the entry first
+              await deleteBrewLog(brewLogEntry.id);
+              
+              // Navigate back to the main BrewLog screen properly
+              // Reset navigation stack to ensure we go back to the main list, not a modal
+              navigation.reset({
+                index: 0,
+                routes: [{ name: 'BrewLogScreen' }],
+              });
+            } catch (error) {
+              console.error('Error deleting brew log:', error);
+              Alert.alert('Error', 'Failed to delete brew log');
+            }
+          },
+        },
+      ]
+    );
   };
 
   const updateField = (field: string, value: string) => {
@@ -155,6 +194,92 @@ const BrewLogEditScreen: React.FC = () => {
     }));
   };
 
+  // Camera and Image picker functions
+  const requestPermissions = async () => {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert(
+        'Permission needed',
+        'Camera permission is required to take photos.',
+        [{ text: 'OK' }]
+      );
+      return false;
+    }
+    return true;
+  };
+
+  const showImagePickerOptions = () => {
+    Alert.alert(
+      'Select Photo',
+      'Choose how you want to add a photo',
+      [
+        {
+          text: 'Camera',
+          onPress: openCamera,
+        },
+        {
+          text: 'Photo Library',
+          onPress: openImageLibrary,
+        },
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+      ]
+    );
+  };
+
+  const openCamera = async () => {
+    const hasPermission = await requestPermissions();
+    if (!hasPermission) return;
+
+    try {
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1], // Square aspect ratio
+        quality: 0.8,
+      });
+
+      if (!result.canceled && result.assets[0]) {
+        // Store image using the enhanced storage function
+        const permanentUri = await storeImagePermanently(result.assets[0].uri, brewLogEntry.id);
+        
+        setEditableData(prev => ({
+          ...prev,
+          image: permanentUri
+        }));
+      }
+    } catch (error) {
+      console.error('Error opening camera:', error);
+      Alert.alert('Error', 'Failed to open camera');
+    }
+  };
+
+  const openImageLibrary = async () => {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1], // Square aspect ratio
+        quality: 0.8,
+      });
+
+      if (!result.canceled && result.assets[0]) {
+        // Store image using the enhanced storage function
+        const permanentUri = await storeImagePermanently(result.assets[0].uri, brewLogEntry.id);
+        
+        setEditableData(prev => ({
+          ...prev,
+          image: permanentUri
+        }));
+      }
+    } catch (error) {
+      console.error('Error opening image library:', error);
+      Alert.alert('Error', 'Failed to open photo library');
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       
@@ -195,10 +320,15 @@ const BrewLogEditScreen: React.FC = () => {
         
         {/* Brew Log Image */}
         <View style={styles.imageContainer}>
-          <Image
-            source={{ uri: brewLogEntry.image }}
-            style={styles.brewImage}
-          />
+          <TouchableOpacity onPress={showImagePickerOptions} activeOpacity={0.8}>
+            <Image
+              source={{ uri: editableData.image }}
+              style={styles.brewImage}
+            />
+            <View style={styles.imageOverlay}>
+              <Text style={styles.imageOverlayText}>Tap to change photo</Text>
+            </View>
+          </TouchableOpacity>
         </View>
         
         {/* Header Section */}
@@ -349,6 +479,17 @@ const BrewLogEditScreen: React.FC = () => {
             keyboardType="numeric"
           />
         </View>
+
+        {/* DELETE BUTTON SECTION */}
+        <View style={styles.deleteButtonContainer}>
+          <TouchableOpacity 
+            style={styles.deleteButton} 
+            onPress={handleDelete}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.deleteButtonText}>Delete Brew Log</Text>
+          </TouchableOpacity>
+        </View>
         
       </ScrollView>
 
@@ -418,11 +559,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#FF3B30",
     fontWeight: "400",
+    fontFamily: 'cardRegular',
   },
   modalTitle: {
     fontSize: 18,
     fontWeight: "600",
     color: "white",
+    fontFamily: 'cardRegular',
   },
   saveButton: {
     paddingVertical: 8,
@@ -432,6 +575,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#8CDBED", // App's accent color instead of iOS blue
     fontWeight: "600",
+    fontFamily: 'cardRegular',
   },
   scrollView: {
     flex: 1,
@@ -450,6 +594,7 @@ const styles = StyleSheet.create({
     color: "#8CDBED",
     fontWeight: "400",
     textAlign: "center",
+    fontFamily: 'cardRegular',
   },
   editableDrinkNameText: {
     fontSize: 20,
@@ -457,6 +602,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     textAlign: "center",
     minWidth: 200,
+    fontFamily: 'cardRegular',
   },
   imageContainer: {
     alignItems: "center",
@@ -467,6 +613,23 @@ const styles = StyleSheet.create({
     height: 150,
     borderRadius: 10,
   },
+  imageOverlay: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    borderBottomLeftRadius: 10,
+    borderBottomRightRadius: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 4,
+  },
+  imageOverlayText: {
+    color: 'white',
+    fontSize: 12,
+    textAlign: 'center',
+    fontFamily: 'cardRegular',
+  },
   contentContainer: {
     alignItems: "center",
     marginBottom: 16,
@@ -476,6 +639,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#666",
     fontWeight: "400",
+    fontFamily: 'cardRegular',
   },
   sectionTitle: {
     fontSize: 24,
@@ -485,6 +649,7 @@ const styles = StyleSheet.create({
     marginTop: 24,
     letterSpacing: 1.2,
     textAlign: "left",
+    fontFamily: 'cardRegular',
   },
   infoRow: {
     flexDirection: "row",
@@ -500,6 +665,7 @@ const styles = StyleSheet.create({
     color: "white",
     fontWeight: "500",
     flex: 1,
+    fontFamily: 'cardRegular',
   },
   editableValue: {
     fontSize: 16,
@@ -508,6 +674,7 @@ const styles = StyleSheet.create({
     flex: 1,
     textAlign: "right",
     paddingHorizontal: 4,
+    fontFamily: 'cardRegular',
   },
   tasteGrid: {
     flexDirection: "row",
@@ -525,11 +692,13 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#666",
     fontWeight: "400",
+    fontFamily: 'cardRegular',
   },
   tasteValue: {
     fontSize: 14,
     color: "#333",
     fontWeight: "500",
+    fontFamily: 'cardRegular',
   },
   modalOverlay: {
     flex: 1,
@@ -556,11 +725,33 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#8CDBED", // App's accent color instead of iOS blue
     fontWeight: "600",
+    fontFamily: 'cardRegular',
   },
   datePicker: {
     backgroundColor: "white",
     width: "100%",
     alignSelf: "center",
+  },
+  deleteButtonContainer: {
+    marginTop: 40,
+    marginBottom: 30,
+    alignItems: "center",
+  },
+  deleteButton: {
+    backgroundColor: "transparent",
+    borderWidth: 2,
+    borderColor: "#FF3B30",
+    borderRadius: 25,
+    paddingVertical: 12,
+    paddingHorizontal: 30,
+    minWidth: 200,
+    alignItems: "center",
+  },
+  deleteButtonText: {
+    color: "#FF3B30",
+    fontSize: 16,
+    fontWeight: "600",
+    fontFamily: 'cardRegular',
   },
 });
 
