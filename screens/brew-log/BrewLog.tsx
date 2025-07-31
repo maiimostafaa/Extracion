@@ -258,7 +258,7 @@ export default function BrewLogScreen() {
     id: Date.now(), // Temporary ID - will be replaced when saving
     date: new Date(),
     name: "New Brew Log",
-    brewMethod: "pour over",
+    brewMethod: "Pour Over",
     image: "https://images.unsplash.com/photo-1447933601403-0c6688de566e?w=400&h=400&fit=crop",
     coffeeBeanDetail: {
       coffeeName: "",

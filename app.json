@@ -67,7 +67,7 @@
           "photosPermission": "Allows selecting coffee images",
           "cameraPermission": "Allows taking coffee photos"
         }
-      ]
+      ],
       "expo-video"
     ],
     "extra": {
