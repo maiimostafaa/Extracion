@@ -43,17 +43,16 @@ export default function LoginScreen() {
         behavior={Platform.OS === "ios" ? "padding" : undefined}
         keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}
       >
-        <View style={styles.header}>
-          <Image
-            source={require("../../assets/nonclickable-visual-elements/getthepong-logo.png")}
-            style={styles.headerLogo}
-          />
-        </View>
-
         <ScrollView
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
         >
+          <View style={styles.header}>
+            <Image
+              source={require("../../assets/nonclickable-visual-elements/getthepong-logo.png")}
+              style={styles.headerLogo}
+            />
+          </View>
           <View style={styles.formContainer}>
             <Text
               style={{
@@ -135,22 +134,26 @@ export default function LoginScreen() {
               </Text>
             </View>
           </View>
+          <View
+            style={{
+              width: "100%",
+              flexDirection: "column",
+              justifyContent: "flex-end",
+              padding: 70,
+              alignItems: "center",
+            }}
+          >
+            <Image
+              source={require("../../assets/nonclickable-visual-elements/extracion-logo.png")}
+              style={{
+                tintColor: "#58595B",
+                resizeMode: "contain",
+                height: 30,
+              }}
+            />
+          </View>
         </ScrollView>
       </KeyboardAvoidingView>
-      <View
-        style={{
-          width: "100%",
-          flexDirection: "column",
-          justifyContent: "flex-end",
-          padding: 70,
-          alignItems: "center",
-        }}
-      >
-        <Image
-          source={require("../../assets/nonclickable-visual-elements/extracion-logo.png")}
-          style={{ tintColor: "#58595B", resizeMode: "contain", height: 30 }}
-        />
-      </View>
     </ImageBackground>
   );
 }
@@ -222,7 +225,6 @@ const styles = StyleSheet.create({
   submitButtonText: {
     color: "#58595B",
     fontSize: 18,
-
     fontFamily: "cardRegular",
   },
   background: {

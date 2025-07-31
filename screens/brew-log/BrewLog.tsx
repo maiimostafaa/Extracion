@@ -345,7 +345,7 @@ export default function BrewLogScreen() {
         }
         activeOpacity={0.8}
       >
-        <Ionicons name="add" size={28} color="#FFFFFF" />
+        <Ionicons name="add" size={50} color="#FFFFFF" />
       </TouchableOpacity>
     </SafeAreaView>
   );
@@ -397,7 +397,7 @@ const styles = StyleSheet.create({
     right: 20,
     width: 56,
     height: 56,
-    borderRadius: 28,
+    borderRadius: 10,
     backgroundColor: "#8CDBED",
     justifyContent: "center",
     alignItems: "center",
