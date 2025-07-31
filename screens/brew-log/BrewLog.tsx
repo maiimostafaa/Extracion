@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useMemo,
+  useCallback,
+} from "react";
 import {
   StyleSheet,
   View,
@@ -216,7 +222,7 @@ export default function BrewLogScreen() {
   ];
 
   // Testing brew log's peristent store
-    // Fetches from permanent store every time the screen is shown (not mounted)
+  // Fetches from permanent store every time the screen is shown (not mounted)
   useFocusEffect(
     useCallback(() => {
       let isActive = true;
@@ -236,12 +242,14 @@ export default function BrewLogScreen() {
     }, [])
   );
 
-  const [allBrewLogEntriesTest, setAllBrewLogEntriesTest] = useState<brewLogEntry[]>([]);
+  const [allBrewLogEntriesTest, setAllBrewLogEntriesTest] = useState<
+    brewLogEntry[]
+  >([]);
 
   // Filtering Data
   const filteredData = useMemo(() => {
     if (selectedFilter === "All") {
-      return allBrewLogEntries;
+      return allBrewLogEntriesTest; // Use data from permanent storage, not mock data
     }
 
     return allBrewLogEntriesTest.filter(
@@ -329,12 +337,14 @@ export default function BrewLogScreen() {
       {/* Floating Action Button */}
       <TouchableOpacity
         style={styles.fab}
-        onPress={() => navigation.navigate('BrewLogEditScreen', { 
-          brewLogEntry: createNewBrewLogEntry()
-        })}
+        onPress={() =>
+          navigation.navigate("BrewLogEditScreen", {
+            brewLogEntry: createNewBrewLogEntry(),
+          })
+        }
         activeOpacity={0.8}
       >
-        <Ionicons name="add" size={28} color="#FFFFFF" />
+        <Ionicons name="add" size={50} color="#FFFFFF" />
       </TouchableOpacity>
     </SafeAreaView>
   );
@@ -378,19 +388,19 @@ const styles = StyleSheet.create({
   separator: {
     height: 8, // Additional vertical spacing between rows
   },
-  
+
   // Floating Action Button
   fab: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 30,
     right: 20,
     width: 56,
     height: 56,
-    borderRadius: 28,
-    backgroundColor: '#8CDBED',
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000000',
+    borderRadius: 10,
+    backgroundColor: "#8CDBED",
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,

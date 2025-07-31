@@ -7,9 +7,7 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "splash": {
       "image": "./assets/backgrounds/splash.png",
       "resizeMode": "contain"
@@ -20,7 +18,9 @@
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSLocationWhenInUseUsageDescription": "This app uses location to find nearby coffee shops and cafes.",
-        "NSLocationAlwaysAndWhenInUseUsageDescription": "This app uses location to find nearby coffee shops and provide location-based coffee recommendations."
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "This app uses location to find nearby coffee shops and provide location-based coffee recommendations.",
+        "NSCameraUsageDescription": "This app uses the camera to take photos of your coffee and brewing process.",
+        "NSPhotoLibraryUsageDescription": "This app uses photo library to select images for your brew logs and coffee photos."
       }
     },
     "android": {
@@ -55,15 +55,14 @@
         "react-native-ble-plx",
         {
           "isBackgroundEnabled": true,
-          "modes": [
-            "central"
-          ],
+          "modes": ["central"],
           "bluetoothAlwaysPermission": "Allow $(thePongLocalName) to connect to bluetooth devices."
         }
       ],
       "expo-web-browser",
       [
-        "expo-image-picker", {
+        "expo-image-picker",
+        {
           "photosPermission": "Allows selecting coffee images",
           "cameraPermission": "Allows taking coffee photos"
         }
