@@ -479,7 +479,7 @@ export default function ExtractionScreen() {
                     <View
                       style={{
                         width: "90%",
-                        height: 420,
+                        height: "100%",
                         backgroundColor: "#58595B1A",
                         borderRadius: 20,
                         marginTop: "-40%",
@@ -920,7 +920,7 @@ const styles = StyleSheet.create({
   buttonContainer: {
     width: "90%", // Match the button width
     alignItems: "center", // Center the button
-    marginTop: 60,
+    marginTop: "10%",
     marginBottom: 12,
   },
   skipButton: {
