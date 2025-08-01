@@ -214,11 +214,11 @@ function useBLE() {
           return;
         }
 
-        // Filter for STM32WB devices only and devices with names
+        // Filter for STM32WB devices and thePong devices with names
         if (device && (device.name || device.localName)) {
           const deviceName = device.name || device.localName || '';
-          if (deviceName.includes('STM32WB')) {
-            console.log('Found STM32WB device:', deviceName, device.id);
+          if (deviceName.includes('STM32WB') || deviceName.includes('thePongLocalName')) {
+            console.log('Found thePong device:', deviceName, device.id);
             setAllDevices((prevState: Device[]) => {
               if (!isDuplicateDevice(prevState, device)) {
                 return [...prevState, device];
