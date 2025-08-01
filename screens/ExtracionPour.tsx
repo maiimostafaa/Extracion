@@ -124,7 +124,7 @@ export default function ExtracionPour() {
           <DynamicThermometer temp={Number(temperature.toFixed(0))} />
         </View>
         <View style={{ alignItems: "center", width: "100%" }}>
-          {/* <Image
+          <Image
             source={require("../assets/nonclickable-visual-elements/fill-container.png")}
             style={{
               width: 206,
@@ -147,8 +147,8 @@ export default function ExtracionPour() {
               {zeroedOut.toFixed(0)}
             </Text>
             <Text style={{ fontSize: 20 }}>{pourAmount}ml</Text>
-          </View> */}
-          <WaterContainer numerator={5} denominator={6} />
+          </View>
+          {/* <WaterContainer numerator={5} denominator={6} /> */}
         </View>
 
         {/* Uncomment if you want to use the timer */}
