@@ -396,6 +396,7 @@ export default function ExtractionScreen() {
       style={styles.background}
       source={require("../assets/backgrounds/bg-extracion.png")}
     >
+      <ScrollView style={styles.container}>
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
           <Header tintColor="#58595B" />
@@ -405,6 +406,56 @@ export default function ExtractionScreen() {
           <View style={styles.methodsContainer}>
             <ExtracionCoffeeToWaterInstructionBanner text="Choose your brewing method" />
 
+            {/* BLE Connection Button - Show when no device connected */}
+            {!connectedDevice && (
+              <TouchableOpacity
+                style={styles.connectButton}
+                onPress={() => {
+                  setShowBLEModal(true);
+                  setModalState("initial");
+                }}
+              >
+                <Ionicons name="bluetooth" size={20} color="#8CDBED" />
+                <Text style={styles.connectButtonText}>
+                  Connect to Extracion Device
+                </Text>
+                <Text style={styles.connectButtonSubtext}>
+                  Optional - for live data
+                </Text>
+              </TouchableOpacity>
+            )}
+
+            {/* Connection Status and Data */}
+            {connectedDevice && (
+              <View style={styles.deviceStatus}>
+                <View style={styles.statusHeader}>
+                  <View style={styles.connectedIndicator}>
+                    <Ionicons name="bluetooth" size={16} color="#4CAF50" />
+                    <Text style={styles.connectedText}>BLE Device Connected</Text>
+                  </View>
+                  <TouchableOpacity
+                    onPress={handleDisconnect}
+                    style={styles.disconnectButton}
+                  >
+                    <Text style={styles.disconnectText}>Disconnect</Text>
+                  </TouchableOpacity>
+                </View>
+
+                <View style={styles.dataRow}>
+                  <View style={styles.dataItem}>
+                    <Text style={styles.dataLabel}>Temperature</Text>
+                    <Text style={styles.dataValue}>
+                      {temperature.toFixed(1)}°C
+                    </Text>
+                  </View>
+                  <View style={styles.dataItem}>
+                    <Text style={styles.dataLabel}>Weight</Text>
+                    <Text style={styles.dataValue}>{weight.toFixed(1)}g</Text>
+                  </View>
+                </View>
+              </View>
+            )}
+            
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
@@ -687,6 +738,7 @@ export default function ExtractionScreen() {
           </View>
         </Modal>
       </SafeAreaView>
+      </ScrollView>
     </ImageBackground>
   );
 }

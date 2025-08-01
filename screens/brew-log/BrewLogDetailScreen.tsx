@@ -7,6 +7,7 @@ import {
   ScrollView,
   TouchableOpacity,
   Image,
+  Platform,
 } from "react-native";
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute, RouteProp, useFocusEffect } from "@react-navigation/native";
@@ -217,6 +218,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#333333", // Match header background to extend to top
+    ...Platform.select({
+      android: {
+        marginTop: "10%",
+      },
+      // iOS doesn't get the marginTop
+    }),
   },
   header: {
     flexDirection: "row",

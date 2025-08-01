@@ -539,6 +539,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#58595B",
+    ...Platform.select({
+      android: {
+        marginTop: "10%",
+      },
+      // iOS doesn't get the marginTop
+    }),
   },
   modalHeader: {
     flexDirection: "row",
