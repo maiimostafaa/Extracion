@@ -7,6 +7,7 @@ import { Text } from "react-native";
 import { useEffect } from "react";
 import * as SplashScreen from "expo-splash-screen";
 import { BLEProvider } from "./context/BLEContext";
+import { AuthProvider } from "./context/AuthContext";
 
 // import { Buffer } from "buffer";
 // global.Buffer = Buffer;
@@ -44,12 +45,14 @@ export default function App() {
   if (!fontsLoaded) return null;
 
   return (
-    <ApolloProvider client={shopifyClient}>
-      <BLEProvider>
-        <NavigationContainer>
-          <AppNavigator />
-        </NavigationContainer>
-      </BLEProvider>
-    </ApolloProvider>
+    <AuthProvider>
+      <ApolloProvider client={shopifyClient}>
+        <BLEProvider>
+          <NavigationContainer>
+            <AppNavigator />
+          </NavigationContainer>
+        </BLEProvider>
+      </ApolloProvider>
+    </AuthProvider>
   );
 }
