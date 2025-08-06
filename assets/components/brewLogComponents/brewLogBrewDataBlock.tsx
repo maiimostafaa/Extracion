@@ -6,6 +6,7 @@ interface brewLogBrewDataBlockProps {
   title: string;
   value: string | number;
   unit?: string; // Optional unit like "g", "ml", "°C", etc.
+  valueColor?: string; // Optional color for the value text
 }
 
 const BrewLogBrewDataBlock: React.FC<brewLogBrewDataBlockProps> = ({
@@ -13,6 +14,7 @@ const BrewLogBrewDataBlock: React.FC<brewLogBrewDataBlockProps> = ({
   title,
   value,
   unit = "",
+  valueColor = "#8CDBED", // Default to light blue for backward compatibility
 }) => {
   const displayValue = value || "enter value";
   const isPlaceholder = !value || value === 0 || value === "0";
@@ -23,7 +25,7 @@ const BrewLogBrewDataBlock: React.FC<brewLogBrewDataBlockProps> = ({
         <Image source={iconPath} style={styles.icon} resizeMode="contain" />
       </View>
       <Text style={styles.title} numberOfLines={1}>{title}</Text>
-      <Text style={[styles.value, isPlaceholder && styles.placeholderValue]}>
+      <Text style={[styles.value, isPlaceholder && styles.placeholderValue, { color: isPlaceholder ? "#999999" : valueColor }]}>
         {displayValue}{unit}
       </Text>
     </View>
@@ -59,10 +61,10 @@ const styles = StyleSheet.create({
   },
   value: {
     fontSize: 14,
-    color: "#8CDBED",
     fontWeight: "500",
     textAlign: "center",
     fontFamily: 'cardRegular',
+    // Color will be set dynamically via props
   },
   placeholderValue: {
     color: "#999999",

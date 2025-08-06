@@ -52,18 +52,36 @@ const TastingWheel: React.FC<TastingWheelProps> = ({ tasteRating, onTasteRatingC
     return `M ${x1} ${y1} L ${x2} ${y2} A ${outerRadius} ${outerRadius} 0 ${largeArcFlag} 1 ${x3} ${y3} L ${x4} ${y4} A ${innerRadius} ${innerRadius} 0 ${largeArcFlag} 0 ${x1} ${y1}`;
   };
 
-  const getLabelPosition = (angle: number, radius: number, fontSize: number) => {
-    // Calculate base position
-    const x = center + radius * Math.cos(angle);
-    const y = center + radius * Math.sin(angle);
+  const getLabelPosition = (angle: number, radius: number, fontSize: number, text: string) => {
+    // Balanced base distance - enough clearance without going overboard
+    const baseDistance = Math.max(20, size * 0.055);
     
-    // Adjust for SVG text baseline issues - bottom labels appear further, top labels appear closer
-    // We need to pull bottom labels in and push top labels out slightly
-    const verticalAdjustment = fontSize * -0.3 * Math.sin(angle);
+    // Add a small extra buffer for longer words to prevent overlap
+    let labelDistance = baseDistance;
+    if (text.length > 8) { // Only for very long words like "Chocolate"
+      labelDistance += 5; // Just a small bump, not a rocket launch
+    }
+    
+    // Calculate position
+    const x = center + (radius + labelDistance) * Math.cos(angle);
+    const y = center + (radius + labelDistance) * Math.sin(angle);
+    
+    // Gentle boundary constraints - allow some breathing room but don't be too restrictive
+    const padding = fontSize; // Use font size as padding for proportional spacing
+    const maxX = size - padding;
+    const minX = padding;
+    const maxY = size - padding;
+    const minY = padding;
+    
+    const clampedX = Math.max(minX, Math.min(maxX, x));
+    const clampedY = Math.max(minY, Math.min(maxY, y));
+    
+    // Fine-tune vertical positioning for SVG text baseline
+    const verticalAdjustment = fontSize * 0.35;
     
     return { 
-      x, 
-      y: y + verticalAdjustment 
+      x: clampedX, 
+      y: clampedY + verticalAdjustment 
     };
   };
 
@@ -109,7 +127,13 @@ const TastingWheel: React.FC<TastingWheelProps> = ({ tasteRating, onTasteRatingC
     const taste = getTasteFromAngle(angle);
     
     if (ring > 0 && taste) {
-      onTasteRatingChange(taste, ring);
+      const currentRating = tasteRating[taste] || 0;
+      
+      // If tapping the same ring that's already selected, reset to 0
+      // Otherwise, set to the tapped ring value
+      const newRating = currentRating === ring ? 0 : ring;
+      
+      onTasteRatingChange(taste, newRating);
     }
   };
 
@@ -193,10 +217,10 @@ const TastingWheel: React.FC<TastingWheelProps> = ({ tasteRating, onTasteRatingC
                     
                     {/* Taste label - show for ALL tastes, keep all white */}
                     {(() => {
-                      const labelDistance = radius + Math.max(20, size * 0.04); // Consistent distance from circle edge
+                      const labelDistance = radius + Math.max(20, size * 0.04); // This will be overridden by getLabelPosition
                       const baseFontSize = Math.max(10, size * 0.035); // Scale font size with component size
                       const fontSize = categoryTastes.length > 6 ? baseFontSize * 0.9 : baseFontSize; // Slightly smaller for crowded categories
-                      const labelPos = getLabelPosition(midAngle, labelDistance, fontSize);
+                      const labelPos = getLabelPosition(midAngle, radius, fontSize, taste);
                       return (
                         <SvgText
                           x={labelPos.x}

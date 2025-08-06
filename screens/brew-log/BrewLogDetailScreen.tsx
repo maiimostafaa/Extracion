@@ -205,17 +205,20 @@ const BrewLogDetailScreen: React.FC = () => {
               iconPath={require("../../assets/icons/brewLog/coffee_bean.png")}
               title="Grind Size"
               value={currentBrewLogEntry.brewDetail.grindSize}
+              valueColor="white"
             />
             <BrewLogBrewDataBlock
               iconPath={require("../../assets/icons/brewLog/coffee_bean.png")}
               title="Weight (g)"
               value={currentBrewLogEntry.brewDetail.beanWeight}
+              valueColor="white"
               // unit="g"
             />
             <BrewLogBrewDataBlock
               iconPath={require("../../assets/icons/brewLog/water-drop.png")}
               title="Water (ml)"
               value={currentBrewLogEntry.brewDetail.waterAmount}
+              valueColor="white"
               // unit="ml"
             />
           </View>
@@ -224,16 +227,19 @@ const BrewLogDetailScreen: React.FC = () => {
               iconPath={require("../../assets/icons/brewLog/scale.png")}
               title="Ratio"
               value={currentBrewLogEntry.brewDetail.ratio ? `1:${currentBrewLogEntry.brewDetail.ratio}` : ""}
+              valueColor="white"
             />
             <BrewLogBrewDataBlock
               iconPath={require("../../assets/icons/brewLog/clock.png")}
               title="Brew Time"
               value={currentBrewLogEntry.brewDetail.brewTime ? formatBrewTime(currentBrewLogEntry.brewDetail.brewTime) : ""}
+              valueColor="white"
             />
             <BrewLogBrewDataBlock
               iconPath={require("../../assets/icons/brewLog/thermometer.png")}
               title="Temperature"
               value={currentBrewLogEntry.brewDetail.temperature}
+              valueColor="white"
               // unit="°C"
             />
           </View>
@@ -331,7 +337,7 @@ const styles = StyleSheet.create({
   },
   dateText: {
     fontSize: 16,
-    color: "#8CDBED",
+    color: "white",
     fontWeight: "400",
     fontFamily: 'cardRegular',
   },
@@ -401,7 +407,7 @@ const styles = StyleSheet.create({
   },
   value: {
     fontSize: 14,
-    color: "#8CDBED",
+    color: "white",
     fontWeight: "400",
     flex: 1,
     textAlign: "right",
