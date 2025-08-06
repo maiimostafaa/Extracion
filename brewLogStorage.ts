@@ -78,10 +78,10 @@ export const validateImagePath = async (imagePath: string): Promise<string> => {
         
         // If file doesn't exist, return a fallback image
         console.warn(`Image file not found: ${imagePath}`);
-        return "https://images.unsplash.com/photo-1447933601403-0c6688de566e?w=400&h=400&fit=crop";
+        return "../../assets/nonclickable-visual-elements/brewLog/BrewLogEditScreenPlaceholderInstruction.png";
     } catch (error) {
         console.error('Error validating image path:', error);
-        return "https://images.unsplash.com/photo-1447933601403-0c6688de566e?w=400&h=400&fit=crop";
+        return "../../assets/nonclickable-visual-elements/brewLog/BrewLogEditScreenPlaceholderInstruction.png";
     }
 };
 

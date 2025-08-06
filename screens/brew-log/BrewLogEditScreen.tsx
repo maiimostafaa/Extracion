@@ -12,6 +12,7 @@ import {
   Platform,
   Alert,
 } from "react-native";
+import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
@@ -20,6 +21,8 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../navigation/AppNavigator";
 import { brewLogEntry } from "../../assets/types/BrewLog/brewLogEntry";
 import TastingWheel from "../../assets/components/brewLogComponents/TastingWheel";
+import BrewLogBrewDataBlock from "../../assets/components/brewLogComponents/brewLogBrewDataBlock";
+import BrewLogRatingStars from "../../assets/components/brewLogComponents/BrewLogRatingStars";
 import { addBrewLog, loadBrewLogs, saveBrewLogs, deleteBrewLog, storeImagePermanently } from "../../brewLogStorage";
 
 type EditScreenRouteProp = RouteProp<RootStackParamList, "BrewLogEditScreen">;
@@ -34,15 +37,80 @@ const BrewLogEditScreen: React.FC = () => {
   
   // Date picker state
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showBrewMethodPicker, setShowBrewMethodPicker] = useState(false);
+  const [showRoasterDatePicker, setShowRoasterDatePicker] = useState(false);
   
+  // Brew method options
+  const brewMethods = ['Pour Over', 'French Press', 'Cold Brew', 'Cold Drip', 'Brew Bar'];
+  
+  // Get brewing method icon
+  const getBrewMethodIcon = (brewMethod: string) => {
+    switch (brewMethod) {
+      case 'French Press':
+        return require('../../assets/components/brewLogComponents/icons/french_press.png');
+      case 'Pour Over':
+        return require('../../assets/components/brewLogComponents/icons/pour_over.png');
+      case 'Cold Brew':
+      case 'Cold Drip':
+        return require('../../assets/components/brewLogComponents/icons/cold_brew.png');
+      case 'Brew Bar':
+        return require('../../assets/components/brewLogComponents/icons/brew_bar.png');
+      default:
+        return require('../../assets/components/brewLogComponents/icons/pour_over.png');
+    }
+  };
+  
+  // Helper function to safely parse date
+  const parseRoasterDate = (dateString: string): Date => {
+    if (!dateString) return new Date();
+    
+    // Try to parse the date string directly first
+    const parsedDate = new Date(dateString);
+    
+    // If valid date, return it (this handles both ISO strings and formatted dates)
+    if (!isNaN(parsedDate.getTime())) {
+      return parsedDate;
+    }
+    
+    // If invalid date, try parsing with Date.parse which handles more formats
+    const alternativeParse = Date.parse(dateString);
+    if (!isNaN(alternativeParse)) {
+      return new Date(alternativeParse);
+    }
+    
+    // Try parsing common date formats manually
+    // Handle "DD Month YYYY" format (e.g., "6 August 2025")
+    const dateRegex = /^(\d{1,2})\s+(\w+)\s+(\d{4})$/;
+    const match = dateString.match(dateRegex);
+    if (match) {
+      const [, day, monthName, year] = match;
+      const monthNames = [
+        'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'
+      ];
+      const monthIndex = monthNames.findIndex(m => m.toLowerCase() === monthName.toLowerCase());
+      if (monthIndex !== -1) {
+        const constructedDate = new Date(parseInt(year), monthIndex, parseInt(day));
+        if (!isNaN(constructedDate.getTime())) {
+          return constructedDate;
+        }
+      }
+    }
+    
+    // If all parsing fails, return current date as fallback
+    console.warn(`Could not parse roaster date: ${dateString}, using current date`);
+    return new Date();
+  };
+
   // Editable state values
   const [editableData, setEditableData] = useState({
     name: brewLogEntry.name,
     date: brewLogEntry.date,
     image: brewLogEntry.image, // Add image to editable data
+    brewMethod: brewLogEntry.brewMethod, // Add brew method to editable data
     coffeeName: brewLogEntry.coffeeBeanDetail.coffeeName,
     origin: brewLogEntry.coffeeBeanDetail.origin,
-    roasterDate: brewLogEntry.coffeeBeanDetail.roasterDate,
+    roasterDate: parseRoasterDate(brewLogEntry.coffeeBeanDetail.roasterDate || ''), // Use helper function with fallback
     roasterLevel: brewLogEntry.coffeeBeanDetail.roasterLevel,
     bagWeight: brewLogEntry.coffeeBeanDetail.bagWeight.toString(),
     grindSize: brewLogEntry.brewDetail.grindSize.toString(),
@@ -65,6 +133,21 @@ const BrewLogEditScreen: React.FC = () => {
     });
   };
 
+  const formatBrewTime = (seconds: number) => {
+    if (seconds >= 3600) {
+      const hours = Math.floor(seconds / 3600);
+      return `${hours}h`;
+    } else if (seconds >= 60) {
+      const minutes = Math.floor(seconds / 60);
+      return `${minutes}m`;
+    }
+    return `${seconds}s`;
+  };
+
+  const handleBack = () => {
+    navigation.goBack();
+  };
+
   const handleCancel = () => {
     navigation.goBack();
   };
@@ -77,11 +160,12 @@ const BrewLogEditScreen: React.FC = () => {
         name: editableData.name,
         date: editableData.date,
         image: editableData.image, // Include updated image
+        brewMethod: editableData.brewMethod, // Include updated brew method
         coffeeBeanDetail: {
           ...brewLogEntry.coffeeBeanDetail,
           coffeeName: editableData.coffeeName,
           origin: editableData.origin,
-          roasterDate: editableData.roasterDate,
+          roasterDate: formatDate(editableData.roasterDate), // Keep the original formatted date format
           roasterLevel: editableData.roasterLevel,
           bagWeight: parseInt(editableData.bagWeight) || 0,
         },
@@ -183,11 +267,40 @@ const BrewLogEditScreen: React.FC = () => {
     setShowDatePicker(false);
   };
 
+  const showRoasterDatePickerModal = () => {
+    setShowRoasterDatePicker(true);
+  };
+
+  const hideRoasterDatePicker = () => {
+    setShowRoasterDatePicker(false);
+  };
+
+  const handleRoasterDateChange = (event: any, selectedDate?: Date) => {
+    if (Platform.OS === 'android') {
+      setShowRoasterDatePicker(false);
+    }
+    
+    if (selectedDate) {
+      setEditableData(prev => ({
+        ...prev,
+        roasterDate: selectedDate
+      }));
+    }
+  };
+
   // Handler for taste rating changes
   const handleTasteRatingChange = (taste: string, rating: number) => {
     setTasteRating(prev => ({
       ...prev,
       [taste]: rating
+    }));
+  };
+
+  // Handler for star rating changes
+  const handleStarRatingChange = (newRating: number) => {
+    setEditableData(prev => ({
+      ...prev,
+      rating: newRating.toString()
     }));
   };
 
@@ -295,31 +408,34 @@ const BrewLogEditScreen: React.FC = () => {
 
       <ScrollView style={styles.scrollView}>
         
-        {/* Date */}
-        <View style={styles.dateContainer}>
-          <TouchableOpacity onPress={showDatePickerModal}>
-            <Text style={styles.editableDateText}>
-              {formatDate(editableData.date)}
-            </Text>
-          </TouchableOpacity>
-        </View>
-        
-        {/* Drink Name */}
-        <View style={styles.drinkNameContainer}>
-          <TextInput
-            style={styles.editableDrinkNameText}
-            value={editableData.name}
-            onChangeText={(text) => updateField('name', text)}
-            placeholder="Drink Name"
-            placeholderTextColor="#666"
-          />
+        {/* Date and Brew Method with Icon */}
+        <View style={styles.dateBrewMethodContainer}>
+          <View style={styles.dateBrewMethodContent}>
+            <TouchableOpacity style={styles.dateContainer} onPress={showDatePickerModal}>
+              <Text style={styles.dateText}>{formatDate(editableData.date)}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.drinkNameContainer} onPress={() => setShowBrewMethodPicker(true)}>
+              <Image 
+                source={getBrewMethodIcon(editableData.brewMethod)}
+                style={styles.brewMethodIcon}
+                resizeMode="contain"
+              />
+              <Text style={styles.drinkNameText}>{editableData.brewMethod}</Text>
+            </TouchableOpacity>
+          </View>
         </View>
         
         {/* Brew Log Image */}
         <View style={styles.imageContainer}>
           <TouchableOpacity onPress={showImagePickerOptions} activeOpacity={0.8}>
             <Image
-              source={{ uri: editableData.image }}
+              source={
+                editableData.image.startsWith('http') 
+                  ? { uri: editableData.image }
+                  : editableData.image.includes('BrewLogEditScreenPlaceholderInstruction.png')
+                  ? require('../../assets/nonclickable-visual-elements/brewLog/BrewLogEditScreenPlaceholderInstruction.png')
+                  : { uri: editableData.image }
+              }
               style={styles.brewImage}
             />
             <View style={styles.imageOverlay}>
@@ -327,14 +443,9 @@ const BrewLogEditScreen: React.FC = () => {
             </View>
           </TouchableOpacity>
         </View>
-        
-        {/* Header Section */}
-        <View style={styles.contentContainer}>
-          <Text style={styles.subtitle}>#{brewLogEntry.id}</Text>
-        </View>
 
         {/* GENERAL SECTION - Coffee bean information */}
-        <Text style={styles.sectionTitle}>general</Text>
+        <Text style={styles.sectionTitle}>General</Text>
         <View style={styles.infoRow}>
           <Text style={styles.label}>Coffee Name:</Text>
           <TextInput
@@ -346,7 +457,7 @@ const BrewLogEditScreen: React.FC = () => {
           />
         </View>
         <View style={styles.infoRow}>
-          <Text style={styles.label}>Origin:</Text>
+          <Text style={styles.label}>Region:</Text>
           <TextInput
             style={styles.editableValue}
             value={editableData.origin}
@@ -357,13 +468,14 @@ const BrewLogEditScreen: React.FC = () => {
         </View>
         <View style={styles.infoRow}>
           <Text style={styles.label}>Roaster Date:</Text>
-          <TextInput
-            style={styles.editableValue}
-            value={editableData.roasterDate}
-            onChangeText={(text) => updateField('roasterDate', text)}
-            placeholder="Roaster Date"
-            placeholderTextColor="#666"
-          />
+          <TouchableOpacity onPress={showRoasterDatePickerModal}>
+            <Text style={styles.editableValue}>
+              {editableData.roasterDate instanceof Date && !isNaN(editableData.roasterDate.getTime()) 
+                ? formatDate(editableData.roasterDate)
+                : 'Select Date'
+              }
+            </Text>
+          </TouchableOpacity>
         </View>
         <View style={styles.infoRow}>
           <Text style={styles.label}>Roaster Level:</Text>
@@ -388,92 +500,117 @@ const BrewLogEditScreen: React.FC = () => {
         </View>
 
         {/* BREW DATA SECTION - Brewing parameters */}
-        <Text style={styles.sectionTitle}>brew data</Text>
-        <View style={styles.infoRow}>
-          <Text style={styles.label}>Grind Size:</Text>
-          <TextInput
-            style={styles.editableValue}
-            value={editableData.grindSize}
-            onChangeText={(text) => updateField('grindSize', text)}
-            placeholder="Grind Size"
-            placeholderTextColor="#666"
-            keyboardType="numeric"
-          />
-        </View>
-        <View style={styles.infoRow}>
-          <Text style={styles.label}>Coffee (Weight):</Text>
-          <TextInput
-            style={styles.editableValue}
-            value={editableData.beanWeight}
-            onChangeText={(text) => updateField('beanWeight', text)}
-            placeholder="Coffee Weight"
-            placeholderTextColor="#666"
-            keyboardType="numeric"
-          />
-        </View>
-        <View style={styles.infoRow}>
-          <Text style={styles.label}>Water (Weight):</Text>
-          <TextInput
-            style={styles.editableValue}
-            value={editableData.waterAmount}
-            onChangeText={(text) => updateField('waterAmount', text)}
-            placeholder="Water Amount"
-            placeholderTextColor="#666"
-            keyboardType="numeric"
-          />
-        </View>
-        <View style={styles.infoRow}>
-          <Text style={styles.label}>Ratio:</Text>
-          <TextInput
-            style={styles.editableValue}
-            value={editableData.ratio}
-            onChangeText={(text) => updateField('ratio', text)}
-            placeholder="Ratio"
-            placeholderTextColor="#666"
-            keyboardType="numeric"
-          />
-        </View>
-        <View style={styles.infoRow}>
-          <Text style={styles.label}>Time:</Text>
-          <TextInput
-            style={styles.editableValue}
-            value={editableData.brewTime}
-            onChangeText={(text) => updateField('brewTime', text)}
-            placeholder="Brew Time (seconds)"
-            placeholderTextColor="#666"
-            keyboardType="numeric"
-          />
-        </View>
-        <View style={styles.infoRow}>
-          <Text style={styles.label}>Temperature:</Text>
-          <TextInput
-            style={styles.editableValue}
-            value={editableData.temperature}
-            onChangeText={(text) => updateField('temperature', text)}
-            placeholder="Temperature"
-            placeholderTextColor="#666"
-            keyboardType="numeric"
-          />
+        <Text style={styles.sectionTitle}>Brew Data</Text>
+        <View style={styles.brewDataGrid}>
+          <View style={styles.gridRow}>
+            <View style={styles.editableBrewDataBlock}>
+              <View style={styles.iconContainer}>
+                <Image source={require("../../assets/icons/brewLog/coffee_bean.png")} style={styles.brewDataIcon} resizeMode="contain" />
+              </View>
+              <Text style={styles.brewDataTitle}>Grind Size</Text>
+              <TextInput
+                style={styles.brewDataValueInput}
+                value={editableData.grindSize}
+                onChangeText={(text) => updateField('grindSize', text)}
+                placeholder="enter value"
+                placeholderTextColor="#8CDBED"
+                keyboardType="numeric"
+                textAlign="center"
+              />
+            </View>
+            <View style={styles.editableBrewDataBlock}>
+              <View style={styles.iconContainer}>
+                <Image source={require("../../assets/icons/brewLog/coffee_bean.png")} style={styles.brewDataIcon} resizeMode="contain" />
+              </View>
+              <Text style={styles.brewDataTitle}>Weight (g)</Text>
+              <TextInput
+                style={styles.brewDataValueInput}
+                value={editableData.beanWeight}
+                onChangeText={(text) => updateField('beanWeight', text)}
+                placeholder="enter value"
+                placeholderTextColor="#8CDBED"
+                keyboardType="numeric"
+                textAlign="center"
+              />
+            </View>
+            <View style={styles.editableBrewDataBlock}>
+              <View style={styles.iconContainer}>
+                <Image source={require("../../assets/icons/brewLog/water-drop.png")} style={styles.brewDataIcon} resizeMode="contain" />
+              </View>
+              <Text style={styles.brewDataTitle}>Water (ml)</Text>
+              <TextInput
+                style={styles.brewDataValueInput}
+                value={editableData.waterAmount}
+                onChangeText={(text) => updateField('waterAmount', text)}
+                placeholder="enter value"
+                placeholderTextColor="#8CDBED"
+                keyboardType="numeric"
+                textAlign="center"
+              />
+            </View>
+          </View>
+          <View style={styles.gridRow}>
+            <View style={styles.editableBrewDataBlock}>
+              <View style={styles.iconContainer}>
+                <Image source={require("../../assets/icons/brewLog/scale.png")} style={styles.brewDataIcon} resizeMode="contain" />
+              </View>
+              <Text style={styles.brewDataTitle}>Ratio</Text>
+              <TextInput
+                style={styles.brewDataValueInput}
+                value={editableData.ratio}
+                onChangeText={(text) => updateField('ratio', text)}
+                placeholder="enter value"
+                placeholderTextColor="#8CDBED"
+                keyboardType="numeric"
+                textAlign="center"
+              />
+            </View>
+            <View style={styles.editableBrewDataBlock}>
+              <View style={styles.iconContainer}>
+                <Image source={require("../../assets/icons/brewLog/clock.png")} style={styles.brewDataIcon} resizeMode="contain" />
+              </View>
+              <Text style={styles.brewDataTitle}>Brew Time</Text>
+              <TextInput
+                style={styles.brewDataValueInput}
+                value={editableData.brewTime}
+                onChangeText={(text) => updateField('brewTime', text)}
+                placeholder="enter value"
+                placeholderTextColor="#8CDBED"
+                keyboardType="numeric"
+                textAlign="center"
+              />
+            </View>
+            <View style={styles.editableBrewDataBlock}>
+              <View style={styles.iconContainer}>
+                <Image source={require("../../assets/icons/brewLog/thermometer.png")} style={styles.brewDataIcon} resizeMode="contain" />
+              </View>
+              <Text style={styles.brewDataTitle}>Temperature</Text>
+              <TextInput
+                style={styles.brewDataValueInput}
+                value={editableData.temperature}
+                onChangeText={(text) => updateField('temperature', text)}
+                placeholder="enter value"
+                placeholderTextColor="#8CDBED"
+                keyboardType="numeric"
+                textAlign="center"
+              />
+            </View>
+          </View>
         </View>
 
         {/* TASTING WHEEL SECTION - Interactive */}
-        <Text style={styles.sectionTitle}>tasting wheel</Text>
+        <Text style={styles.sectionTitle}>Tasting Wheel</Text>
         <TastingWheel 
           tasteRating={tasteRating}
           onTasteRatingChange={handleTasteRatingChange}
         />
 
-        {/* OVERALL RATING SECTION - Final rating */}
-        <Text style={styles.sectionTitle}>overall rating</Text>
-        <View style={styles.infoRow}>
-          <Text style={styles.label}>Rating:</Text>
-          <TextInput
-            style={styles.editableValue}
-            value={editableData.rating}
-            onChangeText={(text) => updateField('rating', text)}
-            placeholder="Rating (0-5)"
-            placeholderTextColor="#666"
-            keyboardType="numeric"
+        {/* OVERALL RATING SECTION - Interactive star rating */}
+        <Text style={styles.sectionTitle}>Overall Rating</Text>
+        <View style={styles.ratingContainer}>
+          <BrewLogRatingStars 
+            rating={parseFloat(editableData.rating) || 0} 
+            onRatingChange={handleStarRatingChange}
           />
         </View>
 
@@ -531,6 +668,98 @@ const BrewLogEditScreen: React.FC = () => {
         </>
       )}
 
+      {/* Roaster Date Picker Modal */}
+      {showRoasterDatePicker && (
+        <>
+          {Platform.OS === 'ios' ? (
+            <Modal
+              transparent={true}
+              animationType="slide"
+              visible={showRoasterDatePicker}
+              onRequestClose={hideRoasterDatePicker}
+            >
+              <View style={styles.modalOverlay}>
+                <View style={styles.datePickerContainer}>
+                  <View style={styles.datePickerHeader}>
+                    <TouchableOpacity onPress={hideRoasterDatePicker}>
+                      <Text style={styles.datePickerButton}>Cancel</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={hideRoasterDatePicker}>
+                      <Text style={styles.datePickerButton}>Done</Text>
+                    </TouchableOpacity>
+                  </View>
+                  <DateTimePicker
+                    value={isNaN(editableData.roasterDate.getTime()) ? new Date() : editableData.roasterDate}
+                    mode="date"
+                    display="spinner"
+                    onChange={handleRoasterDateChange}
+                    style={styles.datePicker}
+                  />
+                </View>
+              </View>
+            </Modal>
+          ) : (
+            <DateTimePicker
+              value={isNaN(editableData.roasterDate.getTime()) ? new Date() : editableData.roasterDate}
+              mode="date"
+              display="default"
+              onChange={handleRoasterDateChange}
+            />
+          )}
+        </>
+      )}
+
+      {/* Brew Method Picker Modal */}
+      {showBrewMethodPicker && (
+        <Modal
+          transparent={true}
+          animationType="slide"
+          visible={showBrewMethodPicker}
+          onRequestClose={() => setShowBrewMethodPicker(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.pickerContainer}>
+              <View style={styles.pickerHeader}>
+                <TouchableOpacity onPress={() => setShowBrewMethodPicker(false)}>
+                  <Text style={styles.pickerButton}>Cancel</Text>
+                </TouchableOpacity>
+                <Text style={styles.pickerTitle}>Select Brew Method</Text>
+                <TouchableOpacity onPress={() => setShowBrewMethodPicker(false)}>
+                  <Text style={styles.pickerButton}>Done</Text>
+                </TouchableOpacity>
+              </View>
+              <ScrollView style={styles.pickerContent}>
+                {brewMethods.map((method) => (
+                  <TouchableOpacity
+                    key={method}
+                    style={[
+                      styles.pickerOption,
+                      editableData.brewMethod === method && styles.pickerOptionSelected
+                    ]}
+                    onPress={() => {
+                      updateField('brewMethod', method);
+                      setShowBrewMethodPicker(false);
+                    }}
+                  >
+                    <Image 
+                      source={getBrewMethodIcon(method)}
+                      style={styles.pickerOptionIcon}
+                      resizeMode="contain"
+                    />
+                    <Text style={[
+                      styles.pickerOptionText,
+                      editableData.brewMethod === method && styles.pickerOptionTextSelected
+                    ]}>
+                      {method}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
+          </View>
+        </Modal>
+      )}
+
     </SafeAreaView>
   );
 };
@@ -538,13 +767,24 @@ const BrewLogEditScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#58595B",
+    backgroundColor: "#333333", // Match header background to extend to top
     ...Platform.select({
       android: {
         marginTop: "10%",
       },
       // iOS doesn't get the marginTop
     }),
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    backgroundColor: "#333333",
+    borderBottomWidth: 0.5,
+    borderBottomColor: "#444444",
+    height: 50,
   },
   modalHeader: {
     flexDirection: "row",
@@ -554,6 +794,20 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     backgroundColor: "#333333",
   },
+  leftSection: {
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1,
+  },
+  backButton: {
+    paddingVertical: 6,
+    paddingHorizontal: 6,
+    justifyContent: "center",
+    alignItems: "center",
+    minWidth: 44,
+    minHeight: 44,
+    borderRadius: 22,
+  },
   cancelButton: {
     paddingVertical: 8,
     paddingHorizontal: 12,
@@ -562,6 +816,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#FF3B30",
     fontWeight: "400",
+    fontFamily: 'cardRegular',
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: "600",
+    color: "white",
+    marginLeft: 8,
     fontFamily: 'cardRegular',
   },
   modalTitle: {
@@ -576,44 +837,59 @@ const styles = StyleSheet.create({
   },
   saveButtonText: {
     fontSize: 16,
-    color: "#8CDBED", // App's accent color instead of iOS blue
+    color: "#8CDBED",
     fontWeight: "600",
     fontFamily: 'cardRegular',
   },
   scrollView: {
     flex: 1,
-    padding: 16,
+    padding: 22,
+    backgroundColor: "#58595B",
+  },
+  dateBrewMethodContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 16,
+  },
+  dateBrewMethodContent: {
+    alignItems: "center",
   },
   dateContainer: {
     alignItems: "center",
+    paddingTop: 12,
     marginBottom: 8,
   },
-  drinkNameContainer: {
-    alignItems: "center",
-    marginBottom: 16,
-  },
-  editableDateText: {
+  dateText: {
     fontSize: 16,
     color: "#8CDBED",
     fontWeight: "400",
-    textAlign: "center",
     fontFamily: 'cardRegular',
   },
-  editableDrinkNameText: {
+  drinkNameContainer: {
+    alignItems: "center",
+    flexDirection: "row",
+  },
+  brewMethodIcon: {
+    width: 20,
+    height: 20,
+    tintColor: "#8CDBED",
+    resizeMode: "contain",
+    marginRight: 8,
+  },
+  drinkNameText: {
     fontSize: 20,
-    color: "white",
+    color: "#8CDBED",
     fontWeight: "600",
-    textAlign: "center",
-    minWidth: 200,
     fontFamily: 'cardRegular',
   },
   imageContainer: {
     alignItems: "center",
+    marginTop: 22,
     marginBottom: 20,
   },
   brewImage: {
-    width: 150,
-    height: 150,
+    width: 216,
+    height: 216,
     borderRadius: 10,
   },
   imageOverlay: {
@@ -645,12 +921,12 @@ const styles = StyleSheet.create({
     fontFamily: 'cardRegular',
   },
   sectionTitle: {
-    fontSize: 24,
-    fontWeight: "600",
+    fontSize: 16,
+    fontWeight: "400",
     color: "#8CDBED",
     marginBottom: 16,
-    marginTop: 24,
-    letterSpacing: 1.2,
+    marginTop: 28,
+    letterSpacing: 1.0,
     textAlign: "left",
     fontFamily: 'cardRegular',
   },
@@ -658,20 +934,20 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 12,
-    paddingBottom: 12,
+    marginBottom: 14,
+    paddingBottom: 10,
     borderBottomWidth: 1,
     borderBottomColor: "#666666",
   },
   label: {
-    fontSize: 16,
+    fontSize: 14,
     color: "white",
     fontWeight: "500",
     flex: 1,
     fontFamily: 'cardRegular',
   },
   editableValue: {
-    fontSize: 16,
+    fontSize: 14,
     color: "#8CDBED",
     fontWeight: "400",
     flex: 1,
@@ -679,28 +955,96 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
     fontFamily: 'cardRegular',
   },
-  tasteGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
+  brewDataGrid: {
+    marginBottom: 0,
   },
-  tasteItem: {
+  gridRow: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    width: "48%",
-    marginBottom: 8,
-    paddingVertical: 4,
+    justifyContent: "space-around",
+    marginBottom: 12,
+    gap: 0,
   },
-  tasteLabel: {
+  editableBrewDataBlock: {
+    flex: 1,
+    borderRadius: 8,
+    padding: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    minHeight: 100,
+    margin: 2,
+    minWidth: 100,
+  },
+  iconContainer: {
+    marginBottom: 10,
+  },
+  brewDataIcon: {
+    width: 36,
+    height: 36,
+    tintColor: "#FFFFFF",
+  },
+  brewDataTitle: {
     fontSize: 14,
-    color: "#666",
+    color: "white",
     fontWeight: "400",
+    textAlign: "center",
     fontFamily: 'cardRegular',
   },
-  tasteValue: {
+  brewDataValueInput: {
     fontSize: 14,
-    color: "#333",
+    color: "#8CDBED", // Light blue for edit screen
     fontWeight: "500",
+    textAlign: "center",
+    fontFamily: 'cardRegular',
+    minWidth: 60,
+    paddingVertical: 0,
+    paddingHorizontal: 4,
+    borderBottomWidth: 0,
+  },
+  ratingContainer: {
+    alignItems: "center",
+  },
+  ratingInputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 16,
+  },
+  ratingInputLabel: {
+    fontSize: 14,
+    color: "white",
+    fontWeight: "500",
+    fontFamily: 'cardRegular',
+    marginRight: 12,
+  },
+  ratingInput: {
+    fontSize: 16,
+    color: "#8CDBED",
+    fontWeight: "400",
+    fontFamily: 'cardRegular',
+    textAlign: "center",
+    minWidth: 60,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: "#666666",
+  },
+  deleteButtonContainer: {
+    marginTop: 10,
+    marginBottom: 30,
+    alignItems: "center",
+  },
+  deleteButton: {
+    backgroundColor: "#ed5858ff",
+    borderWidth: 0,
+    borderRadius: 25,
+    paddingVertical: 10,
+    paddingHorizontal: 30,
+    minWidth: 280,
+    alignItems: "center",
+  },
+  deleteButtonText: {
+    color: "#333333",
+    fontSize: 16,
+    fontWeight: "400",
     fontFamily: 'cardRegular',
   },
   modalOverlay: {
@@ -712,7 +1056,7 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    paddingBottom: 34, // Safe area padding for iOS
+    paddingBottom: 34,
     width: "100%",
   },
   datePickerHeader: {
@@ -726,7 +1070,7 @@ const styles = StyleSheet.create({
   },
   datePickerButton: {
     fontSize: 16,
-    color: "#8CDBED", // App's accent color instead of iOS blue
+    color: "#8CDBED",
     fontWeight: "600",
     fontFamily: 'cardRegular',
   },
@@ -735,26 +1079,65 @@ const styles = StyleSheet.create({
     width: "100%",
     alignSelf: "center",
   },
-  deleteButtonContainer: {
-    marginTop: 40,
-    marginBottom: 30,
-    alignItems: "center",
+  pickerContainer: {
+    backgroundColor: "white",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingBottom: 34,
+    width: "100%",
+    maxHeight: "50%",
   },
-  deleteButton: {
-    backgroundColor: "transparent",
-    borderWidth: 2,
-    borderColor: "#FF3B30",
-    borderRadius: 25,
-    paddingVertical: 12,
-    paddingHorizontal: 30,
-    minWidth: 200,
+  pickerHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E0E0E0",
   },
-  deleteButtonText: {
-    color: "#FF3B30",
+  pickerTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#333",
+    fontFamily: 'cardRegular',
+  },
+  pickerButton: {
     fontSize: 16,
+    color: "#8CDBED",
     fontWeight: "600",
     fontFamily: 'cardRegular',
+  },
+  pickerContent: {
+    maxHeight: 300,
+  },
+  pickerOption: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E0E0E0",
+  },
+  pickerOptionSelected: {
+    backgroundColor: "#F0F8FF",
+  },
+  pickerOptionIcon: {
+    width: 24,
+    height: 24,
+    tintColor: "#333",
+    resizeMode: "contain",
+    marginRight: 12,
+  },
+  pickerOptionText: {
+    fontSize: 16,
+    color: "#333",
+    fontWeight: "400",
+    fontFamily: 'cardRegular',
+  },
+  pickerOptionTextSelected: {
+    color: "#8CDBED",
+    fontWeight: "600",
   },
 });
 

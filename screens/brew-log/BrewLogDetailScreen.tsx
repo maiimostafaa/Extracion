@@ -15,6 +15,8 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../navigation/AppNavigator";
 import { brewLogEntry } from "../../assets/types/BrewLog/brewLogEntry";
 import TastingWheel from "../../assets/components/brewLogComponents/TastingWheel";
+import BrewLogBrewDataBlock from "../../assets/components/brewLogComponents/brewLogBrewDataBlock";
+import BrewLogRatingStars from "../../assets/components/brewLogComponents/BrewLogRatingStars";
 import { loadBrewLogs } from "../../brewLogStorage";
 
 type DetailScreenRouteProp = RouteProp<RootStackParamList, "BrewLogDetailScreen">;
@@ -29,6 +31,23 @@ const BrewLogDetailScreen: React.FC = () => {
   
   // State to hold the current brew log entry (will be updated when screen comes into focus)
   const [currentBrewLogEntry, setCurrentBrewLogEntry] = useState<brewLogEntry | undefined>(initialBrewLogEntry);
+
+  // Get brewing method icon
+  const getBrewMethodIcon = (brewMethod: string) => {
+    switch (brewMethod) {
+      case 'French Press':
+        return require('../../assets/components/brewLogComponents/icons/french_press.png');
+      case 'Pour Over':
+        return require('../../assets/components/brewLogComponents/icons/pour_over.png');
+      case 'Cold Brew':
+      case 'Cold Drip':
+        return require('../../assets/components/brewLogComponents/icons/cold_brew.png');
+      case 'Brew Bar':
+        return require('../../assets/components/brewLogComponents/icons/brew_bar.png');
+      default:
+        return require('../../assets/components/brewLogComponents/icons/pour_over.png');
+    }
+  };
 
   // Reload brew log data when screen comes into focus
   useFocusEffect(
@@ -124,89 +143,115 @@ const BrewLogDetailScreen: React.FC = () => {
 
       <ScrollView style={styles.scrollView}>
         
-        {/* Date */}
-        <View style={styles.dateContainer}>
-          <Text style={styles.dateText}>{formatDate(currentBrewLogEntry.date)}</Text>
-        </View>
-        
-        {/* Drink Name */}
-        <View style={styles.drinkNameContainer}>
-          <Text style={styles.drinkNameText}>{currentBrewLogEntry.name}</Text>
+        {/* Date and Brew Method with Icon */}
+        <View style={styles.dateBrewMethodContainer}>
+          <View style={styles.dateBrewMethodContent}>
+            <View style={styles.dateContainer}>
+              <Text style={styles.dateText}>{formatDate(currentBrewLogEntry.date)}</Text>
+            </View>
+            <View style={styles.drinkNameContainer}>
+              <Image 
+                source={getBrewMethodIcon(currentBrewLogEntry.brewMethod)}
+                style={styles.brewMethodIcon}
+                resizeMode="contain"
+              />
+              <Text style={styles.drinkNameText}>{currentBrewLogEntry.brewMethod}</Text>
+            </View>
+          </View>
         </View>
         
         {/* Brew Log Image */}
         <View style={styles.imageContainer}>
           <Image
-            source={{ uri: currentBrewLogEntry.image }}
+            source={
+              currentBrewLogEntry.image.startsWith('http') 
+                ? { uri: currentBrewLogEntry.image }
+                : currentBrewLogEntry.image.includes('BrewLogEditScreenPlaceholderInstruction.png')
+                ? require('../../assets/nonclickable-visual-elements/brewLog/BrewLogEditScreenPlaceholderInstruction.png')
+                : { uri: currentBrewLogEntry.image }
+            }
             style={styles.brewImage}
           />
         </View>
-        
-        {/* Header Section */}
-        <View style={styles.contentContainer}>
-          <Text style={styles.subtitle}>#{currentBrewLogEntry.id}</Text>
-        </View>
 
         {/* GENERAL SECTION - Coffee bean information */}
-        <Text style={styles.sectionTitle}>general</Text>
+        <Text style={styles.sectionTitle}>General</Text>
         <View style={styles.infoRow}>
-          <Text style={styles.label}>Coffee Name:</Text>
+          <Text style={styles.label}>Coffee Name</Text>
           <Text style={styles.value}>{currentBrewLogEntry.coffeeBeanDetail.coffeeName}</Text>
         </View>
         <View style={styles.infoRow}>
-          <Text style={styles.label}>Origin:</Text>
+          <Text style={styles.label}>Region</Text>
           <Text style={styles.value}>{currentBrewLogEntry.coffeeBeanDetail.origin}</Text>
         </View>
         <View style={styles.infoRow}>
-          <Text style={styles.label}>Roaster Date:</Text>
+          <Text style={styles.label}>Roast Date</Text>
           <Text style={styles.value}>{currentBrewLogEntry.coffeeBeanDetail.roasterDate}</Text>
         </View>
         <View style={styles.infoRow}>
-          <Text style={styles.label}>Roaster Level:</Text>
+          <Text style={styles.label}>Roast Level</Text>
           <Text style={styles.value}>{currentBrewLogEntry.coffeeBeanDetail.roasterLevel}</Text>
         </View>
         <View style={styles.infoRow}>
-          <Text style={styles.label}>Bag Weight:</Text>
+          <Text style={styles.label}>Bag Weight (g)</Text>
           <Text style={styles.value}>{currentBrewLogEntry.coffeeBeanDetail.bagWeight}g</Text>
         </View>
 
         {/* BREW DATA SECTION - Brewing parameters */}
-        <Text style={styles.sectionTitle}>brew data</Text>
-        <View style={styles.infoRow}>
-          <Text style={styles.label}>Grind Size:</Text>
-          <Text style={styles.value}>{currentBrewLogEntry.brewDetail.grindSize}</Text>
-        </View>
-        <View style={styles.infoRow}>
-          <Text style={styles.label}>Coffee (Weight):</Text>
-          <Text style={styles.value}>{currentBrewLogEntry.brewDetail.beanWeight}g</Text>
-        </View>
-        <View style={styles.infoRow}>
-          <Text style={styles.label}>Water (Weight):</Text>
-          <Text style={styles.value}>{currentBrewLogEntry.brewDetail.waterAmount}ml</Text>
-        </View>
-        <View style={styles.infoRow}>
-          <Text style={styles.label}>Ratio:</Text>
-          <Text style={styles.value}>1:{currentBrewLogEntry.brewDetail.ratio}</Text>
-        </View>
-        <View style={styles.infoRow}>
-          <Text style={styles.label}>Time:</Text>
-          <Text style={styles.value}>{formatBrewTime(currentBrewLogEntry.brewDetail.brewTime)}</Text>
-        </View>
-        <View style={styles.infoRow}>
-          <Text style={styles.label}>Temperature:</Text>
-          <Text style={styles.value}>{currentBrewLogEntry.brewDetail.temperature}°C</Text>
+        <Text style={styles.sectionTitle}>Brew Data</Text>
+        <View style={styles.brewDataGrid}>
+          <View style={styles.gridRow}>
+            <BrewLogBrewDataBlock
+              iconPath={require("../../assets/icons/brewLog/coffee_bean.png")}
+              title="Grind Size"
+              value={currentBrewLogEntry.brewDetail.grindSize}
+              valueColor="white"
+            />
+            <BrewLogBrewDataBlock
+              iconPath={require("../../assets/icons/brewLog/coffee_bean.png")}
+              title="Weight (g)"
+              value={currentBrewLogEntry.brewDetail.beanWeight}
+              valueColor="white"
+              // unit="g"
+            />
+            <BrewLogBrewDataBlock
+              iconPath={require("../../assets/icons/brewLog/water-drop.png")}
+              title="Water (ml)"
+              value={currentBrewLogEntry.brewDetail.waterAmount}
+              valueColor="white"
+              // unit="ml"
+            />
+          </View>
+          <View style={styles.gridRow}>
+            <BrewLogBrewDataBlock
+              iconPath={require("../../assets/icons/brewLog/scale.png")}
+              title="Ratio"
+              value={currentBrewLogEntry.brewDetail.ratio ? `1:${currentBrewLogEntry.brewDetail.ratio}` : ""}
+              valueColor="white"
+            />
+            <BrewLogBrewDataBlock
+              iconPath={require("../../assets/icons/brewLog/clock.png")}
+              title="Brew Time"
+              value={currentBrewLogEntry.brewDetail.brewTime ? formatBrewTime(currentBrewLogEntry.brewDetail.brewTime) : ""}
+              valueColor="white"
+            />
+            <BrewLogBrewDataBlock
+              iconPath={require("../../assets/icons/brewLog/thermometer.png")}
+              title="Temperature"
+              value={currentBrewLogEntry.brewDetail.temperature}
+              valueColor="white"
+              // unit="°C"
+            />
+          </View>
         </View>
 
         {/* TASTING WHEEL SECTION - All taste profiles */}
-        <Text style={styles.sectionTitle}>tasting wheel</Text>
+        <Text style={styles.sectionTitle}>Tasting Wheel</Text>
         <TastingWheel tasteRating={currentBrewLogEntry.tasteRating} />
 
-        {/* OVERALL RATING SECTION - Final rating */}
-        <Text style={styles.sectionTitle}>overall rating</Text>
-        <View style={styles.infoRow}>
-          <Text style={styles.label}>Rating:</Text>
-          <Text style={styles.value}>{currentBrewLogEntry.rating}/5</Text>
-        </View>
+        {/* OVERALL RATING SECTION - Star rating */}
+        <Text style={styles.sectionTitle}>Overall Rating</Text>
+        <BrewLogRatingStars rating={currentBrewLogEntry.rating} key={`rating-${currentBrewLogEntry.rating}-${currentBrewLogEntry.id}`} />
         
       </ScrollView>
 
@@ -251,7 +296,7 @@ const styles = StyleSheet.create({
     borderRadius: 22,
   },
   headerTitle: {
-    fontSize: 17, // iOS standard navigation title size
+    fontSize: 20, // Lach: Adjusted to try and match Figma mockup's size
     fontWeight: "600",
     color: "white",
     marginLeft: 8, // Add some space after the back button
@@ -274,22 +319,38 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
-    padding: 16,
+    padding: 22,
     backgroundColor: "#58595B", // Original content background color
+  },
+  dateBrewMethodContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 16,
+  },
+  dateBrewMethodContent: {
+    alignItems: "center",
   },
   dateContainer: {
     alignItems: "center",
+    paddingTop: 12,
     marginBottom: 8,
   },
   dateText: {
     fontSize: 16,
-    color: "#8CDBED",
+    color: "white",
     fontWeight: "400",
     fontFamily: 'cardRegular',
   },
   drinkNameContainer: {
     alignItems: "center",
-    marginBottom: 16,
+    flexDirection: "row",
+  },
+  brewMethodIcon: {
+    width: 20,
+    height: 20,
+    tintColor: "#FFFFFF",
+    resizeMode: "contain",
+    marginRight: 8,
   },
   drinkNameText: {
     fontSize: 20,
@@ -299,11 +360,12 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     alignItems: "center",
+    marginTop: 22,
     marginBottom: 20,
   },
   brewImage: {
-    width: 150,
-    height: 150,
+    width: 216,
+    height: 216,
     borderRadius: 10,
   },
   contentContainer: {
@@ -318,12 +380,12 @@ const styles = StyleSheet.create({
     fontFamily: 'cardRegular',
   },
   sectionTitle: {
-    fontSize: 24,
-    fontWeight: "600",
+    fontSize: 16,
+    fontWeight: "400", // 400 for normal / regular font weight
     color: "#8CDBED",
     marginBottom: 16,
-    marginTop: 24,
-    letterSpacing: 1.2,
+    marginTop: 28,
+    letterSpacing: 1.0,
     textAlign: "left",
     fontFamily: 'cardRegular',
   },
@@ -331,25 +393,34 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 12,
-    paddingBottom: 12,
+    marginBottom: 14,
+    paddingBottom: 10,
     borderBottomWidth: 1,
     borderBottomColor: "#666666",
   },
   label: {
-    fontSize: 16,
+    fontSize: 14,
     color: "white",
     fontWeight: "500",
     flex: 1,
     fontFamily: 'cardRegular',
   },
   value: {
-    fontSize: 16,
-    color: "#8CDBED",
+    fontSize: 14,
+    color: "white",
     fontWeight: "400",
     flex: 1,
     textAlign: "right",
     fontFamily: 'cardRegular',
+  },
+  brewDataGrid: {
+    marginBottom: 0,
+  },
+  gridRow: {
+    flexDirection: "row",
+    justifyContent: "space-around", // Changed from "space-between" to give more even spacing
+    marginBottom: 12,
+    gap: 0, // No need to add a gap between items as the current padding and margins in individual info blocks is sufficient
   },
 });
 
