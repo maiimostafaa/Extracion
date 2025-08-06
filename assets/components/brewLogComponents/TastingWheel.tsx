@@ -5,15 +5,19 @@ import Svg, { Circle, G, Path, Text as SvgText } from 'react-native-svg';
 interface TastingWheelProps {
   tasteRating: Record<string, number>;
   onTasteRatingChange?: (taste: string, rating: number) => void; // Optional - makes it interactive
+  containerSize?: number; // Optional - allows parent to specify size
 }
 
-const TastingWheel: React.FC<TastingWheelProps> = ({ tasteRating, onTasteRatingChange }) => {
+const TastingWheel: React.FC<TastingWheelProps> = ({ tasteRating, onTasteRatingChange, containerSize }) => {
   const screenWidth = Dimensions.get('window').width;
-  const textPadding = 18; // Distance from wheel edge to text labels
-  const sidePadding = textPadding; // Same padding on sides as text spacing
-  const size = screenWidth - (2 * sidePadding); // Use consistent padding on both sides
+  
+  // Use containerSize if provided, otherwise calculate based on screen width
+  const maxSize = containerSize || (screenWidth * 0.9); // Use 90% of screen width as default
+  const textPadding = Math.max(35, maxSize * 0.12); // Scale text padding with size, minimum 35px
+  const size = maxSize;
   const center = size / 2;
-  const radius = center - textPadding - 20; // Leave space for labels plus small margin
+  const radius = center - textPadding; // Simplified - let text padding handle the spacing
+  const strokeWidth = Math.max(1, size * 0.0045); // Scale stroke width with component size
   
   // Organized taste categories
   const tasteCategories = {
@@ -48,26 +52,29 @@ const TastingWheel: React.FC<TastingWheelProps> = ({ tasteRating, onTasteRatingC
     return `M ${x1} ${y1} L ${x2} ${y2} A ${outerRadius} ${outerRadius} 0 ${largeArcFlag} 1 ${x3} ${y3} L ${x4} ${y4} A ${innerRadius} ${innerRadius} 0 ${largeArcFlag} 0 ${x1} ${y1}`;
   };
 
-  const getLabelPosition = (angle: number, radius: number) => {
-    return {
-      x: center + radius * Math.cos(angle),
-      y: center + radius * Math.sin(angle)
+  const getLabelPosition = (angle: number, radius: number, fontSize: number) => {
+    // Calculate base position
+    const x = center + radius * Math.cos(angle);
+    const y = center + radius * Math.sin(angle);
+    
+    // Adjust for SVG text baseline issues - bottom labels appear further, top labels appear closer
+    // We need to pull bottom labels in and push top labels out slightly
+    const verticalAdjustment = fontSize * -0.3 * Math.sin(angle);
+    
+    return { 
+      x, 
+      y: y + verticalAdjustment 
     };
   };
 
   // Function to determine which ring was tapped based on distance from center
-  const getRingFromDistance = (distance: number): number => {
-    const ring1Radius = radius * 0.33;
-    const ring2Radius = radius * 0.66;
-    const ring3Radius = radius;
-
-    if (distance <= ring1Radius) return 1;
-    if (distance <= ring2Radius) return 2;
-    if (distance <= ring3Radius) return 3;
-    return 0; // Outside wheel
-  };
-
-  // Function to determine which taste segment was tapped based on angle
+    const getRingFromDistance = (distance: number, radius: number): number => {
+      if (distance < radius * 0.35) return 0; // Inside hollow center
+      if (distance < radius * 0.58) return 1; // Ring 1
+      if (distance < radius * 0.81) return 2; // Ring 2
+      if (distance < radius) return 3;        // Ring 3
+      return 0; // Outside wheel
+    };  // Function to determine which taste segment was tapped based on angle
   const getTasteFromAngle = (angle: number): string | null => {
     // Normalize angle to 0-2π range
     const normalizedAngle = ((angle % (2 * Math.PI)) + (2 * Math.PI)) % (2 * Math.PI);
@@ -98,7 +105,7 @@ const TastingWheel: React.FC<TastingWheelProps> = ({ tasteRating, onTasteRatingC
     const angle = Math.atan2(dy, dx);
     
     // Determine which ring and taste were tapped
-    const ring = getRingFromDistance(distance);
+    const ring = getRingFromDistance(distance, radius);
     const taste = getTasteFromAngle(angle);
     
     if (ring > 0 && taste) {
@@ -110,21 +117,30 @@ const TastingWheel: React.FC<TastingWheelProps> = ({ tasteRating, onTasteRatingC
     <View style={[styles.container, { width: size, height: size }]}>
       <Svg width={size} height={size} onPress={onTasteRatingChange ? handleWheelTap : undefined}>
         {/* Draw complete concentric circles first */}
+        {/* Center hollow circle - new design (transparent/hollow) */}
         <Circle
           cx={center}
           cy={center}
-          r={radius * 0.33}
+          r={radius * 0.35}
           fill="none"
           stroke="#fff"
-          strokeWidth="1"
+          strokeWidth={strokeWidth}
         />
         <Circle
           cx={center}
           cy={center}
-          r={radius * 0.66}
+          r={radius * 0.58}
           fill="none"
           stroke="#fff"
-          strokeWidth="1"
+          strokeWidth={strokeWidth}
+        />
+        <Circle
+          cx={center}
+          cy={center}
+          r={radius * 0.81}
+          fill="none"
+          stroke="#fff"
+          strokeWidth={strokeWidth}
         />
         <Circle
           cx={center}
@@ -132,7 +148,7 @@ const TastingWheel: React.FC<TastingWheelProps> = ({ tasteRating, onTasteRatingC
           r={radius}
           fill="none"
           stroke="#fff"
-          strokeWidth="1"
+          strokeWidth={strokeWidth}
         />
 
         {/* Draw each main category */}
@@ -151,25 +167,25 @@ const TastingWheel: React.FC<TastingWheelProps> = ({ tasteRating, onTasteRatingC
                 
                 return (
                   <G key={taste}>
-                    {/* Ring 1 (0% - 33%) - Inner ring */}
+                    {/* Ring 1 (35% - 58%) - Inner ring */}
                     <Path
-                      d={createArcPath(tasteStartAngle, tasteEndAngle, 0, radius * 0.33)}
+                      d={createArcPath(tasteStartAngle, tasteEndAngle, radius * 0.35, radius * 0.58)}
                       fill={rating >= 1 ? accentColor : transparentColor}
                       opacity={rating >= 1 ? 1 : 0}
                       stroke="none"
                     />
                     
-                    {/* Ring 2 (33% - 66%) - Middle ring */}
+                    {/* Ring 2 (58% - 81%) - Middle ring */}
                     <Path
-                      d={createArcPath(tasteStartAngle, tasteEndAngle, radius * 0.33, radius * 0.66)}
+                      d={createArcPath(tasteStartAngle, tasteEndAngle, radius * 0.58, radius * 0.81)}
                       fill={rating >= 2 ? accentColor : transparentColor}
                       opacity={rating >= 2 ? 1 : 0}
                       stroke="none"
                     />
                     
-                    {/* Ring 3 (66% - 100%) - Outer ring */}
+                    {/* Ring 3 (81% - 100%) - Outer ring */}
                     <Path
-                      d={createArcPath(tasteStartAngle, tasteEndAngle, radius * 0.66, radius)}
+                      d={createArcPath(tasteStartAngle, tasteEndAngle, radius * 0.81, radius)}
                       fill={rating >= 3 ? accentColor : transparentColor}
                       opacity={rating >= 3 ? 1 : 0}
                       stroke="none"
@@ -177,8 +193,10 @@ const TastingWheel: React.FC<TastingWheelProps> = ({ tasteRating, onTasteRatingC
                     
                     {/* Taste label - show for ALL tastes, keep all white */}
                     {(() => {
-                      const labelPos = getLabelPosition(midAngle, radius + 18);
-                      const fontSize = categoryTastes.length > 6 ? 9 : 10;
+                      const labelDistance = radius + Math.max(20, size * 0.04); // Consistent distance from circle edge
+                      const baseFontSize = Math.max(10, size * 0.035); // Scale font size with component size
+                      const fontSize = categoryTastes.length > 6 ? baseFontSize * 0.9 : baseFontSize; // Slightly smaller for crowded categories
+                      const labelPos = getLabelPosition(midAngle, labelDistance, fontSize);
                       return (
                         <SvgText
                           x={labelPos.x}
@@ -187,8 +205,9 @@ const TastingWheel: React.FC<TastingWheelProps> = ({ tasteRating, onTasteRatingC
                           fill="#fff" // Keep all text white
                           textAnchor="middle"
                           fontWeight="500"
+                          fontFamily="cardRegular"
                         >
-                          {taste}
+                          {taste.trim()}
                         </SvgText>
                       );
                     })()}
@@ -196,9 +215,9 @@ const TastingWheel: React.FC<TastingWheelProps> = ({ tasteRating, onTasteRatingC
                     {/* Divider lines between taste segments within each category */}
                     {index > 0 && (
                       <Path
-                        d={`M ${center} ${center} L ${center + radius * Math.cos(tasteStartAngle)} ${center + radius * Math.sin(tasteStartAngle)}`}
+                        d={`M ${center + radius * 0.35 * Math.cos(tasteStartAngle)} ${center + radius * 0.35 * Math.sin(tasteStartAngle)} L ${center + radius * Math.cos(tasteStartAngle)} ${center + radius * Math.sin(tasteStartAngle)}`}
                         stroke="#fff"
-                        strokeWidth="1"
+                        strokeWidth={strokeWidth}
                         opacity={0.8}
                       />
                     )}
@@ -213,9 +232,9 @@ const TastingWheel: React.FC<TastingWheelProps> = ({ tasteRating, onTasteRatingC
         {Object.values(categoryAngles).map((angles, index) => (
           <G key={`divider-${index}`}>
             <Path
-              d={`M ${center} ${center} L ${center + radius * Math.cos(angles.start)} ${center + radius * Math.sin(angles.start)}`}
+              d={`M ${center + radius * 0.35 * Math.cos(angles.start)} ${center + radius * 0.35 * Math.sin(angles.start)} L ${center + radius * Math.cos(angles.start)} ${center + radius * Math.sin(angles.start)}`}
               stroke="#fff"
-              strokeWidth="1"
+              strokeWidth={strokeWidth}
               opacity={0.9}
             />
           </G>
@@ -229,7 +248,6 @@ const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
     justifyContent: 'center',
-    marginVertical: 20,
     alignSelf: 'center', // Center the wheel horizontally
   },
 });

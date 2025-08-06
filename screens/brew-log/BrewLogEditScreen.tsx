@@ -319,7 +319,13 @@ const BrewLogEditScreen: React.FC = () => {
         <View style={styles.imageContainer}>
           <TouchableOpacity onPress={showImagePickerOptions} activeOpacity={0.8}>
             <Image
-              source={{ uri: editableData.image }}
+              source={
+                editableData.image.startsWith('http') 
+                  ? { uri: editableData.image }
+                  : editableData.image.includes('BrewLogEditScreenPlaceholderInstruction.png')
+                  ? require('../../assets/nonclickable-visual-elements/brewLog/BrewLogEditScreenPlaceholderInstruction.png')
+                  : { uri: editableData.image }
+              }
               style={styles.brewImage}
             />
             <View style={styles.imageOverlay}>
@@ -612,8 +618,8 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   brewImage: {
-    width: 150,
-    height: 150,
+    width: 217,
+    height: 217,
     borderRadius: 10,
   },
   imageOverlay: {
