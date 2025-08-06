@@ -22,9 +22,6 @@ import {
 import { Ionicons, EvilIcons } from "@expo/vector-icons";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-// import Video from "react-native-video";
-
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import type { RootStackParamList } from "../navigation/AppNavigator";
 import Header from "../navigation/Header";
 import NewsletterCard from "../assets/components/newsletter";
@@ -186,7 +183,7 @@ export default function HomeScreen() {
         <View style={styles.overlayContent}>
           <SafeAreaView
             style={{
-              top: 0,
+              top: 3,
               left: 0,
               right: 0,
               bottom: 0,

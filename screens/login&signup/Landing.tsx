@@ -15,8 +15,7 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../../navigation/AppNavigator";
-import { Ionicons } from "@expo/vector-icons";
-import { Shadow } from "react-native-shadow-2";
+import { useAuth } from "../../context/AuthContext";
 
 type LoginScreenNavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -24,12 +23,15 @@ export default function LoginScreen() {
   const navigation = useNavigation<LoginScreenNavigationProp>();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const { login } = useAuth();
 
   const handleLogin = () => {
-    navigation.reset({
-      index: 0,
-      routes: [{ name: "MainTabs" }],
-    });
+    if (!email) return alert("Please provide login information");
+    login({ email }); // you can also include title if you want
+    // navigation.reset({
+    //   index: 0,
+    //   routes: [{ name: "MainTabs" }],
+    // });
   };
 
   const handleBack = () => {

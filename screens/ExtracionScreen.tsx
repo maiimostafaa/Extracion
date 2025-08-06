@@ -397,347 +397,386 @@ export default function ExtractionScreen() {
       source={require("../assets/backgrounds/bg-extracion.png")}
     >
       <ScrollView style={styles.container}>
-      <SafeAreaView style={styles.container}>
-        <View style={styles.header}>
-          <Header tintColor="#58595B" />
-        </View>
-
-        <View style={styles.content}>
-          <View style={styles.methodsContainer}>
-            <ExtracionCoffeeToWaterInstructionBanner text="Choose your brewing method" />
-
-            {/* BLE Connection Button - Show when no device connected */}
-            {!connectedDevice && (
-              <TouchableOpacity
-                style={styles.connectButton}
-                onPress={() => {
-                  setShowBLEModal(true);
-                  setModalState("initial");
-                }}
-              >
-                <Ionicons name="bluetooth" size={20} color="#8CDBED" />
-                <Text style={styles.connectButtonText}>
-                  Connect to Extracion Device
-                </Text>
-                <Text style={styles.connectButtonSubtext}>
-                  Optional - for live data
-                </Text>
-              </TouchableOpacity>
-            )}
-
-            {/* Connection Status and Data */}
-            {connectedDevice && (
-              <View style={styles.deviceStatus}>
-                <View style={styles.statusHeader}>
-                  <View style={styles.connectedIndicator}>
-                    <Ionicons name="bluetooth" size={16} color="#4CAF50" />
-                    <Text style={styles.connectedText}>BLE Device Connected</Text>
-                  </View>
-                  <TouchableOpacity
-                    onPress={handleDisconnect}
-                    style={styles.disconnectButton}
-                  >
-                    <Text style={styles.disconnectText}>Disconnect</Text>
-                  </TouchableOpacity>
-                </View>
-
-                <View style={styles.dataRow}>
-                  <View style={styles.dataItem}>
-                    <Text style={styles.dataLabel}>Temperature</Text>
-                    <Text style={styles.dataValue}>
-                      {temperature.toFixed(1)}°C
-                    </Text>
-                  </View>
-                  <View style={styles.dataItem}>
-                    <Text style={styles.dataLabel}>Weight</Text>
-                    <Text style={styles.dataValue}>{weight.toFixed(1)}g</Text>
-                  </View>
-                </View>
-              </View>
-            )}
-            
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.carouselContent}
-              style={styles.carousel}
-            >
-              {brewingMethods.map(renderBrewingMethodCard)}
-            </ScrollView>
+        <SafeAreaView style={styles.container}>
+          <View style={styles.header}>
+            <Header tintColor="#58595B" />
           </View>
-        </View>
 
-        {/* BLE Connection Modal */}
-        <Modal
-          visible={showBLEModal}
-          transparent={true}
-          animationType="slide"
-          onRequestClose={handleBLEModalClose}
-        >
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalContent}>
-              {/* Status Bar - Fixed position outside ScrollView */}
-              <View style={styles.statusBar} />
+          <View style={styles.content}>
+            <View style={styles.methodsContainer}>
+              <ExtracionCoffeeToWaterInstructionBanner text="Choose your brewing method" />
 
-              {/* Close Button - Fixed position outside ScrollView */}
-              <TouchableOpacity
-                style={styles.closeButton}
-                onPress={handleBLEModalClose}
+              {/* BLE Connection Button - Show when no device connected */}
+              {!connectedDevice && (
+                <TouchableOpacity
+                  style={styles.connectButton}
+                  onPress={() => {
+                    setShowBLEModal(true);
+                    setModalState("initial");
+                  }}
+                >
+                  <Ionicons name="bluetooth" size={20} color="#8CDBED" />
+                  <Text style={styles.connectButtonText}>
+                    Connect to Extracion Device
+                  </Text>
+                  <Text style={styles.connectButtonSubtext}>
+                    Optional - for live data
+                  </Text>
+                </TouchableOpacity>
+              )}
+
+              {/* Connection Status and Data */}
+              {connectedDevice && (
+                <View style={styles.deviceStatus}>
+                  <View style={styles.statusHeader}>
+                    <View style={styles.connectedIndicator}>
+                      <Ionicons name="bluetooth" size={16} color="#4CAF50" />
+                      <Text style={styles.connectedText}>
+                        BLE Device Connected
+                      </Text>
+                    </View>
+                    <TouchableOpacity
+                      onPress={handleDisconnect}
+                      style={styles.disconnectButton}
+                    >
+                      <Text style={styles.disconnectText}>Disconnect</Text>
+                    </TouchableOpacity>
+                  </View>
+
+                  <View style={styles.dataRow}>
+                    <View style={styles.dataItem}>
+                      <Text style={styles.dataLabel}>Temperature</Text>
+                      <Text style={styles.dataValue}>
+                        {temperature.toFixed(1)}°C
+                      </Text>
+                    </View>
+                    <View style={styles.dataItem}>
+                      <Text style={styles.dataLabel}>Weight</Text>
+                      <Text style={styles.dataValue}>{weight.toFixed(1)}g</Text>
+                    </View>
+                  </View>
+                </View>
+              )}
+
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.carouselContent}
+                style={styles.carousel}
               >
-                <Ionicons name="close" size={46} color="#666" />
-              </TouchableOpacity>
-
-              {/* Scrollable Content */}
-              <View style={styles.modalBody}>
-                {/* French Press Icon */}
-
-                {modalState === "initial" && (
-                  <>
-                    <View
-                      style={{
-                        width: "90%",
-                        height: 290,
-                        backgroundColor: "#58595B1A",
-                        borderRadius: 20,
-                        marginTop: "-40%",
-                      }}
-                    >
-                      <Image
-                        source={require("../assets/nonclickable-visual-elements/coffee press unfilled.png")}
-                        style={styles.frenchPressModalIcon}
-                      />
-                      <Text style={styles.modalTitle}>
-                        Turn on your Extracion
-                      </Text>
-                      <Text style={styles.modalSubtitle}>
-                        Continue when it's on.
-                      </Text>
-                    </View>
-
-                    <View style={styles.buttonContainer}>
-                      <TouchableOpacity
-                        style={styles.continueButton}
-                        onPress={handleContinue}
-                      >
-                        <Text style={styles.continueButtonText}>Continue</Text>
-                      </TouchableOpacity>
-                    </View>
-                  </>
-                )}
-
-                {modalState === "searching" && (
-                  <>
-                    <View
-                      style={{
-                        width: "90%",
-                        height: "100%",
-                        backgroundColor: "#58595B1A",
-                        borderRadius: 20,
-                        marginTop: "-40%",
-                      }}
-                    >
-                      <Animated.View
-                        style={[
-                          styles.loadingSpinner,
-                          {
-                            transform: [
-                              {
-                                rotate: spinAnim.interpolate({
-                                  inputRange: [0, 1],
-                                  outputRange: ["0deg", "360deg"],
-                                }),
-                              },
-                            ],
-                          },
-                        ]}
-                      >
-                        <View style={styles.spinnerCircle} />
-                      </Animated.View>
-                      <Text style={styles.modalTitle}>Searching...</Text>
-                      <Text style={styles.modalSubtitle}>
-                        Make sure your machine is turned on.
-                      </Text>
-                    </View>
-                  </>
-                )}
-
-                {modalState === "deviceList" && (
-                  <>
-                    {allDevices.length > 0 ? (
-                      <>
-                        <View
-                          style={{
-                            width: "90%",
-                            height: 290,
-                            backgroundColor: "#58595B1A",
-                            borderRadius: 20,
-                            marginBottom: 30,
-                            marginTop: "-40%",
-                          }}
-                        >
-                          <Image
-                            source={require("../assets/nonclickable-visual-elements/coffee press unfilled.png")}
-                            style={styles.frenchPressModalIcon}
-                          />
-                          <Text style={styles.modalTitle}>
-                            Let's connect to Extracion
-                          </Text>
-                          <Text style={styles.modalSubtitle}>
-                            Choose your Extracion device
-                          </Text>
-                          <Text style={styles.modalSubtitle}>to continue.</Text>
-                        </View>
-                        <View style={styles.deviceListContainer}>
-                          {allDevices.map((device, index) => (
-                            <TouchableOpacity
-                              key={device.id}
-                              style={styles.deviceItem}
-                              onPress={() => handleDeviceConnect(device)}
-                            >
-                              <View style={styles.wifiIcon}>
-                                <Ionicons
-                                  name="bluetooth"
-                                  size={20}
-                                  color="#333"
-                                />
-                              </View>
-                              <Text style={styles.deviceName}>
-                                {device.name ||
-                                  device.localName ||
-                                  "STM32WB Device"}
-                              </Text>
-                              <Ionicons
-                                name="chevron-forward"
-                                size={20}
-                                color="#666"
-                              />
-                            </TouchableOpacity>
-                          ))}
-                        </View>
-
-                        {/* Your additional button */}
-                        {allDevices.map((device, index) => (
-                          <TouchableOpacity
-                            style={styles.continueButton}
-                            onPress={() => handleDeviceConnect(device)}
-                          >
-                            <Text style={styles.continueButtonText}>
-                              Continue
-                            </Text>
-                          </TouchableOpacity>
-                        ))}
-                      </>
-                    ) : (
-                      <>
-                        <View
-                          style={{
-                            width: "90%",
-                            height: 290,
-                            backgroundColor: "#58595B1A",
-                            borderRadius: 20,
-                            marginBottom: 30,
-                          }}
-                        >
-                          <Image
-                            source={require("../assets/nonclickable-visual-elements/coffee press unfilled.png")}
-                            style={styles.frenchPressModalIcon}
-                          />
-                          <Text style={styles.modalTitle}>
-                            Let's connect to Extracion
-                          </Text>
-                          <Text style={styles.modalSubtitle}>
-                            Choose your Extracion device
-                          </Text>
-                          <Text style={styles.modalSubtitle}>to continue.</Text>
-                        </View>
-                        <Text style={styles.noDevicesText}>
-                          No STM32WB devices found
-                        </Text>
-                        <View style={styles.buttonContainer}>
-                          <TouchableOpacity
-                            style={styles.continueButton}
-                            onPress={() => {
-                              console.log("Search again button pressed");
-                              setModalState("initial");
-                            }}
-                          >
-                            <Text style={styles.continueButtonText}>
-                              search again
-                            </Text>
-                          </TouchableOpacity>
-                          <TouchableOpacity
-                            style={styles.skipButton}
-                            onPress={handleBLEModalClose}
-                          >
-                            <Text style={styles.skipButtonText}>
-                              continue without device
-                            </Text>
-                          </TouchableOpacity>
-                        </View>
-                      </>
-                    )}
-                  </>
-                )}
-
-                {modalState === "connecting" && (
-                  <>
-                    <Animated.View
-                      style={[
-                        styles.loadingSpinner,
-                        {
-                          transform: [
-                            {
-                              rotate: spinAnim.interpolate({
-                                inputRange: [0, 1],
-                                outputRange: ["0deg", "360deg"],
-                              }),
-                            },
-                          ],
-                        },
-                      ]}
-                    >
-                      <View style={styles.spinnerCircle} />
-                    </Animated.View>
-                    <Text style={styles.modalTitle}>Connecting...</Text>
-                    <Text style={styles.modalSubtitle}>
-                      Just a moment more, please.
-                    </Text>
-                    <TouchableOpacity
-                      style={styles.cancelButton}
-                      onPress={() => {
-                        setConnectingDevice(null);
-                        setModalState("deviceList");
-                      }}
-                    >
-                      <Text style={styles.cancelButtonText}>cancel</Text>
-                    </TouchableOpacity>
-                  </>
-                )}
-
-                {modalState === "connected" && (
-                  <>
-                    <Text style={styles.modalTitle}>
-                      Extracion is ready to use
-                    </Text>
-                    <Text style={styles.modalSubtitle}>
-                      Let's brew some magic!
-                    </Text>
-                    <TouchableOpacity
-                      style={styles.continueButton}
-                      onPress={() => {
-                        setShowBLEModal(false);
-                        setModalState("initial");
-                      }}
-                    >
-                      <Text style={styles.continueButtonText}>finish</Text>
-                    </TouchableOpacity>
-                  </>
-                )}
-              </View>
+                {brewingMethods.map(renderBrewingMethodCard)}
+              </ScrollView>
             </View>
           </View>
-        </Modal>
-      </SafeAreaView>
+
+          {/* BLE Connection Modal */}
+          <Modal
+            visible={showBLEModal}
+            transparent={true}
+            animationType="slide"
+            onRequestClose={handleBLEModalClose}
+          >
+            <View style={styles.modalOverlay}>
+              <View style={styles.modalContent}>
+                {/* Status Bar - Fixed position outside ScrollView */}
+                <View style={styles.statusBar} />
+
+                {/* Close Button - Fixed position outside ScrollView */}
+                <TouchableOpacity
+                  style={styles.closeButton}
+                  onPress={handleBLEModalClose}
+                >
+                  <Ionicons name="close" size={46} color="#666" />
+                </TouchableOpacity>
+
+                {/* Scrollable Content */}
+                <View style={styles.modalBody}>
+                  {/* French Press Icon */}
+
+                  {modalState === "initial" && (
+                    <>
+                      <View
+                        style={{
+                          width: "90%",
+                          height: 290,
+                          backgroundColor: "#58595B1A",
+                          borderRadius: 20,
+                          marginTop: "-40%",
+                        }}
+                      >
+                        <Image
+                          source={require("../assets/nonclickable-visual-elements/coffee press unfilled.png")}
+                          style={styles.frenchPressModalIcon}
+                        />
+                        <Text style={styles.modalTitle}>
+                          Turn on your Extracion
+                        </Text>
+                        <Text style={styles.modalSubtitle}>
+                          Continue when it's on.
+                        </Text>
+                      </View>
+
+                      <View style={styles.buttonContainer}>
+                        <TouchableOpacity
+                          style={styles.continueButton}
+                          onPress={handleContinue}
+                        >
+                          <Text style={styles.continueButtonText}>
+                            Continue
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+                    </>
+                  )}
+
+                  {modalState === "searching" && (
+                    <>
+                      <View
+                        style={{
+                          width: "90%",
+                          height: "100%",
+                          backgroundColor: "#58595B1A",
+                          borderRadius: 20,
+                          marginTop: "-40%",
+                        }}
+                      >
+                        <Animated.View
+                          style={[
+                            styles.loadingSpinner,
+                            {
+                              transform: [
+                                {
+                                  rotate: spinAnim.interpolate({
+                                    inputRange: [0, 1],
+                                    outputRange: ["0deg", "360deg"],
+                                  }),
+                                },
+                              ],
+                            },
+                          ]}
+                        >
+                          <View style={styles.spinnerCircle} />
+                        </Animated.View>
+                        <Text style={styles.modalTitle}>Searching...</Text>
+                        <Text style={styles.modalSubtitle}>
+                          Make sure your machine is turned on.
+                        </Text>
+                      </View>
+                    </>
+                  )}
+
+                  {modalState === "deviceList" && (
+                    <>
+                      {allDevices.length > 0 ? (
+                        <>
+                          <View
+                            style={{
+                              width: "90%",
+                              height: 290,
+                              backgroundColor: "#58595B1A",
+                              borderRadius: 20,
+                              marginBottom: 30,
+                              marginTop: "-40%",
+                            }}
+                          >
+                            <Image
+                              source={require("../assets/nonclickable-visual-elements/coffee press unfilled.png")}
+                              style={styles.frenchPressModalIcon}
+                            />
+                            <Text style={styles.modalTitle}>
+                              Let's connect to Extracion
+                            </Text>
+                            <Text style={styles.modalSubtitle}>
+                              Choose your Extracion device
+                            </Text>
+                            <Text style={styles.modalSubtitle}>
+                              to continue.
+                            </Text>
+                          </View>
+                          <View style={styles.deviceListContainer}>
+                            {allDevices.map((device, index) => (
+                              <TouchableOpacity
+                                key={device.id}
+                                style={styles.deviceItem}
+                                onPress={() => handleDeviceConnect(device)}
+                              >
+                                <View style={styles.wifiIcon}>
+                                  <Ionicons
+                                    name="bluetooth"
+                                    size={20}
+                                    color="#333"
+                                  />
+                                </View>
+                                <Text style={styles.deviceName}>
+                                  {device.name ||
+                                    device.localName ||
+                                    "STM32WB Device"}
+                                </Text>
+                                <Ionicons
+                                  name="chevron-forward"
+                                  size={20}
+                                  color="#666"
+                                />
+                              </TouchableOpacity>
+                            ))}
+                          </View>
+
+                          {/* Your additional button */}
+                          {allDevices.map((device, index) => (
+                            <TouchableOpacity
+                              style={styles.continueButton}
+                              onPress={() => handleDeviceConnect(device)}
+                            >
+                              <Text style={styles.continueButtonText}>
+                                Continue
+                              </Text>
+                            </TouchableOpacity>
+                          ))}
+                        </>
+                      ) : (
+                        <>
+                          <View
+                            style={{
+                              width: "90%",
+                              height: 290,
+                              backgroundColor: "#58595B1A",
+                              borderRadius: 20,
+                              marginBottom: 30,
+                              marginTop: "-30%",
+                            }}
+                          >
+                            <Image
+                              source={require("../assets/nonclickable-visual-elements/coffee press unfilled.png")}
+                              style={styles.frenchPressModalIcon}
+                            />
+                            <Text style={styles.modalTitle}>
+                              Let's connect to Extracion
+                            </Text>
+                            <Text style={styles.modalSubtitle}>
+                              Choose your Extracion device
+                            </Text>
+                            <Text style={styles.modalSubtitle}>
+                              to continue.
+                            </Text>
+                          </View>
+                          <Text style={styles.noDevicesText}>
+                            No STM32WB devices found
+                          </Text>
+                          <View style={styles.buttonContainer}>
+                            <TouchableOpacity
+                              style={styles.continueButton}
+                              onPress={() => {
+                                console.log("Search again button pressed");
+                                setModalState("initial");
+                              }}
+                            >
+                              <Text style={styles.continueButtonText}>
+                                Search Again
+                              </Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                              style={styles.skipButton}
+                              onPress={handleBLEModalClose}
+                            >
+                              <Text style={styles.skipButtonText}>
+                                Continue without device
+                              </Text>
+                            </TouchableOpacity>
+                          </View>
+                        </>
+                      )}
+                    </>
+                  )}
+
+                  {modalState === "connecting" && (
+                    <>
+                      <View
+                        style={{
+                          width: "90%",
+                          height: "100%",
+                          backgroundColor: "#58595B1A",
+                          borderRadius: 20,
+                          marginTop: "-40%",
+                          marginBottom: 30,
+                          alignContent: "center",
+                        }}
+                      >
+                        <Animated.View
+                          style={[
+                            styles.loadingSpinner,
+                            {
+                              transform: [
+                                {
+                                  rotate: spinAnim.interpolate({
+                                    inputRange: [0, 1],
+                                    outputRange: ["0deg", "360deg"],
+                                  }),
+                                },
+                              ],
+                            },
+                          ]}
+                        >
+                          <View style={styles.spinnerCircle} />
+                        </Animated.View>
+                        <Text style={styles.modalTitle}>Connecting...</Text>
+
+                        <Text style={styles.modalSubtitle}>
+                          Just a moment more, please.
+                        </Text>
+                      </View>
+                      <TouchableOpacity
+                        style={styles.cancelButton}
+                        onPress={() => {
+                          setConnectingDevice(null);
+                          setModalState("deviceList");
+                        }}
+                      >
+                        <Text style={styles.cancelButtonText}>Cancel</Text>
+                      </TouchableOpacity>
+                    </>
+                  )}
+
+                  {modalState === "connected" && (
+                    <>
+                      <View
+                        style={{
+                          width: "90%",
+                          height: 290,
+                          backgroundColor: "#58595B1A",
+                          borderRadius: 20,
+                          marginTop: "-40%",
+                        }}
+                      >
+                        <Image
+                          source={require("../assets/nonclickable-visual-elements/coffee press unfilled.png")}
+                          style={styles.frenchPressModalIcon}
+                        />
+                        <Text style={styles.modalTitle}>
+                          Extracion is ready to use
+                        </Text>
+                        <Text style={styles.modalSubtitle}>
+                          Let's brew some magic!
+                        </Text>
+                      </View>
+
+                      <View style={styles.buttonContainer}>
+                        <TouchableOpacity
+                          style={styles.continueButton}
+                          onPress={() => {
+                            setShowBLEModal(false);
+                            setModalState("initial");
+                          }}
+                        >
+                          <Text style={styles.continueButtonText}>Finish</Text>
+                        </TouchableOpacity>
+                      </View>
+                    </>
+                  )}
+                </View>
+              </View>
+            </View>
+          </Modal>
+        </SafeAreaView>
       </ScrollView>
     </ImageBackground>
   );
@@ -954,7 +993,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 30,
     alignItems: "center",
-    width: "90%", // Full width of the wrapper
+    width: "100%", // Full width of the wrapper
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
@@ -990,16 +1029,23 @@ const styles = StyleSheet.create({
   },
   cancelButton: {
     backgroundColor: "#E5E5E5",
-    paddingVertical: 14,
-    paddingHorizontal: 50,
-    borderRadius: 25,
+    padding: 10,
+    borderRadius: 30,
     alignItems: "center",
-    minWidth: 200,
+    width: "100%", // Full width of the wrapper
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 3, // Reduced from 3 for better centering
+    },
+    shadowOpacity: 0.25, // Reduced for more subtle shadow
+    shadowRadius: 2, // Increased for softer shadow
+    elevation: 5, // Reduced elevation for Android
   },
   cancelButtonText: {
-    fontSize: 16,
-    fontWeight: "500",
-    color: "#333333",
+    fontSize: 18,
+    fontFamily: "cardRegular",
+    color: "#58595B",
   },
   loadingSpinner: {
     width: 100,
@@ -1056,7 +1102,6 @@ const styles = StyleSheet.create({
     color: "#999999",
     textAlign: "center",
     fontStyle: "italic",
-    marginVertical: 20,
   },
 
   // Legacy styles (to be cleaned up)
