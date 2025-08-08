@@ -42,7 +42,13 @@ const BrewLogEntryCard: React.FC<brewLogEntryCardProps> = ({
       activeOpacity={0.95}
     >
       <Image
-        source={{ uri: brewLogEntry.image }}
+        source={
+          brewLogEntry.image.startsWith('http') 
+            ? { uri: brewLogEntry.image }
+            : brewLogEntry.image.includes('BrewLogEditScreenPlaceholderInstruction.png')
+            ? require('../../nonclickable-visual-elements/brewLog/BrewLogEditScreenPlaceholderInstruction.png')
+            : { uri: brewLogEntry.image }
+        }
         style={styles.image}
         resizeMode="cover"
       />
