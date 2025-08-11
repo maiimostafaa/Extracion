@@ -26,6 +26,7 @@ import type { RootStackParamList } from "../navigation/AppNavigator";
 import Header from "../navigation/Header";
 import NewsletterCard from "../assets/components/newsletter";
 import HomePageFilterSelector from "../assets/components/HomePageFilterSelector";
+import ShopWebViewModal from "../components/ShopWebViewModal";
 import mockNewsletters from "../assets/mock_data/mock-newsletter-items";
 import { newsletterItem } from "../assets/types/newsletter-item";
 
@@ -50,6 +51,7 @@ export default function HomeScreen() {
   const navigation = useNavigation<NavigationProp>();
   const [refreshing, setRefreshing] = useState(false);
   const [instagramPosts, setInstagramPosts] = useState<newsletterItem[]>([]);
+  const [showShopModal, setShowShopModal] = useState(false);
 
   const scrollY = useRef(new Animated.Value(0)).current;
   const [animationFrame, setAnimationFrame] = useState(0);
@@ -257,7 +259,9 @@ export default function HomeScreen() {
             showsHorizontalScrollIndicator={false}
             nestedScrollEnabled={true}
           >
-            <TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => setShowShopModal(true)}
+            >
               <ImageBackground
                 source={require("../assets/backgrounds/barista-classes-bg.png")}
                 style={styles.imageContainer}
@@ -273,7 +277,9 @@ export default function HomeScreen() {
                 imageStyle={{ borderRadius: 10 }}
               ></ImageBackground>
             </TouchableOpacity>
-            <TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => setShowShopModal(true)}
+            >
               <ImageBackground
                 source={require("../assets/backgrounds/cafe-event-bg.png")}
                 style={{ width: 200, height: 250, borderRadius: 10 }}
@@ -302,6 +308,11 @@ export default function HomeScreen() {
           ))}
         </View>
       </Animated.ScrollView>
+      
+      <ShopWebViewModal 
+        visible={showShopModal} 
+        onClose={() => setShowShopModal(false)} 
+      />
     </View>
   );
 }
