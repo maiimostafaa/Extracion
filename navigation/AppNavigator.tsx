@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Image, View } from "react-native";
 import { useAuth } from "../context/AuthContext";
+import ShopWebViewModal from "../components/ShopWebViewModal";
 
 import LandingScreen from "../screens/login&signup/Landing";
 import SignUpScreen from "../screens/login&signup/SignUp";
@@ -25,7 +26,6 @@ import MainWallet from "../screens/wallet/mainWallet";
 import AllCouponsScreen from "../screens/wallet/allCoupons";
 import FullCouponScreen from "../screens/wallet/FullCoupon";
 import ProfileScreen from "../screens/ProfileScreen";
-import ShopScreen from "../screens/ShopScreen";
 import SearchScreen from "../screens/SearchScreen";
 import BrewLogScreen from "../screens/brew-log/BrewLog";
 import BrewLogEditScreen from "../screens/brew-log/BrewLogEditScreen";
@@ -149,8 +149,16 @@ function HomeStackScreen() {
 }
 
 function MainTabs() {
+  const [showShopModal, setShowShopModal] = useState(false);
+
+  // Simple placeholder component for Shop tab
+  const ShopTabComponent = () => {
+    return <View style={{ flex: 1, backgroundColor: '#333333' }} />;
+  };
+
   return (
-    <Tab.Navigator
+    <>
+      <Tab.Navigator
       screenOptions={({ route }) => ({
         tabBarIcon: ({ focused, color, size }) => {
           let iconSource;
@@ -207,8 +215,23 @@ function MainTabs() {
       <Tab.Screen name="Brew Log" component={BrewLogScreen} />
       <Tab.Screen name="Scan" component={CameraScreen} />
       <Tab.Screen name="Extracion" component={ExtracionScreen} />
-      <Tab.Screen name="Shop" component={ShopScreen} />
+      <Tab.Screen 
+        name="Shop" 
+        component={ShopTabComponent}
+        listeners={{
+          tabPress: (e) => {
+            e.preventDefault();
+            setShowShopModal(true);
+          },
+        }}
+      />
     </Tab.Navigator>
+    
+    <ShopWebViewModal 
+      visible={showShopModal} 
+      onClose={() => setShowShopModal(false)} 
+    />
+    </>
   );
 }
 
@@ -263,7 +286,6 @@ export default function AppNavigator() {
       <Stack.Screen name="ExtracionPour" component={ExtracionPour} />
       <Stack.Screen name="ExtracionSpiral" component={ExtracionSpiral} />
       <Stack.Screen name="ExtracionBrew" component={ExtracionBrew} />
-      <Stack.Screen name="ShopScreen" component={ShopScreen} />
     </Stack.Navigator>
   ) : (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
