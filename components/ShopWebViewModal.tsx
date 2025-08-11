@@ -184,7 +184,7 @@ const styles = StyleSheet.create({
   },
   loadingContainer: {
     position: 'absolute',
-    top: 80,
+    top: 120,
     left: 0,
     right: 0,
     bottom: 0,
