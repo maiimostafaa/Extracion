@@ -12,72 +12,87 @@ import {
   Platform,
   Alert,
 } from "react-native";
-import { Ionicons } from '@expo/vector-icons';
-import DateTimePicker from '@react-native-community/datetimepicker';
-import * as ImagePicker from 'expo-image-picker';
-import * as FileSystem from 'expo-file-system';
+import { Ionicons } from "@expo/vector-icons";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import * as ImagePicker from "expo-image-picker";
+import * as FileSystem from "expo-file-system";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../navigation/AppNavigator";
 import { brewLogEntry } from "../../assets/types/BrewLog/brewLogEntry";
-import TastingWheel from "../../assets/components/brewLogComponents/TastingWheel";
-import BrewLogBrewDataBlock from "../../assets/components/brewLogComponents/brewLogBrewDataBlock";
-import BrewLogRatingStars from "../../assets/components/brewLogComponents/BrewLogRatingStars";
-import { addBrewLog, loadBrewLogs, saveBrewLogs, deleteBrewLog, storeImagePermanently } from "../../brewLogStorage";
+import TastingWheel from "../../assets/components/brew-log-components/TastingWheel";
+import BrewLogBrewDataBlock from "../../assets/components/brew-log-components/brewLogBrewDataBlock";
+import BrewLogRatingStars from "../../assets/components/brew-log-components/BrewLogRatingStars";
+import {
+  addBrewLog,
+  loadBrewLogs,
+  saveBrewLogs,
+  deleteBrewLog,
+  storeImagePermanently,
+} from "../../brewLogStorage";
 
 type EditScreenRouteProp = RouteProp<RootStackParamList, "BrewLogEditScreen">;
-type EditScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, "BrewLogEditScreen">;
+type EditScreenNavigationProp = NativeStackNavigationProp<
+  RootStackParamList,
+  "BrewLogEditScreen"
+>;
 
 const BrewLogEditScreen: React.FC = () => {
   const route = useRoute<EditScreenRouteProp>();
   const navigation = useNavigation<EditScreenNavigationProp>();
-  
+
   // Get brewLogEntry from route params - it's always required
   const brewLogEntry = route.params.brewLogEntry;
-  
+
   // Date picker state
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showBrewMethodPicker, setShowBrewMethodPicker] = useState(false);
   const [showRoasterDatePicker, setShowRoasterDatePicker] = useState(false);
-  
+
   // Brew method options
-  const brewMethods = ['Pour Over', 'French Press', 'Cold Brew', 'Cold Drip', 'Brew Bar'];
-  
+  const brewMethods = [
+    "Pour Over",
+    "French Press",
+    "Cold Brew",
+    "Cold Drip",
+    "Brew Bar",
+  ];
+
   // Get brewing method icon
   const getBrewMethodIcon = (brewMethod: string) => {
     switch (brewMethod) {
-      case 'French Press':
-        return require('../../assets/components/brewLogComponents/icons/french_press.png');
-      case 'Pour Over':
-        return require('../../assets/components/brewLogComponents/icons/pour_over.png');
-      case 'Cold Brew':
-      case 'Cold Drip':
-        return require('../../assets/components/brewLogComponents/icons/cold_brew.png');
-      case 'Brew Bar':
-        return require('../../assets/components/brewLogComponents/icons/brew_bar.png');
+      case "French Press":
+        return require("../../assets/components/brew-log-components/icons/french_press.png");
+      case "Pour Over":
+        return require("../../assets/components/brew-log-components/icons/pour_over.png");
+      case "Cold Brew":
+      case "Cold Drip":
+        return require("../../assets/components/brew-log-components/icons/cold_brew.png");
+      case "Brew Bar":
+        return require("../../assets/components/brew-log-components/icons/brew_bar.png");
       default:
-        return require('../../assets/components/brewLogComponents/icons/pour_over.png');
+        return require("../../assets/components/brew-log-components/icons/pour_over.png");
     }
   };
-  
+
   // Helper function to safely parse date
   const parseRoasterDate = (dateString: string): Date => {
     if (!dateString) return new Date();
-    
+
     // Try to parse the date string directly first
     const parsedDate = new Date(dateString);
-    
+
     // If valid date, return it (this handles both ISO strings and formatted dates)
     if (!isNaN(parsedDate.getTime())) {
       return parsedDate;
     }
-    
+
     // If invalid date, try parsing with Date.parse which handles more formats
     const alternativeParse = Date.parse(dateString);
     if (!isNaN(alternativeParse)) {
       return new Date(alternativeParse);
     }
-    
+
     // Try parsing common date formats manually
     // Handle "DD Month YYYY" format (e.g., "6 August 2025")
     const dateRegex = /^(\d{1,2})\s+(\w+)\s+(\d{4})$/;
@@ -85,20 +100,38 @@ const BrewLogEditScreen: React.FC = () => {
     if (match) {
       const [, day, monthName, year] = match;
       const monthNames = [
-        'January', 'February', 'March', 'April', 'May', 'June',
-        'July', 'August', 'September', 'October', 'November', 'December'
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
       ];
-      const monthIndex = monthNames.findIndex(m => m.toLowerCase() === monthName.toLowerCase());
+      const monthIndex = monthNames.findIndex(
+        (m) => m.toLowerCase() === monthName.toLowerCase()
+      );
       if (monthIndex !== -1) {
-        const constructedDate = new Date(parseInt(year), monthIndex, parseInt(day));
+        const constructedDate = new Date(
+          parseInt(year),
+          monthIndex,
+          parseInt(day)
+        );
         if (!isNaN(constructedDate.getTime())) {
           return constructedDate;
         }
       }
     }
-    
+
     // If all parsing fails, return current date as fallback
-    console.warn(`Could not parse roaster date: ${dateString}, using current date`);
+    console.warn(
+      `Could not parse roaster date: ${dateString}, using current date`
+    );
     return new Date();
   };
 
@@ -110,7 +143,9 @@ const BrewLogEditScreen: React.FC = () => {
     brewMethod: brewLogEntry.brewMethod, // Add brew method to editable data
     coffeeName: brewLogEntry.coffeeBeanDetail.coffeeName,
     origin: brewLogEntry.coffeeBeanDetail.origin,
-    roasterDate: parseRoasterDate(brewLogEntry.coffeeBeanDetail.roasterDate || ''), // Use helper function with fallback
+    roasterDate: parseRoasterDate(
+      brewLogEntry.coffeeBeanDetail.roasterDate || ""
+    ), // Use helper function with fallback
     roasterLevel: brewLogEntry.coffeeBeanDetail.roasterLevel,
     bagWeight: brewLogEntry.coffeeBeanDetail.bagWeight.toString(),
     grindSize: brewLogEntry.brewDetail.grindSize.toString(),
@@ -184,50 +219,52 @@ const BrewLogEditScreen: React.FC = () => {
 
       // Check if this is a new entry (by checking if ID exists in storage)
       const existingLogs = await loadBrewLogs();
-      const isNewEntry = !existingLogs.some(log => log.id === brewLogEntry.id);
-      
+      const isNewEntry = !existingLogs.some(
+        (log) => log.id === brewLogEntry.id
+      );
+
       if (isNewEntry) {
         // Generate a proper ID for new entry
         updatedEntry.id = Date.now();
         await addBrewLog(updatedEntry);
       } else {
         // Update existing entry
-        const updatedLogs = existingLogs.map(log => 
+        const updatedLogs = existingLogs.map((log) =>
           log.id === brewLogEntry.id ? updatedEntry : log
         );
         await saveBrewLogs(updatedLogs);
       }
-      
+
       navigation.goBack();
     } catch (error) {
-      console.error('Error saving brew log:', error);
+      console.error("Error saving brew log:", error);
       // TODO: Show error alert to user
     }
   };
 
   const handleDelete = async () => {
     Alert.alert(
-      'Delete Brew Log',
-      'Are you sure you want to delete this brew log? This action cannot be undone.',
+      "Delete Brew Log",
+      "Are you sure you want to delete this brew log? This action cannot be undone.",
       [
         {
-          text: 'Cancel',
-          style: 'cancel',
+          text: "Cancel",
+          style: "cancel",
         },
         {
-          text: 'Delete',
-          style: 'destructive',
+          text: "Delete",
+          style: "destructive",
           onPress: async () => {
             try {
               // Delete the entry first
               await deleteBrewLog(brewLogEntry.id);
-              
+
               // Navigate back to the main BrewLog screen while preserving tab navigation
               // Use popToTop to go back to the first screen in the stack, preserving tab context
               navigation.popToTop();
             } catch (error) {
-              console.error('Error deleting brew log:', error);
-              Alert.alert('Error', 'Failed to delete brew log');
+              console.error("Error deleting brew log:", error);
+              Alert.alert("Error", "Failed to delete brew log");
             }
           },
         },
@@ -236,24 +273,24 @@ const BrewLogEditScreen: React.FC = () => {
   };
 
   const updateField = (field: string, value: string) => {
-    setEditableData(prev => ({
+    setEditableData((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   };
 
   const updateDate = (newDate: Date) => {
-    setEditableData(prev => ({
+    setEditableData((prev) => ({
       ...prev,
-      date: newDate
+      date: newDate,
     }));
   };
 
   const handleDateChange = (event: any, selectedDate?: Date) => {
-    if (Platform.OS === 'android') {
+    if (Platform.OS === "android") {
       setShowDatePicker(false);
     }
-    
+
     if (selectedDate) {
       updateDate(selectedDate);
     }
@@ -276,42 +313,42 @@ const BrewLogEditScreen: React.FC = () => {
   };
 
   const handleRoasterDateChange = (event: any, selectedDate?: Date) => {
-    if (Platform.OS === 'android') {
+    if (Platform.OS === "android") {
       setShowRoasterDatePicker(false);
     }
-    
+
     if (selectedDate) {
-      setEditableData(prev => ({
+      setEditableData((prev) => ({
         ...prev,
-        roasterDate: selectedDate
+        roasterDate: selectedDate,
       }));
     }
   };
 
   // Handler for taste rating changes
   const handleTasteRatingChange = (taste: string, rating: number) => {
-    setTasteRating(prev => ({
+    setTasteRating((prev) => ({
       ...prev,
-      [taste]: rating
+      [taste]: rating,
     }));
   };
 
   // Handler for star rating changes
   const handleStarRatingChange = (newRating: number) => {
-    setEditableData(prev => ({
+    setEditableData((prev) => ({
       ...prev,
-      rating: newRating.toString()
+      rating: newRating.toString(),
     }));
   };
 
   // Camera and Image picker functions
   const requestPermissions = async () => {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
-    if (status !== 'granted') {
+    if (status !== "granted") {
       Alert.alert(
-        'Permission needed',
-        'Camera permission is required to take photos.',
-        [{ text: 'OK' }]
+        "Permission needed",
+        "Camera permission is required to take photos.",
+        [{ text: "OK" }]
       );
       return false;
     }
@@ -319,24 +356,20 @@ const BrewLogEditScreen: React.FC = () => {
   };
 
   const showImagePickerOptions = () => {
-    Alert.alert(
-      'Select Photo',
-      'Choose how you want to add a photo',
-      [
-        {
-          text: 'Camera',
-          onPress: openCamera,
-        },
-        {
-          text: 'Photo Library',
-          onPress: openImageLibrary,
-        },
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
-      ]
-    );
+    Alert.alert("Select Photo", "Choose how you want to add a photo", [
+      {
+        text: "Camera",
+        onPress: openCamera,
+      },
+      {
+        text: "Photo Library",
+        onPress: openImageLibrary,
+      },
+      {
+        text: "Cancel",
+        style: "cancel",
+      },
+    ]);
   };
 
   const openCamera = async () => {
@@ -353,16 +386,19 @@ const BrewLogEditScreen: React.FC = () => {
 
       if (!result.canceled && result.assets[0]) {
         // Store image using the enhanced storage function
-        const permanentUri = await storeImagePermanently(result.assets[0].uri, brewLogEntry.id);
-        
-        setEditableData(prev => ({
+        const permanentUri = await storeImagePermanently(
+          result.assets[0].uri,
+          brewLogEntry.id
+        );
+
+        setEditableData((prev) => ({
           ...prev,
-          image: permanentUri
+          image: permanentUri,
         }));
       }
     } catch (error) {
-      console.error('Error opening camera:', error);
-      Alert.alert('Error', 'Failed to open camera');
+      console.error("Error opening camera:", error);
+      Alert.alert("Error", "Failed to open camera");
     }
   };
 
@@ -377,64 +413,80 @@ const BrewLogEditScreen: React.FC = () => {
 
       if (!result.canceled && result.assets[0]) {
         // Store image using the enhanced storage function
-        const permanentUri = await storeImagePermanently(result.assets[0].uri, brewLogEntry.id);
-        
-        setEditableData(prev => ({
+        const permanentUri = await storeImagePermanently(
+          result.assets[0].uri,
+          brewLogEntry.id
+        );
+
+        setEditableData((prev) => ({
           ...prev,
-          image: permanentUri
+          image: permanentUri,
         }));
       }
     } catch (error) {
-      console.error('Error opening image library:', error);
-      Alert.alert('Error', 'Failed to open photo library');
+      console.error("Error opening image library:", error);
+      Alert.alert("Error", "Failed to open photo library");
     }
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      
       {/* Modal Header with Cancel and Save buttons */}
       <View style={styles.modalHeader}>
         <TouchableOpacity style={styles.cancelButton} onPress={handleCancel}>
           <Text style={styles.cancelButtonText}>Cancel</Text>
         </TouchableOpacity>
-        
+
         <Text style={styles.modalTitle}>Edit Brew Log</Text>
-        
+
         <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
           <Text style={styles.saveButtonText}>Save</Text>
         </TouchableOpacity>
       </View>
 
       <ScrollView style={styles.scrollView}>
-        
         {/* Date and Brew Method with Icon */}
         <View style={styles.dateBrewMethodContainer}>
           <View style={styles.dateBrewMethodContent}>
-            <TouchableOpacity style={styles.dateContainer} onPress={showDatePickerModal}>
-              <Text style={styles.dateText}>{formatDate(editableData.date)}</Text>
+            <TouchableOpacity
+              style={styles.dateContainer}
+              onPress={showDatePickerModal}
+            >
+              <Text style={styles.dateText}>
+                {formatDate(editableData.date)}
+              </Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.drinkNameContainer} onPress={() => setShowBrewMethodPicker(true)}>
-              <Image 
+            <TouchableOpacity
+              style={styles.drinkNameContainer}
+              onPress={() => setShowBrewMethodPicker(true)}
+            >
+              <Image
                 source={getBrewMethodIcon(editableData.brewMethod)}
                 style={styles.brewMethodIcon}
                 resizeMode="contain"
               />
-              <Text style={styles.drinkNameText}>{editableData.brewMethod}</Text>
+              <Text style={styles.drinkNameText}>
+                {editableData.brewMethod}
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
-        
+
         {/* Brew Log Image */}
         <View style={styles.imageContainer}>
-          <TouchableOpacity onPress={showImagePickerOptions} activeOpacity={0.8}>
+          <TouchableOpacity
+            onPress={showImagePickerOptions}
+            activeOpacity={0.8}
+          >
             <Image
               source={
-                editableData.image.startsWith('http') 
+                editableData.image.startsWith("http")
                   ? { uri: editableData.image }
-                  : editableData.image.includes('BrewLogEditScreenPlaceholderInstruction.png')
-                  ? require('../../assets/nonclickable-visual-elements/brewLog/BrewLogEditScreenPlaceholderInstruction.png')
-                  : { uri: editableData.image }
+                  : editableData.image.includes(
+                        "BrewLogEditScreenPlaceholderInstruction.png"
+                      )
+                    ? require("../../assets/nonclickable-visual-elements/brewLog/BrewLogEditScreenPlaceholderInstruction.png")
+                    : { uri: editableData.image }
               }
               style={styles.brewImage}
             />
@@ -451,7 +503,7 @@ const BrewLogEditScreen: React.FC = () => {
           <TextInput
             style={styles.editableValue}
             value={editableData.coffeeName}
-            onChangeText={(text) => updateField('coffeeName', text)}
+            onChangeText={(text) => updateField("coffeeName", text)}
             placeholder="Coffee Name"
             placeholderTextColor="#666"
           />
@@ -461,7 +513,7 @@ const BrewLogEditScreen: React.FC = () => {
           <TextInput
             style={styles.editableValue}
             value={editableData.origin}
-            onChangeText={(text) => updateField('origin', text)}
+            onChangeText={(text) => updateField("origin", text)}
             placeholder="Origin"
             placeholderTextColor="#666"
           />
@@ -470,10 +522,10 @@ const BrewLogEditScreen: React.FC = () => {
           <Text style={styles.label}>Roaster Date:</Text>
           <TouchableOpacity onPress={showRoasterDatePickerModal}>
             <Text style={styles.editableValue}>
-              {editableData.roasterDate instanceof Date && !isNaN(editableData.roasterDate.getTime()) 
+              {editableData.roasterDate instanceof Date &&
+              !isNaN(editableData.roasterDate.getTime())
                 ? formatDate(editableData.roasterDate)
-                : 'Select Date'
-              }
+                : "Select Date"}
             </Text>
           </TouchableOpacity>
         </View>
@@ -482,7 +534,7 @@ const BrewLogEditScreen: React.FC = () => {
           <TextInput
             style={styles.editableValue}
             value={editableData.roasterLevel}
-            onChangeText={(text) => updateField('roasterLevel', text)}
+            onChangeText={(text) => updateField("roasterLevel", text)}
             placeholder="Roaster Level"
             placeholderTextColor="#666"
           />
@@ -492,7 +544,7 @@ const BrewLogEditScreen: React.FC = () => {
           <TextInput
             style={styles.editableValue}
             value={editableData.bagWeight}
-            onChangeText={(text) => updateField('bagWeight', text)}
+            onChangeText={(text) => updateField("bagWeight", text)}
             placeholder="Bag Weight"
             placeholderTextColor="#666"
             keyboardType="numeric"
@@ -505,13 +557,17 @@ const BrewLogEditScreen: React.FC = () => {
           <View style={styles.gridRow}>
             <View style={styles.editableBrewDataBlock}>
               <View style={styles.iconContainer}>
-                <Image source={require("../../assets/icons/brewLog/coffee_bean.png")} style={styles.brewDataIcon} resizeMode="contain" />
+                <Image
+                  source={require("../../assets/icons/brewLog/coffee_bean.png")}
+                  style={styles.brewDataIcon}
+                  resizeMode="contain"
+                />
               </View>
               <Text style={styles.brewDataTitle}>Grind Size</Text>
               <TextInput
                 style={styles.brewDataValueInput}
                 value={editableData.grindSize}
-                onChangeText={(text) => updateField('grindSize', text)}
+                onChangeText={(text) => updateField("grindSize", text)}
                 placeholder="enter value"
                 placeholderTextColor="#8CDBED"
                 keyboardType="numeric"
@@ -520,13 +576,17 @@ const BrewLogEditScreen: React.FC = () => {
             </View>
             <View style={styles.editableBrewDataBlock}>
               <View style={styles.iconContainer}>
-                <Image source={require("../../assets/icons/brewLog/coffee_bean.png")} style={styles.brewDataIcon} resizeMode="contain" />
+                <Image
+                  source={require("../../assets/icons/brewLog/coffee_bean.png")}
+                  style={styles.brewDataIcon}
+                  resizeMode="contain"
+                />
               </View>
               <Text style={styles.brewDataTitle}>Weight (g)</Text>
               <TextInput
                 style={styles.brewDataValueInput}
                 value={editableData.beanWeight}
-                onChangeText={(text) => updateField('beanWeight', text)}
+                onChangeText={(text) => updateField("beanWeight", text)}
                 placeholder="enter value"
                 placeholderTextColor="#8CDBED"
                 keyboardType="numeric"
@@ -535,13 +595,17 @@ const BrewLogEditScreen: React.FC = () => {
             </View>
             <View style={styles.editableBrewDataBlock}>
               <View style={styles.iconContainer}>
-                <Image source={require("../../assets/icons/brewLog/water-drop.png")} style={styles.brewDataIcon} resizeMode="contain" />
+                <Image
+                  source={require("../../assets/icons/brewLog/water-drop.png")}
+                  style={styles.brewDataIcon}
+                  resizeMode="contain"
+                />
               </View>
               <Text style={styles.brewDataTitle}>Water (ml)</Text>
               <TextInput
                 style={styles.brewDataValueInput}
                 value={editableData.waterAmount}
-                onChangeText={(text) => updateField('waterAmount', text)}
+                onChangeText={(text) => updateField("waterAmount", text)}
                 placeholder="enter value"
                 placeholderTextColor="#8CDBED"
                 keyboardType="numeric"
@@ -552,13 +616,17 @@ const BrewLogEditScreen: React.FC = () => {
           <View style={styles.gridRow}>
             <View style={styles.editableBrewDataBlock}>
               <View style={styles.iconContainer}>
-                <Image source={require("../../assets/icons/brewLog/scale.png")} style={styles.brewDataIcon} resizeMode="contain" />
+                <Image
+                  source={require("../../assets/icons/brewLog/scale.png")}
+                  style={styles.brewDataIcon}
+                  resizeMode="contain"
+                />
               </View>
               <Text style={styles.brewDataTitle}>Ratio</Text>
               <TextInput
                 style={styles.brewDataValueInput}
                 value={editableData.ratio}
-                onChangeText={(text) => updateField('ratio', text)}
+                onChangeText={(text) => updateField("ratio", text)}
                 placeholder="enter value"
                 placeholderTextColor="#8CDBED"
                 keyboardType="numeric"
@@ -567,13 +635,17 @@ const BrewLogEditScreen: React.FC = () => {
             </View>
             <View style={styles.editableBrewDataBlock}>
               <View style={styles.iconContainer}>
-                <Image source={require("../../assets/icons/brewLog/clock.png")} style={styles.brewDataIcon} resizeMode="contain" />
+                <Image
+                  source={require("../../assets/icons/brewLog/clock.png")}
+                  style={styles.brewDataIcon}
+                  resizeMode="contain"
+                />
               </View>
               <Text style={styles.brewDataTitle}>Brew Time</Text>
               <TextInput
                 style={styles.brewDataValueInput}
                 value={editableData.brewTime}
-                onChangeText={(text) => updateField('brewTime', text)}
+                onChangeText={(text) => updateField("brewTime", text)}
                 placeholder="enter value"
                 placeholderTextColor="#8CDBED"
                 keyboardType="numeric"
@@ -582,13 +654,17 @@ const BrewLogEditScreen: React.FC = () => {
             </View>
             <View style={styles.editableBrewDataBlock}>
               <View style={styles.iconContainer}>
-                <Image source={require("../../assets/icons/brewLog/thermometer.png")} style={styles.brewDataIcon} resizeMode="contain" />
+                <Image
+                  source={require("../../assets/icons/brewLog/thermometer.png")}
+                  style={styles.brewDataIcon}
+                  resizeMode="contain"
+                />
               </View>
               <Text style={styles.brewDataTitle}>Temperature</Text>
               <TextInput
                 style={styles.brewDataValueInput}
                 value={editableData.temperature}
-                onChangeText={(text) => updateField('temperature', text)}
+                onChangeText={(text) => updateField("temperature", text)}
                 placeholder="enter value"
                 placeholderTextColor="#8CDBED"
                 keyboardType="numeric"
@@ -600,7 +676,7 @@ const BrewLogEditScreen: React.FC = () => {
 
         {/* TASTING WHEEL SECTION - Interactive */}
         <Text style={styles.sectionTitle}>Tasting Wheel</Text>
-        <TastingWheel 
+        <TastingWheel
           tasteRating={tasteRating}
           onTasteRatingChange={handleTasteRatingChange}
         />
@@ -608,29 +684,28 @@ const BrewLogEditScreen: React.FC = () => {
         {/* OVERALL RATING SECTION - Interactive star rating */}
         <Text style={styles.sectionTitle}>Overall Rating</Text>
         <View style={styles.ratingContainer}>
-          <BrewLogRatingStars 
-            rating={parseFloat(editableData.rating) || 0} 
+          <BrewLogRatingStars
+            rating={parseFloat(editableData.rating) || 0}
             onRatingChange={handleStarRatingChange}
           />
         </View>
 
         {/* DELETE BUTTON SECTION */}
         <View style={styles.deleteButtonContainer}>
-          <TouchableOpacity 
-            style={styles.deleteButton} 
+          <TouchableOpacity
+            style={styles.deleteButton}
             onPress={handleDelete}
             activeOpacity={0.8}
           >
             <Text style={styles.deleteButtonText}>Delete Brew Log</Text>
           </TouchableOpacity>
         </View>
-        
       </ScrollView>
 
       {/* Date Picker Modal */}
       {showDatePicker && (
         <>
-          {Platform.OS === 'ios' ? (
+          {Platform.OS === "ios" ? (
             <Modal
               transparent={true}
               animationType="slide"
@@ -671,7 +746,7 @@ const BrewLogEditScreen: React.FC = () => {
       {/* Roaster Date Picker Modal */}
       {showRoasterDatePicker && (
         <>
-          {Platform.OS === 'ios' ? (
+          {Platform.OS === "ios" ? (
             <Modal
               transparent={true}
               animationType="slide"
@@ -689,7 +764,11 @@ const BrewLogEditScreen: React.FC = () => {
                     </TouchableOpacity>
                   </View>
                   <DateTimePicker
-                    value={isNaN(editableData.roasterDate.getTime()) ? new Date() : editableData.roasterDate}
+                    value={
+                      isNaN(editableData.roasterDate.getTime())
+                        ? new Date()
+                        : editableData.roasterDate
+                    }
                     mode="date"
                     display="spinner"
                     onChange={handleRoasterDateChange}
@@ -700,7 +779,11 @@ const BrewLogEditScreen: React.FC = () => {
             </Modal>
           ) : (
             <DateTimePicker
-              value={isNaN(editableData.roasterDate.getTime()) ? new Date() : editableData.roasterDate}
+              value={
+                isNaN(editableData.roasterDate.getTime())
+                  ? new Date()
+                  : editableData.roasterDate
+              }
               mode="date"
               display="default"
               onChange={handleRoasterDateChange}
@@ -720,11 +803,15 @@ const BrewLogEditScreen: React.FC = () => {
           <View style={styles.modalOverlay}>
             <View style={styles.pickerContainer}>
               <View style={styles.pickerHeader}>
-                <TouchableOpacity onPress={() => setShowBrewMethodPicker(false)}>
+                <TouchableOpacity
+                  onPress={() => setShowBrewMethodPicker(false)}
+                >
                   <Text style={styles.pickerButton}>Cancel</Text>
                 </TouchableOpacity>
                 <Text style={styles.pickerTitle}>Select Brew Method</Text>
-                <TouchableOpacity onPress={() => setShowBrewMethodPicker(false)}>
+                <TouchableOpacity
+                  onPress={() => setShowBrewMethodPicker(false)}
+                >
                   <Text style={styles.pickerButton}>Done</Text>
                 </TouchableOpacity>
               </View>
@@ -734,22 +821,26 @@ const BrewLogEditScreen: React.FC = () => {
                     key={method}
                     style={[
                       styles.pickerOption,
-                      editableData.brewMethod === method && styles.pickerOptionSelected
+                      editableData.brewMethod === method &&
+                        styles.pickerOptionSelected,
                     ]}
                     onPress={() => {
-                      updateField('brewMethod', method);
+                      updateField("brewMethod", method);
                       setShowBrewMethodPicker(false);
                     }}
                   >
-                    <Image 
+                    <Image
                       source={getBrewMethodIcon(method)}
                       style={styles.pickerOptionIcon}
                       resizeMode="contain"
                     />
-                    <Text style={[
-                      styles.pickerOptionText,
-                      editableData.brewMethod === method && styles.pickerOptionTextSelected
-                    ]}>
+                    <Text
+                      style={[
+                        styles.pickerOptionText,
+                        editableData.brewMethod === method &&
+                          styles.pickerOptionTextSelected,
+                      ]}
+                    >
                       {method}
                     </Text>
                   </TouchableOpacity>
@@ -759,7 +850,6 @@ const BrewLogEditScreen: React.FC = () => {
           </View>
         </Modal>
       )}
-
     </SafeAreaView>
   );
 };
@@ -816,20 +906,20 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#FF3B30",
     fontWeight: "400",
-    fontFamily: 'cardRegular',
+    fontFamily: "cardRegular",
   },
   headerTitle: {
     fontSize: 20,
     fontWeight: "600",
     color: "white",
     marginLeft: 8,
-    fontFamily: 'cardRegular',
+    fontFamily: "cardRegular",
   },
   modalTitle: {
     fontSize: 18,
     fontWeight: "600",
     color: "white",
-    fontFamily: 'cardRegular',
+    fontFamily: "cardRegular",
   },
   saveButton: {
     paddingVertical: 8,
@@ -839,7 +929,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#8CDBED",
     fontWeight: "600",
-    fontFamily: 'cardRegular',
+    fontFamily: "cardRegular",
   },
   scrollView: {
     flex: 1,
@@ -863,7 +953,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#8CDBED",
     fontWeight: "400",
-    fontFamily: 'cardRegular',
+    fontFamily: "cardRegular",
   },
   drinkNameContainer: {
     alignItems: "center",
@@ -880,7 +970,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: "#8CDBED",
     fontWeight: "600",
-    fontFamily: 'cardRegular',
+    fontFamily: "cardRegular",
   },
   imageContainer: {
     alignItems: "center",
@@ -893,21 +983,21 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   imageOverlay: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
     borderBottomLeftRadius: 10,
     borderBottomRightRadius: 10,
     paddingVertical: 8,
     paddingHorizontal: 4,
   },
   imageOverlayText: {
-    color: 'white',
+    color: "white",
     fontSize: 12,
-    textAlign: 'center',
-    fontFamily: 'cardRegular',
+    textAlign: "center",
+    fontFamily: "cardRegular",
   },
   contentContainer: {
     alignItems: "center",
@@ -918,7 +1008,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#666",
     fontWeight: "400",
-    fontFamily: 'cardRegular',
+    fontFamily: "cardRegular",
   },
   sectionTitle: {
     fontSize: 16,
@@ -928,7 +1018,7 @@ const styles = StyleSheet.create({
     marginTop: 28,
     letterSpacing: 1.0,
     textAlign: "left",
-    fontFamily: 'cardRegular',
+    fontFamily: "cardRegular",
   },
   infoRow: {
     flexDirection: "row",
@@ -944,7 +1034,7 @@ const styles = StyleSheet.create({
     color: "white",
     fontWeight: "500",
     flex: 1,
-    fontFamily: 'cardRegular',
+    fontFamily: "cardRegular",
   },
   editableValue: {
     fontSize: 14,
@@ -953,7 +1043,7 @@ const styles = StyleSheet.create({
     flex: 1,
     textAlign: "right",
     paddingHorizontal: 4,
-    fontFamily: 'cardRegular',
+    fontFamily: "cardRegular",
   },
   brewDataGrid: {
     marginBottom: 0,
@@ -987,14 +1077,14 @@ const styles = StyleSheet.create({
     color: "white",
     fontWeight: "400",
     textAlign: "center",
-    fontFamily: 'cardRegular',
+    fontFamily: "cardRegular",
   },
   brewDataValueInput: {
     fontSize: 14,
     color: "#8CDBED", // Light blue for edit screen
     fontWeight: "500",
     textAlign: "center",
-    fontFamily: 'cardRegular',
+    fontFamily: "cardRegular",
     minWidth: 60,
     paddingVertical: 0,
     paddingHorizontal: 4,
@@ -1012,14 +1102,14 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "white",
     fontWeight: "500",
-    fontFamily: 'cardRegular',
+    fontFamily: "cardRegular",
     marginRight: 12,
   },
   ratingInput: {
     fontSize: 16,
     color: "#8CDBED",
     fontWeight: "400",
-    fontFamily: 'cardRegular',
+    fontFamily: "cardRegular",
     textAlign: "center",
     minWidth: 60,
     paddingVertical: 4,
@@ -1045,7 +1135,7 @@ const styles = StyleSheet.create({
     color: "#333333",
     fontSize: 16,
     fontWeight: "400",
-    fontFamily: 'cardRegular',
+    fontFamily: "cardRegular",
   },
   modalOverlay: {
     flex: 1,
@@ -1072,7 +1162,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#8CDBED",
     fontWeight: "600",
-    fontFamily: 'cardRegular',
+    fontFamily: "cardRegular",
   },
   datePicker: {
     backgroundColor: "white",
@@ -1100,13 +1190,13 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "600",
     color: "#333",
-    fontFamily: 'cardRegular',
+    fontFamily: "cardRegular",
   },
   pickerButton: {
     fontSize: 16,
     color: "#8CDBED",
     fontWeight: "600",
-    fontFamily: 'cardRegular',
+    fontFamily: "cardRegular",
   },
   pickerContent: {
     maxHeight: 300,
@@ -1133,7 +1223,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#333",
     fontWeight: "400",
-    fontFamily: 'cardRegular',
+    fontFamily: "cardRegular",
   },
   pickerOptionTextSelected: {
     color: "#8CDBED",

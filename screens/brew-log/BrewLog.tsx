@@ -22,10 +22,10 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../../navigation/AppNavigator";
 import Header from "../../navigation/Header";
-import BrewLogFilterButton from "../../assets/components/brewLogComponents/brewLogFilterButton";
+import BrewLogFilterButton from "../../assets/components/brew-log-components/brewLogFilterButton";
 import { brewLogFilter } from "../../assets/types/BrewLog/brewLogFilter";
-import BrewLogFilterSelector from "../../assets/components/brewLogComponents/brewLogFilterSelector";
-import BrewLogEntryCard from "../../assets//components/brewLogComponents/brewLogEntryCard";
+import BrewLogFilterSelector from "../../assets/components/brew-log-components/brewLogFilterSelector";
+import BrewLogEntryCard from "../../assets/components/brew-log-components/brewLogEntryCard";
 import {
   brewLogEntry,
   coffeeBeanDetail,
@@ -267,7 +267,8 @@ export default function BrewLogScreen() {
     date: new Date(),
     name: "New Brew Log",
     brewMethod: "Pour Over",
-    image: "../../assets/nonclickable-visual-elements/brewLog/BrewLogEditScreenPlaceholderInstruction.png",
+    image:
+      "../../assets/nonclickable-visual-elements/brewLog/BrewLogEditScreenPlaceholderInstruction.png",
     coffeeBeanDetail: {
       coffeeName: "",
       origin: "",
