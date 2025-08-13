@@ -1,11 +1,16 @@
+// README
+// This file contains the tasting wheel that is used in EntryDetail and EntryEdit screens.
+// The tasting wheel renders both in a editable (touchable) and a viewing version.
+
+
 import React from 'react';
 import { View, Text, StyleSheet, Dimensions } from 'react-native';
-import Svg, { Circle, G, Path, Text as SvgText } from 'react-native-svg';
+import Svg, { Circle, G, Path, Text as SvgText } from 'react-native-svg';  // These imports are what allows the circle to be drawn
 
 interface TastingWheelProps {
-  tasteRating: Record<string, number>;
+  tasteRating: Record<string, number>;  // This is the hash table of the list of key - value pairs on the tasting wheel.
   onTasteRatingChange?: (taste: string, rating: number) => void; // Optional - makes it interactive
-  containerSize?: number; // Optional - allows parent to specify size
+  containerSize?: number; // Optional - allows parent to specify size (for adapting to different screens well)
 }
 
 const TastingWheel: React.FC<TastingWheelProps> = ({ tasteRating, onTasteRatingChange, containerSize }) => {
@@ -13,9 +18,9 @@ const TastingWheel: React.FC<TastingWheelProps> = ({ tasteRating, onTasteRatingC
   
   // Use containerSize if provided, otherwise calculate based on screen width
   const maxSize = containerSize || (screenWidth * 0.9); // Use 90% of screen width as default
-  const textPadding = Math.max(35, maxSize * 0.12); // Scale text padding with size, minimum 35px
+  const textPadding = Math.max(35, maxSize * 0.12); // Scale text padding with size, maximum 35px
   const size = maxSize;
-  const center = size / 2;
+  const center = size / 2;  // We're treating the container sizer as the diameter
   const radius = center - textPadding; // Simplified - let text padding handle the spacing
   const strokeWidth = Math.max(1, size * 0.0045); // Scale stroke width with component size
   
@@ -142,6 +147,8 @@ const TastingWheel: React.FC<TastingWheelProps> = ({ tasteRating, onTasteRatingC
       <Svg width={size} height={size} onPress={onTasteRatingChange ? handleWheelTap : undefined}>
         {/* Draw complete concentric circles first */}
         {/* Center hollow circle - new design (transparent/hollow) */}
+        
+        {/* The following circle represents the most inner circle */}
         <Circle
           cx={center}
           cy={center}
@@ -150,6 +157,8 @@ const TastingWheel: React.FC<TastingWheelProps> = ({ tasteRating, onTasteRatingC
           stroke="#fff"
           strokeWidth={strokeWidth}
         />
+
+        {/* The following circle represents the second most inner circle */}
         <Circle
           cx={center}
           cy={center}
@@ -158,6 +167,8 @@ const TastingWheel: React.FC<TastingWheelProps> = ({ tasteRating, onTasteRatingC
           stroke="#fff"
           strokeWidth={strokeWidth}
         />
+
+        {/* The following circle represents the third most inner circle */}
         <Circle
           cx={center}
           cy={center}
@@ -166,6 +177,8 @@ const TastingWheel: React.FC<TastingWheelProps> = ({ tasteRating, onTasteRatingC
           stroke="#fff"
           strokeWidth={strokeWidth}
         />
+
+        {/* The following circle represents the outmost circle */}
         <Circle
           cx={center}
           cy={center}
@@ -220,7 +233,7 @@ const TastingWheel: React.FC<TastingWheelProps> = ({ tasteRating, onTasteRatingC
                       const labelDistance = radius + Math.max(20, size * 0.04); // This will be overridden by getLabelPosition
                       const baseFontSize = Math.max(10, size * 0.035); // Scale font size with component size
                       const fontSize = categoryTastes.length > 6 ? baseFontSize * 0.9 : baseFontSize; // Slightly smaller for crowded categories
-                      const labelPos = getLabelPosition(midAngle, radius, fontSize, taste);
+                      const labelPos = getLabelPosition(midAngle, radius, fontSize, taste);  // Positions the labels for each of the different flavours
                       return (
                         <SvgText
                           x={labelPos.x}
