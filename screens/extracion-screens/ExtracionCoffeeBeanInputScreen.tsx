@@ -14,7 +14,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../../navigation/AppNavigator";
-import { CoffeeBean, RoasterLevel } from "../../assets/types/CoffeeBean";
+import { CoffeeBean, RoasterLevel } from "../../assets/types/coffee-bean";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 

@@ -5,7 +5,7 @@ import { brewLogEntry } from "../../types/brew-log/brew-log-entry";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../../../navigation/AppNavigator";
-import StarRating from "./cardStarRating";
+import StarRating from "./card-star-rating";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 

@@ -1,6 +1,6 @@
 import React from "react";
 import { View, ScrollView, StyleSheet } from "react-native";
-import BrewLogFilterButton from "../brew-log-components/filterButton";
+import BrewLogFilterButton from "../brew-log-components/filter-button";
 import { brewLogFilter } from "../../types/brew-log/brew-log-filter";
 
 type filterOptions = "All" | "Coffee Recipe" | "KOL Featuring" | "Promotion";

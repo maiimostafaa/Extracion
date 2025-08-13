@@ -22,7 +22,7 @@ import Header from "../../navigation/Header";
 import MapView, { Marker, Region } from "react-native-maps";
 import * as Location from "expo-location";
 import { Feather, Ionicons } from "@expo/vector-icons";
-import CafeFinderCard from "../../assets/components/home-components/CafeFinderCard";
+import CafeFinderCard from "../../assets/components/home-components/cafe-finder-card";
 import { Cafe } from "../../assets/types/cafe";
 
 const { width, height } = Dimensions.get("window");

@@ -20,9 +20,9 @@ import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../navigation/AppNavigator";
 import { brewLogEntry } from "../../assets/types/brew-log/brew-log-entry";
-import TastingWheel from "../../assets/components/brew-log-components/tastingWheel";
-import BrewLogBrewDataBlock from "../../assets/components/brew-log-components/brewDataBlock";
-import BrewLogRatingStars from "../../assets/components/brew-log-components/editableStarRating";
+import TastingWheel from "../../assets/components/brew-log-components/tasting-wheel";
+import BrewLogBrewDataBlock from "../../assets/components/brew-log-components/brew-data-block";
+import BrewLogRatingStars from "../../assets/components/brew-log-components/editable-star-rating";
 import {
   addBrewLog,
   loadBrewLogs,
