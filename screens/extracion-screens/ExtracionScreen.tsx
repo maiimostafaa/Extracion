@@ -20,7 +20,7 @@ import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../../navigation/AppNavigator";
 import Header from "../../navigation/Header";
-import BrewingMethodCard from "../../assets/components/extracion-components/brewingMethodCard";
+import BrewingMethodCard from "../../assets/components/extracion-components/brewing-method-card";
 import { Ionicons } from "@expo/vector-icons";
 
 import useBLE from "../../services/useBLE";

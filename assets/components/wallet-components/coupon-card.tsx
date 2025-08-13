@@ -1,7 +1,7 @@
 import { TouchableOpacity } from "react-native";
-import CompactView from "./coupon-card-views/compactView";
-import HorizontalView from "./coupon-card-views/horizontalView";
-import FullView from "./coupon-card-views/fullView";
+import CompactView from "./coupon-card-views/compact-view";
+import HorizontalView from "./coupon-card-views/horizontal-view";
+import FullView from "./coupon-card-views/full-view";
 import React, { useState } from "react";
 import { coupon } from "../../types/coupon";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";

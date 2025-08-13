@@ -15,8 +15,8 @@ import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../../../navigation/AppNavigator";
 import Header from "../../../navigation/Header";
-import FlipCard from "../../../assets/components/wallet-components/pointsCard"; // adjust path if needed
-import CouponCard from "../../../assets/components/wallet-components/couponCard"; // adjust path as needed
+import FlipCard from "../../../assets/components/wallet-components/points-card"; // adjust path if needed
+import CouponCard from "../../../assets/components/wallet-components/coupon-card"; // adjust path as needed
 import { mockCoupons } from "../../../assets/mock_data/mock-coupons";
 import { coupon } from "../../../assets/types/coupon";
 import AllCouponsScreen from "./AllCoupons";

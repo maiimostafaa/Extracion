@@ -10,7 +10,7 @@ import {
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../../../navigation/AppNavigator";
-import FullView from "../../../assets/components/wallet-components/coupon-card-views/fullView";
+import FullView from "../../../assets/components/wallet-components/coupon-card-views/full-view";
 import { Ionicons } from "@expo/vector-icons";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
