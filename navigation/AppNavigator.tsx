@@ -3,47 +3,39 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Image, View } from "react-native";
 import { useAuth } from "../context/AuthContext";
-import ShopWebViewModal from "../components/ShopWebViewModal";
+import ShopWebViewModal from "../screens/shop/ShopWebViewModal";
 
-import LandingScreen from "../screens/login&signup/Landing";
-import SignUpScreen from "../screens/login&signup/SignUp";
-import ForgotPassword from "../screens/login&signup/ForgotPassword";
-import ConfirmEmail from "../screens/login&signup/ConfirmEmail";
-import ResetLink from "../screens/login&signup/ResetLink";
-import HomeScreen from "../screens/HomeScreen";
-import ExploreScreen from "../screens/other-screens/ExploreScreen";
-import RecycleScreen from "../screens/other-screens/RecycleScreen";
-import CalendarScreen from "../screens/other-screens/CalendarScreen";
-import CreatePostScreen from "../screens/other-screens/CreatePostScreen";
-import EditPostScreen from "../screens/other-screens/EditPostScreen";
-import MerchantNavigator from "./MerchantNavigator";
-import ConnectScreen from "../screens/other-screens/ConnectScreen";
-import CameraScreen from "../screens/CameraScreen";
-import DeviceScreen from "../screens/other-screens/DeviceScreen";
-import DevicesScreen from "../screens/devices/DevicesScreen";
-import ExtracionScreen from "../screens/ExtracionScreen";
-import MainWallet from "../screens/wallet/mainWallet";
-import AllCouponsScreen from "../screens/wallet/allCoupons";
-import FullCouponScreen from "../screens/wallet/FullCoupon";
-import ProfileScreen from "../screens/ProfileScreen";
-import SearchScreen from "../screens/SearchScreen";
+import LandingScreen from "../screens/login-and-signup/Landing";
+import SignUpScreen from "../screens/login-and-signup/SignUp";
+import ForgotPassword from "../screens/login-and-signup/ForgotPassword";
+import ConfirmEmail from "../screens/login-and-signup/ConfirmEmail";
+import ResetLink from "../screens/login-and-signup/ResetLink";
+import HomeScreen from "../screens/home/HomeScreen";
+
+import CameraScreen from "../screens/home/CameraScreen";
+
+import ExtracionScreen from "../screens/extracion-screens/ExtracionScreen";
+import MainWallet from "../screens/home/wallet/MainWallet";
+import AllCouponsScreen from "../screens/home/wallet/AllCoupons";
+import FullCouponScreen from "../screens/home/wallet/FullCoupon";
+import SearchScreen from "../screens/home/SearchScreen";
 import BrewLogScreen from "../screens/brew-log/BrewLog";
 import BrewLogEditScreen from "../screens/brew-log/BrewLogEditScreen";
 import BrewLogDetailScreen from "../screens/brew-log/BrewLogDetailScreen";
-import ExtracionConfigScreen from "../screens/ExtracionConfigScreen";
-import ExtracionCoffeeBeanListScreen from "../screens/ExtracionCoffeeBeanListScreen";
-import ExtracionCoffeeBeanInputScreen from "../screens/ExtracionCoffeeBeanInputScreen";
-import CafeFinderScreen from "../screens/CafeFinderScreen";
-import NewsletterDetailScreen from "../screens/NewsletterDetailScreen";
-import ExtracionCoffeeToWaterScreen from "../screens/ExtracionCoffeeToWaterScreen";
-import ExtracionPour from "../screens/ExtracionPour";
-import ExtracionBloom from "../screens/ExtracionBloom";
-import ExtracionSpiral from "../screens/ExtracionSpiral";
-import ExtracionBrew from "../screens/ExtracionBrew";
-import DotsMenu from "../screens/DotsMenu";
+import ExtracionConfigScreen from "../screens/extracion-screens/ExtracionConfigScreen";
+import ExtracionCoffeeBeanListScreen from "../screens/extracion-screens/ExtracionCoffeeBeanListScreen";
+import ExtracionCoffeeBeanInputScreen from "../screens/extracion-screens/ExtracionCoffeeBeanInputScreen";
+import CafeFinderScreen from "../screens/home/CafeFinderScreen";
+import NewsletterDetailScreen from "../screens/home/NewsletterDetailScreen";
+import ExtracionCoffeeToWaterScreen from "../screens/extracion-screens/ExtracionCoffeeToWaterScreen";
+import ExtracionPour from "../screens/extracion-screens/ExtracionPour";
+import ExtracionBloom from "../screens/extracion-screens/ExtracionBloom";
+import ExtracionSpiral from "../screens/extracion-screens/ExtracionSpiral";
+import ExtracionBrew from "../screens/extracion-screens/ExtracionBrew";
+import DotsMenu from "../screens/home/DotsMenu";
 
 import { coupon } from "../assets/types/coupon";
-import { brewLogEntry } from "../assets/types/BrewLog/brewLogEntry";
+import { brewLogEntry } from "../assets/types/brew-log/brew-log-entry";
 import { newsletterItem } from "../assets/types/newsletter-item";
 
 export type RootStackParamList = {
@@ -53,21 +45,12 @@ export type RootStackParamList = {
   ConfirmEmail: undefined;
   ResetLink: undefined;
   MainTabs: undefined;
-  Merchant: undefined;
-  Recycle: undefined;
-  Calendar: undefined;
-  CreatePost: undefined;
-  EditPost: undefined;
-  Connect: undefined;
   Camera: undefined;
-  Device: undefined;
-  Devices: undefined;
   Extraction: undefined;
   Wallet: undefined;
-  allCoupons: undefined;
+  AllCoupons: undefined;
   SearchScreen: undefined;
   BrewLogScreen: undefined;
-  ShopScreen: undefined;
   CafeFinderScreen: undefined;
   NewsletterDetail: { item: newsletterItem };
   ExtracionPour: {
@@ -96,7 +79,7 @@ export type RootStackParamList = {
   };
   BrewLogDetailScreen: { brewLogEntry: brewLogEntry };
   BrewLogEditScreen: { brewLogEntry: brewLogEntry };
-  fullCoupon: { coupon: coupon };
+  FullCoupon: { coupon: coupon };
   BeanDetail: { beanId: string };
   CafeDetail: { cafeId: string };
   ClassDetail: { classId: string };
@@ -126,10 +109,10 @@ const HomeStack = createNativeStackNavigator();
 function HomeStackScreen() {
   return (
     <HomeStack.Navigator screenOptions={{ headerShown: false }}>
-      <HomeStack.Screen name="Home" component={HomeScreen} />
+      <HomeStack.Screen name="MainHome" component={HomeScreen} />
       <HomeStack.Screen name="Wallet" component={MainWallet} />
-      <HomeStack.Screen name="allCoupons" component={AllCouponsScreen} />
-      <HomeStack.Screen name="fullCoupon" component={FullCouponScreen} />
+      <HomeStack.Screen name="AllCoupons" component={AllCouponsScreen} />
+      <HomeStack.Screen name="FullCoupon" component={FullCouponScreen} />
       <HomeStack.Screen name="SearchScreen" component={SearchScreen} />
       <HomeStack.Screen
         name="CafeFinderScreen"
@@ -153,84 +136,84 @@ function MainTabs() {
 
   // Simple placeholder component for Shop tab
   const ShopTabComponent = () => {
-    return <View style={{ flex: 1, backgroundColor: '#333333' }} />;
+    return <View style={{ flex: 1, backgroundColor: "#333333" }} />;
   };
 
   return (
     <>
       <Tab.Navigator
-      screenOptions={({ route }) => ({
-        tabBarIcon: ({ focused, color, size }) => {
-          let iconSource;
-          switch (route.name) {
-            case "Home":
-              iconSource = require("../assets/icons/home.png");
-              break;
-            case "Brew Log":
-              iconSource = require("../assets/icons/brew-log.png");
-              break;
-            case "Scan":
-              iconSource = require("../assets/icons/scan.png");
-              break;
-            case "Extracion":
-              iconSource = require("../assets/icons/extracion-icon.png");
-              break;
-            case "Shop":
-              iconSource = require("../assets/icons/shop.png");
-              break;
-          }
-          return (
-            <View
-              style={{
-                alignItems: "center",
-                justifyContent: "center",
-                paddingTop: 10,
-              }}
-            >
-              <Image
-                source={iconSource}
+        screenOptions={({ route }) => ({
+          tabBarIcon: ({ focused, color, size }) => {
+            let iconSource;
+            switch (route.name) {
+              case "Home":
+                iconSource = require("../assets/graphics/nav-icons/home.png");
+                break;
+              case "Brew Log":
+                iconSource = require("../assets/graphics/nav-icons/brew-log.png");
+                break;
+              case "Scan":
+                iconSource = require("../assets/graphics/nav-icons/scan.png");
+                break;
+              case "Extracion":
+                iconSource = require("../assets/graphics/nav-icons/extracion-icon.png");
+                break;
+              case "Shop":
+                iconSource = require("../assets/graphics/nav-icons/shop.png");
+                break;
+            }
+            return (
+              <View
                 style={{
-                  width: size,
-                  height: size,
-                  tintColor: color,
-                  resizeMode: "contain",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  paddingTop: 10,
                 }}
-              />
-            </View>
-          );
-        },
-        tabBarActiveTintColor: "#8CDBED",
-        tabBarInactiveTintColor: "#FFFFFF",
-        tabBarStyle: { height: 90, backgroundColor: "#333333" },
-        tabBarLabelStyle: {
-          fontSize: 12,
-          marginTop: 5,
-          marginBottom: 4,
-          fontFamily: "cardRegular",
-        },
-        headerShown: false,
-      })}
-    >
-      <Tab.Screen name="Home" component={HomeStackScreen} />
-      <Tab.Screen name="Brew Log" component={BrewLogScreen} />
-      <Tab.Screen name="Scan" component={CameraScreen} />
-      <Tab.Screen name="Extracion" component={ExtracionScreen} />
-      <Tab.Screen 
-        name="Shop" 
-        component={ShopTabComponent}
-        listeners={{
-          tabPress: (e) => {
-            e.preventDefault();
-            setShowShopModal(true);
+              >
+                <Image
+                  source={iconSource}
+                  style={{
+                    width: size,
+                    height: size,
+                    tintColor: color,
+                    resizeMode: "contain",
+                  }}
+                />
+              </View>
+            );
           },
-        }}
+          tabBarActiveTintColor: "#8CDBED",
+          tabBarInactiveTintColor: "#FFFFFF",
+          tabBarStyle: { height: 90, backgroundColor: "#333333" },
+          tabBarLabelStyle: {
+            fontSize: 12,
+            marginTop: 5,
+            marginBottom: 4,
+            fontFamily: "cardRegular",
+          },
+          headerShown: false,
+        })}
+      >
+        <Tab.Screen name="Home" component={HomeStackScreen} />
+        <Tab.Screen name="Brew Log" component={BrewLogScreen} />
+        <Tab.Screen name="Scan" component={CameraScreen} />
+        <Tab.Screen name="Extracion" component={ExtracionScreen} />
+        <Tab.Screen
+          name="Shop"
+          component={ShopTabComponent}
+          listeners={{
+            tabPress: (e) => {
+              e.preventDefault();
+              setShowShopModal(true);
+            },
+          }}
+        />
+      </Tab.Navigator>
+
+      <ShopWebViewModal
+        visible={showShopModal}
+        onClose={() => setShowShopModal(false)}
       />
-    </Tab.Navigator>
-    
-    <ShopWebViewModal 
-      visible={showShopModal} 
-      onClose={() => setShowShopModal(false)} 
-    />
     </>
   );
 }
@@ -243,15 +226,7 @@ export default function AppNavigator() {
   return user ? (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="MainTabs" component={MainTabs} />
-      <Stack.Screen name="Merchant" component={MerchantNavigator} />
-      <Stack.Screen name="Recycle" component={RecycleScreen} />
-      <Stack.Screen name="Calendar" component={CalendarScreen} />
-      <Stack.Screen name="CreatePost" component={CreatePostScreen} />
-      <Stack.Screen name="EditPost" component={EditPostScreen} />
-      <Stack.Screen name="Connect" component={ConnectScreen} />
       <Stack.Screen name="Camera" component={CameraScreen} />
-      <Stack.Screen name="Device" component={DeviceScreen} />
-      <Stack.Screen name="Devices" component={DevicesScreen} />
       <Stack.Screen name="Extraction" component={ExtracionScreen} />
       <Stack.Screen name="BrewLogScreen" component={BrewLogScreen} />
       <Stack.Screen name="DotsMenu" component={DotsMenu} />

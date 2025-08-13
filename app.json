@@ -9,7 +9,7 @@
     "newArchEnabled": true,
     "assetBundlePatterns": ["**/*"],
     "splash": {
-      "image": "./assets/backgrounds/splash.png",
+      "image": "./assets/graphics/backgrounds/screen-backgrounds/splash.png",
       "resizeMode": "contain"
     },
     "ios": {

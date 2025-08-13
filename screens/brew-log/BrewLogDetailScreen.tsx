@@ -9,43 +9,55 @@ import {
   Image,
   Platform,
 } from "react-native";
-import { Ionicons } from '@expo/vector-icons';
-import { useNavigation, useRoute, RouteProp, useFocusEffect } from "@react-navigation/native";
+import { Ionicons } from "@expo/vector-icons";
+import {
+  useNavigation,
+  useRoute,
+  RouteProp,
+  useFocusEffect,
+} from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../navigation/AppNavigator";
-import { brewLogEntry } from "../../assets/types/BrewLog/brewLogEntry";
-import TastingWheel from "../../assets/components/brewLogComponents/TastingWheel";
-import BrewLogBrewDataBlock from "../../assets/components/brewLogComponents/brewLogBrewDataBlock";
-import BrewLogRatingStars from "../../assets/components/brewLogComponents/BrewLogRatingStars";
-import { loadBrewLogs } from "../../brewLogStorage";
+import { brewLogEntry } from "../../assets/types/brew-log/brew-log-entry";
+import TastingWheel from "../../assets/components/brew-log-components/tastingWheel";
+import BrewLogBrewDataBlock from "../../assets/components/brew-log-components/brewDataBlock";
+import BrewLogRatingStars from "../../assets/components/brew-log-components/editableStarRating";
+import { loadBrewLogs } from "../../assets/local-storage/brewLogStorage";
 
-type DetailScreenRouteProp = RouteProp<RootStackParamList, "BrewLogDetailScreen">;
-type DetailScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, "BrewLogDetailScreen">;
+type DetailScreenRouteProp = RouteProp<
+  RootStackParamList,
+  "BrewLogDetailScreen"
+>;
+type DetailScreenNavigationProp = NativeStackNavigationProp<
+  RootStackParamList,
+  "BrewLogDetailScreen"
+>;
 
 const BrewLogDetailScreen: React.FC = () => {
   const route = useRoute<DetailScreenRouteProp>();
   const navigation = useNavigation<DetailScreenNavigationProp>();
-  
+
   // Get initial brewLogEntry from route params
   const initialBrewLogEntry = route.params?.brewLogEntry;
-  
+
   // State to hold the current brew log entry (will be updated when screen comes into focus)
-  const [currentBrewLogEntry, setCurrentBrewLogEntry] = useState<brewLogEntry | undefined>(initialBrewLogEntry);
+  const [currentBrewLogEntry, setCurrentBrewLogEntry] = useState<
+    brewLogEntry | undefined
+  >(initialBrewLogEntry);
 
   // Get brewing method icon
   const getBrewMethodIcon = (brewMethod: string) => {
     switch (brewMethod) {
-      case 'French Press':
-        return require('../../assets/components/brewLogComponents/icons/french_press.png');
-      case 'Pour Over':
-        return require('../../assets/components/brewLogComponents/icons/pour_over.png');
-      case 'Cold Brew':
-      case 'Cold Drip':
-        return require('../../assets/components/brewLogComponents/icons/cold_brew.png');
-      case 'Brew Bar':
-        return require('../../assets/components/brewLogComponents/icons/brew_bar.png');
+      case "French Press":
+        return require("../../assets/graphics/brewing-methods/french-press.png");
+      case "Pour Over":
+        return require("../../assets/graphics/brewing-methods/pour-over.png");
+      case "Cold Brew":
+        return require("../../assets/graphics/brewing-methods/cold-brew.png");
+      case "Brew Bar":
+        return require("../../assets/graphics/brewing-methods/brew-bar.png");
       default:
-        return require('../../assets/components/brewLogComponents/icons/pour_over.png');
+        return require("../../assets/graphics/brewing-methods/pour-over.png");
     }
   };
 
@@ -56,7 +68,9 @@ const BrewLogDetailScreen: React.FC = () => {
         if (initialBrewLogEntry) {
           try {
             const allLogs = await loadBrewLogs();
-            const updatedEntry = allLogs.find(log => log.id === initialBrewLogEntry.id);
+            const updatedEntry = allLogs.find(
+              (log) => log.id === initialBrewLogEntry.id
+            );
             if (updatedEntry) {
               setCurrentBrewLogEntry(updatedEntry);
             } else {
@@ -64,7 +78,7 @@ const BrewLogDetailScreen: React.FC = () => {
               setCurrentBrewLogEntry(initialBrewLogEntry);
             }
           } catch (error) {
-            console.error('Error reloading brew log data:', error);
+            console.error("Error reloading brew log data:", error);
             // Fallback to initial data on error
             setCurrentBrewLogEntry(initialBrewLogEntry);
           }
@@ -100,7 +114,9 @@ const BrewLogDetailScreen: React.FC = () => {
 
   const handleEdit = () => {
     if (currentBrewLogEntry) {
-      navigation.navigate('BrewLogEditScreen', { brewLogEntry: currentBrewLogEntry });
+      navigation.navigate("BrewLogEditScreen", {
+        brewLogEntry: currentBrewLogEntry,
+      });
     }
   };
 
@@ -126,7 +142,6 @@ const BrewLogDetailScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      
       {/* Header with Back and Edit buttons */}
       <View style={styles.header}>
         <View style={styles.leftSection}>
@@ -135,40 +150,43 @@ const BrewLogDetailScreen: React.FC = () => {
           </TouchableOpacity>
           <Text style={styles.headerTitle}>My Brew Logs</Text>
         </View>
-        
+
         <TouchableOpacity style={styles.editButton} onPress={handleEdit}>
           <Text style={styles.editButtonText}>Edit</Text>
         </TouchableOpacity>
       </View>
 
       <ScrollView style={styles.scrollView}>
-        
         {/* Date and Brew Method with Icon */}
         <View style={styles.dateBrewMethodContainer}>
           <View style={styles.dateBrewMethodContent}>
             <View style={styles.dateContainer}>
-              <Text style={styles.dateText}>{formatDate(currentBrewLogEntry.date)}</Text>
+              <Text style={styles.dateText}>
+                {formatDate(currentBrewLogEntry.date)}
+              </Text>
             </View>
             <View style={styles.drinkNameContainer}>
-              <Image 
+              <Image
                 source={getBrewMethodIcon(currentBrewLogEntry.brewMethod)}
                 style={styles.brewMethodIcon}
                 resizeMode="contain"
               />
-              <Text style={styles.drinkNameText}>{currentBrewLogEntry.brewMethod}</Text>
+              <Text style={styles.drinkNameText}>
+                {currentBrewLogEntry.brewMethod}
+              </Text>
             </View>
           </View>
         </View>
-        
+
         {/* Brew Log Image */}
         <View style={styles.imageContainer}>
           <Image
             source={
-              currentBrewLogEntry.image.startsWith('http') 
+              currentBrewLogEntry.image.startsWith("http")
                 ? { uri: currentBrewLogEntry.image }
-                : currentBrewLogEntry.image.includes('BrewLogEditScreenPlaceholderInstruction.png')
-                ? require('../../assets/nonclickable-visual-elements/brewLog/BrewLogEditScreenPlaceholderInstruction.png')
-                : { uri: currentBrewLogEntry.image }
+                : currentBrewLogEntry.image.includes("brew-log-placeholder.png")
+                  ? require("../../assets/graphics/brew-log/brew-log-placeholder.png")
+                  : { uri: currentBrewLogEntry.image }
             }
             style={styles.brewImage}
           />
@@ -178,23 +196,33 @@ const BrewLogDetailScreen: React.FC = () => {
         <Text style={styles.sectionTitle}>General</Text>
         <View style={styles.infoRow}>
           <Text style={styles.label}>Coffee Name</Text>
-          <Text style={styles.value}>{currentBrewLogEntry.coffeeBeanDetail.coffeeName}</Text>
+          <Text style={styles.value}>
+            {currentBrewLogEntry.coffeeBeanDetail.coffeeName}
+          </Text>
         </View>
         <View style={styles.infoRow}>
           <Text style={styles.label}>Region</Text>
-          <Text style={styles.value}>{currentBrewLogEntry.coffeeBeanDetail.origin}</Text>
+          <Text style={styles.value}>
+            {currentBrewLogEntry.coffeeBeanDetail.origin}
+          </Text>
         </View>
         <View style={styles.infoRow}>
           <Text style={styles.label}>Roast Date</Text>
-          <Text style={styles.value}>{currentBrewLogEntry.coffeeBeanDetail.roasterDate}</Text>
+          <Text style={styles.value}>
+            {currentBrewLogEntry.coffeeBeanDetail.roasterDate}
+          </Text>
         </View>
         <View style={styles.infoRow}>
           <Text style={styles.label}>Roast Level</Text>
-          <Text style={styles.value}>{currentBrewLogEntry.coffeeBeanDetail.roasterLevel}</Text>
+          <Text style={styles.value}>
+            {currentBrewLogEntry.coffeeBeanDetail.roasterLevel}
+          </Text>
         </View>
         <View style={styles.infoRow}>
           <Text style={styles.label}>Bag Weight (g)</Text>
-          <Text style={styles.value}>{currentBrewLogEntry.coffeeBeanDetail.bagWeight}g</Text>
+          <Text style={styles.value}>
+            {currentBrewLogEntry.coffeeBeanDetail.bagWeight}g
+          </Text>
         </View>
 
         {/* BREW DATA SECTION - Brewing parameters */}
@@ -202,20 +230,20 @@ const BrewLogDetailScreen: React.FC = () => {
         <View style={styles.brewDataGrid}>
           <View style={styles.gridRow}>
             <BrewLogBrewDataBlock
-              iconPath={require("../../assets/icons/brewLog/coffee_bean.png")}
+              iconPath={require("../../assets/graphics/brew-log/coffee-bean.png")}
               title="Grind Size"
               value={currentBrewLogEntry.brewDetail.grindSize}
               valueColor="white"
             />
             <BrewLogBrewDataBlock
-              iconPath={require("../../assets/icons/brewLog/coffee_bean.png")}
+              iconPath={require("../../assets/graphics/brew-log/coffee-bean.png")}
               title="Weight (g)"
               value={currentBrewLogEntry.brewDetail.beanWeight}
               valueColor="white"
               // unit="g"
             />
             <BrewLogBrewDataBlock
-              iconPath={require("../../assets/icons/brewLog/water-drop.png")}
+              iconPath={require("../../assets/graphics/brew-log/water-drop.png")}
               title="Water (ml)"
               value={currentBrewLogEntry.brewDetail.waterAmount}
               valueColor="white"
@@ -224,19 +252,27 @@ const BrewLogDetailScreen: React.FC = () => {
           </View>
           <View style={styles.gridRow}>
             <BrewLogBrewDataBlock
-              iconPath={require("../../assets/icons/brewLog/scale.png")}
+              iconPath={require("../../assets/graphics/brew-log/scale.png")}
               title="Ratio"
-              value={currentBrewLogEntry.brewDetail.ratio ? `1:${currentBrewLogEntry.brewDetail.ratio}` : ""}
+              value={
+                currentBrewLogEntry.brewDetail.ratio
+                  ? `1:${currentBrewLogEntry.brewDetail.ratio}`
+                  : ""
+              }
               valueColor="white"
             />
             <BrewLogBrewDataBlock
-              iconPath={require("../../assets/icons/brewLog/clock.png")}
+              iconPath={require("../../assets/graphics/brew-log/clock.png")}
               title="Brew Time"
-              value={currentBrewLogEntry.brewDetail.brewTime ? formatBrewTime(currentBrewLogEntry.brewDetail.brewTime) : ""}
+              value={
+                currentBrewLogEntry.brewDetail.brewTime
+                  ? formatBrewTime(currentBrewLogEntry.brewDetail.brewTime)
+                  : ""
+              }
               valueColor="white"
             />
             <BrewLogBrewDataBlock
-              iconPath={require("../../assets/icons/brewLog/thermometer.png")}
+              iconPath={require("../../assets/graphics/brew-log/thermometer.png")}
               title="Temperature"
               value={currentBrewLogEntry.brewDetail.temperature}
               valueColor="white"
@@ -251,10 +287,11 @@ const BrewLogDetailScreen: React.FC = () => {
 
         {/* OVERALL RATING SECTION - Star rating */}
         <Text style={styles.sectionTitle}>Overall Rating</Text>
-        <BrewLogRatingStars rating={currentBrewLogEntry.rating} key={`rating-${currentBrewLogEntry.rating}-${currentBrewLogEntry.id}`} />
-        
+        <BrewLogRatingStars
+          rating={currentBrewLogEntry.rating}
+          key={`rating-${currentBrewLogEntry.rating}-${currentBrewLogEntry.id}`}
+        />
       </ScrollView>
-
     </SafeAreaView>
   );
 };
@@ -300,7 +337,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "white",
     marginLeft: 8, // Add some space after the back button
-    fontFamily: 'cardRegular',
+    fontFamily: "cardRegular",
   },
   editButton: {
     paddingVertical: 6, // Reduced padding to match back button
@@ -315,7 +352,7 @@ const styles = StyleSheet.create({
     fontSize: 17, // Match iOS standard button text size
     color: "#8CDBED", // App's accent color instead of iOS blue
     fontWeight: "400", // Slightly lighter weight for iOS style
-    fontFamily: 'cardRegular',
+    fontFamily: "cardRegular",
   },
   scrollView: {
     flex: 1,
@@ -339,7 +376,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "white",
     fontWeight: "400",
-    fontFamily: 'cardRegular',
+    fontFamily: "cardRegular",
   },
   drinkNameContainer: {
     alignItems: "center",
@@ -356,7 +393,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: "white",
     fontWeight: "600",
-    fontFamily: 'cardRegular',
+    fontFamily: "cardRegular",
   },
   imageContainer: {
     alignItems: "center",
@@ -377,7 +414,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#666",
     fontWeight: "400",
-    fontFamily: 'cardRegular',
+    fontFamily: "cardRegular",
   },
   sectionTitle: {
     fontSize: 16,
@@ -387,7 +424,7 @@ const styles = StyleSheet.create({
     marginTop: 28,
     letterSpacing: 1.0,
     textAlign: "left",
-    fontFamily: 'cardRegular',
+    fontFamily: "cardRegular",
   },
   infoRow: {
     flexDirection: "row",
@@ -403,7 +440,7 @@ const styles = StyleSheet.create({
     color: "white",
     fontWeight: "500",
     flex: 1,
-    fontFamily: 'cardRegular',
+    fontFamily: "cardRegular",
   },
   value: {
     fontSize: 14,
@@ -411,7 +448,7 @@ const styles = StyleSheet.create({
     fontWeight: "400",
     flex: 1,
     textAlign: "right",
-    fontFamily: 'cardRegular',
+    fontFamily: "cardRegular",
   },
   brewDataGrid: {
     marginBottom: 0,

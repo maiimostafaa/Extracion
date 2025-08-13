@@ -14,13 +14,13 @@ import { AuthProvider } from "./context/AuthContext";
 
 /* Import Apollo for shopify */
 import { ApolloProvider } from "@apollo/client";
-import shopifyClient from "./shopifyClient";
+import shopifyClient from "./services/shopifyClient";
 
 enableScreens();
 
 export default function App() {
   const [fontsLoaded] = useFonts({
-    second: require("./assets/fonts/second.ttf"),
+    numbers: require("./assets/fonts/technology.ttf"),
     cardLight: require("./assets/fonts/card-light.ttf"),
     cardRegular: require("./assets/fonts/card-regular.ttf"),
     cardMedium: require("./assets/fonts/card-medium.ttf"),
