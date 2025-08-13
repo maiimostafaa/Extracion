@@ -20,7 +20,7 @@ enableScreens();
 
 export default function App() {
   const [fontsLoaded] = useFonts({
-    second: require("./assets/fonts/second.ttf"),
+    numbers: require("./assets/fonts/technology.ttf"),
     cardLight: require("./assets/fonts/card-light.ttf"),
     cardRegular: require("./assets/fonts/card-regular.ttf"),
     cardMedium: require("./assets/fonts/card-medium.ttf"),

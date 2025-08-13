@@ -27,10 +27,10 @@ import useBLE from "../../services/useBLE";
 import { useBLEContext } from "../../context/BLEContext";
 
 // Import images for each brewing method
-const frenchPressImage = require("../../assets/graphics/extracion/extracion-coffee-machine.png");
-const pourOverImage = require("../../assets/graphics/extracion/extracion-coffee-machine.png");
-const coldDripImage = require("../../assets/graphics/extracion/extracion-coffee-machine.png");
-const brewBarImage = require("../../assets/graphics/extracion/extracion-coffee-machine.png");
+const frenchPressImage = require("../../assets/graphics/extracion/method-card/extracion-coffee-machine.png");
+const pourOverImage = require("../../assets/graphics/extracion/method-card/extracion-coffee-machine.png");
+const coldDripImage = require("../../assets/graphics/extracion/method-card/extracion-coffee-machine.png");
+const brewBarImage = require("../../assets/graphics/extracion/method-card/extracion-coffee-machine.png");
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
