@@ -47,7 +47,7 @@ export default function SignUpScreen() {
         />
         <View style={styles.logoContainer}>
           <Image
-            source={require("../../assets/nonclickable-visual-elements/getthepong-logo.png")}
+            source={require("../../assets/graphics/logos/get-the-pong.png")}
             style={styles.headerLogo}
           />
         </View>
@@ -78,7 +78,7 @@ export default function SignUpScreen() {
         }}
       >
         <Image
-          source={require("../../assets/nonclickable-visual-elements/extracion-logo.png")}
+          source={require("../../assets/graphics/logos/extracion.png")}
           style={{ tintColor: "#58595B", resizeMode: "contain", height: 30 }}
         />
       </View>

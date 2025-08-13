@@ -35,7 +35,7 @@ import ExtracionBrew from "../screens/extracion-screens/ExtracionBrew";
 import DotsMenu from "../screens/home/DotsMenu";
 
 import { coupon } from "../assets/types/coupon";
-import { brewLogEntry } from "../assets/types/BrewLog/brewLogEntry";
+import { brewLogEntry } from "../assets/types/brew-log/brew-log-entry";
 import { newsletterItem } from "../assets/types/newsletter-item";
 
 export type RootStackParamList = {
@@ -147,19 +147,19 @@ function MainTabs() {
             let iconSource;
             switch (route.name) {
               case "Home":
-                iconSource = require("../assets/icons/home.png");
+                iconSource = require("../assets/graphics/nav-icons/home.png");
                 break;
               case "Brew Log":
-                iconSource = require("../assets/icons/brew-log.png");
+                iconSource = require("../assets/graphics/nav-icons/brew-log.png");
                 break;
               case "Scan":
-                iconSource = require("../assets/icons/scan.png");
+                iconSource = require("../assets/graphics/nav-icons/scan.png");
                 break;
               case "Extracion":
-                iconSource = require("../assets/icons/extracion-icon.png");
+                iconSource = require("../assets/graphics/nav-icons/extracion-icon.png");
                 break;
               case "Shop":
-                iconSource = require("../assets/icons/shop.png");
+                iconSource = require("../assets/graphics/nav-icons/shop.png");
                 break;
             }
             return (

@@ -14,7 +14,7 @@ import { AuthProvider } from "./context/AuthContext";
 
 /* Import Apollo for shopify */
 import { ApolloProvider } from "@apollo/client";
-import shopifyClient from "./shopifyClient";
+import shopifyClient from "./services/shopifyClient";
 
 enableScreens();
 

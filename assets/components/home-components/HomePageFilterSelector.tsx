@@ -1,7 +1,7 @@
 import React from "react";
 import { View, ScrollView, StyleSheet } from "react-native";
-import BrewLogFilterButton from "../brew-log-components/brewLogFilterButton";
-import { brewLogFilter } from "../../types/BrewLog/brewLogFilter";
+import BrewLogFilterButton from "../brew-log-components/filterButton";
+import { brewLogFilter } from "../../types/brew-log/brew-log-filter";
 
 type filterOptions = "All" | "Coffee Recipe" | "KOL Featuring" | "Promotion";
 
@@ -15,14 +15,26 @@ const HomePageFilterSelector: React.FC<HomePageFilterSelectorProps> = ({
   onFilterChange,
 }) => {
   const filterOptions: brewLogFilter[] = [
-    { id: 1, icon: require("../../icons/all.png"), label: "All" },
+    {
+      id: 1,
+      icon: require("../../graphics/home-filter-icons/all.png"),
+      label: "All",
+    },
     {
       id: 2,
-      icon: require("../../icons/coffee-recipe.png"),
+      icon: require("../../graphics/home-filter-icons/coffee-recipe.png"),
       label: "Coffee Recipe",
     },
-    { id: 3, icon: require("../../icons/KOL.png"), label: "KOL Featuring" },
-    { id: 4, icon: require("../../icons/promotion.png"), label: "Promotion" },
+    {
+      id: 3,
+      icon: require("../../graphics/home-filter-icons/KOL.png"),
+      label: "KOL Featuring",
+    },
+    {
+      id: 4,
+      icon: require("../../graphics/home-filter-icons/promotion.png"),
+      label: "Promotion",
+    },
   ];
 
   return (

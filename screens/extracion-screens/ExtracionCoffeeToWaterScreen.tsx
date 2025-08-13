@@ -14,7 +14,7 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import Slider from "@react-native-community/slider";
 import type { RootStackParamList } from "../../navigation/AppNavigator";
 
-import CoffeeRatioSlider from "../../assets/components/extracion-components/RatioSlider";
+// import CoffeeRatioSlider from "../../assets/components/extracion-components/ratioSlider";
 import { useBLEContext } from "../../context/BLEContext";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -88,7 +88,7 @@ const ExtracionCoffeeToWaterScreen: React.FC = () => {
       <View style={styles.content}>
         {/* <ExtracionCoffeeToWaterInstructionBanner text="Step 1: Adjust your coffee to water ratio" /> */}
 
-        <CoffeeRatioSlider ratio={ratio} onChange={setRatio} />
+        {/* <CoffeeRatioSlider ratio={ratio} onChange={setRatio} /> */}
 
         {/* <ExtracionCoffeeToWaterInstructionBanner
           text={"Step 2: Pour the coffee beans\nto get your water volume"}
@@ -97,20 +97,20 @@ const ExtracionCoffeeToWaterScreen: React.FC = () => {
         {/* Coffee and Water Display */}
         <View style={styles.measurementContainer}>
           <View style={styles.measurementItem}>
-            <Image
+            {/* <Image
               source={require("../../assets/icons/extracion_coffeebean.png")}
               style={styles.iconImage}
-            />
+            /> */}
             <Text style={styles.measurementValue}>{weight.toFixed(0)}g</Text>
           </View>
 
           <View style={styles.divider} />
 
           <View style={styles.measurementItem}>
-            <Image
+            {/* <Image
               source={require("../../assets/icons/extracion_water.png")}
               style={styles.iconImage}
-            />
+            /> */}
             <Text style={styles.measurementValue}>
               {(ratio * Number(weight.toFixed(0))).toFixed(0)}ml
             </Text>

@@ -1,11 +1,11 @@
 import React from "react";
 import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
 import { Ionicons, Feather } from "@expo/vector-icons";
-import { brewLogEntry } from "../../types/BrewLog/brewLogEntry";
+import { brewLogEntry } from "../../types/brew-log/brew-log-entry";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../../../navigation/AppNavigator";
-import StarRating from "./StarRating";
+import StarRating from "./cardStarRating";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -45,10 +45,8 @@ const BrewLogEntryCard: React.FC<brewLogEntryCardProps> = ({
         source={
           brewLogEntry.image.startsWith("http")
             ? { uri: brewLogEntry.image }
-            : brewLogEntry.image.includes(
-                  "BrewLogEditScreenPlaceholderInstruction.png"
-                )
-              ? require("../../nonclickable-visual-elements/brewLog/BrewLogEditScreenPlaceholderInstruction.png")
+            : brewLogEntry.image.includes("brew-log-placeholder.png")
+              ? require("../../graphics/brew-log/brew-log-placeholder.png")
               : { uri: brewLogEntry.image }
         }
         style={styles.image}
@@ -81,16 +79,14 @@ const BrewLogEntryCard: React.FC<brewLogEntryCardProps> = ({
           </Text>
 
           <View style={styles.editButtonWrapper}>
-            <TouchableOpacity
+            <Feather
+              name={"edit"}
+              size={30}
               style={styles.iconButton}
               onPress={handleEditPress}
+              color={"#078CC9"}
               activeOpacity={0.7}
-            >
-              <Image
-                source={require("../../icons/brew-log.png")}
-                style={{ tintColor: "#078CC9", width: 32, height: 32 }}
-              />
-            </TouchableOpacity>
+            ></Feather>
           </View>
         </View>
       </View>
@@ -158,10 +154,8 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   iconButton: {
-    justifyContent: "flex-end",
-    alignItems: "center",
-    width: 40,
-    height: 50,
+    resizeMode: "contain",
+    marginTop: -10,
   },
   iconText: {
     fontSize: 18,

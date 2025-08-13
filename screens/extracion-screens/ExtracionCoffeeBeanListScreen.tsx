@@ -49,7 +49,7 @@ const ExtracionCoffeeBeanListScreen: React.FC = () => {
         {/* French Press Illustration */}
         <View style={styles.illustrationContainer}>
           <Image
-            source={require("../../assets/nonclickable-visual-elements/coffee press unfilled.png")}
+            source={require("../../assets/graphics/extracion/bluetooth-modal/coffee-press-unfilled.png")}
             style={styles.frenchPressImage}
           />
         </View>

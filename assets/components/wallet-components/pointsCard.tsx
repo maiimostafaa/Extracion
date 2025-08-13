@@ -73,7 +73,7 @@ const FlipCard = ({
             style={[styles.card, styles.cardFront, frontAnimatedStyle]}
           >
             <ImageBackground
-              source={require("../../backgrounds/component-backgrounds/card.png")}
+              source={require("../../graphics/backgrounds/component-backgrounds/card.png")}
               style={styles.background}
               imageStyle={{ borderRadius: 15 }}
             >
@@ -101,7 +101,7 @@ const FlipCard = ({
             style={[styles.card, styles.cardBack, backAnimatedStyle]}
           >
             <ImageBackground
-              source={require("../../backgrounds/component-backgrounds/card.png")}
+              source={require("../../graphics/backgrounds/component-backgrounds/card.png")}
               style={styles.background}
               imageStyle={{ borderRadius: 15 }}
             >

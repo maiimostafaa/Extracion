@@ -7,7 +7,7 @@ import {
   ImageBackground,
   TouchableOpacity,
 } from "react-native";
-import { brewLogFilter } from "../../types/BrewLog/brewLogFilter";
+import { brewLogFilter } from "../../types/brew-log/brew-log-filter";
 
 interface brewLogFilterButtonProps {
   brewLogFilter: brewLogFilter;

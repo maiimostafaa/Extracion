@@ -11,7 +11,7 @@ import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../../../navigation/AppNavigator";
 import { mockCoupons } from "../../../assets/mock_data/mock-coupons";
-import CouponCard from "../../../assets/components/wallet-components/CouponCard";
+import CouponCard from "../../../assets/components/wallet-components/couponCard";
 import { coupon } from "../../../assets/types/coupon";
 import { Ionicons } from "@expo/vector-icons";
 

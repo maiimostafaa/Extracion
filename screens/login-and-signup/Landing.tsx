@@ -51,7 +51,7 @@ export default function LoginScreen() {
         >
           <View style={styles.header}>
             <Image
-              source={require("../../assets/nonclickable-visual-elements/getthepong-logo.png")}
+              source={require("../../assets/graphics/logos/get-the-pong.png")}
               style={styles.headerLogo}
             />
           </View>
@@ -146,7 +146,7 @@ export default function LoginScreen() {
             }}
           >
             <Image
-              source={require("../../assets/nonclickable-visual-elements/extracion-logo.png")}
+              source={require("../../assets/graphics/logos/extracion.png")}
               style={{
                 tintColor: "#58595B",
                 resizeMode: "contain",

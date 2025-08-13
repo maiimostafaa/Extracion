@@ -19,17 +19,17 @@ import * as FileSystem from "expo-file-system";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../navigation/AppNavigator";
-import { brewLogEntry } from "../../assets/types/BrewLog/brewLogEntry";
-import TastingWheel from "../../assets/components/brew-log-components/TastingWheel";
-import BrewLogBrewDataBlock from "../../assets/components/brew-log-components/brewLogBrewDataBlock";
-import BrewLogRatingStars from "../../assets/components/brew-log-components/BrewLogRatingStars";
+import { brewLogEntry } from "../../assets/types/brew-log/brew-log-entry";
+import TastingWheel from "../../assets/components/brew-log-components/tastingWheel";
+import BrewLogBrewDataBlock from "../../assets/components/brew-log-components/brewDataBlock";
+import BrewLogRatingStars from "../../assets/components/brew-log-components/editableStarRating";
 import {
   addBrewLog,
   loadBrewLogs,
   saveBrewLogs,
   deleteBrewLog,
   storeImagePermanently,
-} from "../../brewLogStorage";
+} from "../../assets/local-storage/brewLogStorage";
 
 type EditScreenRouteProp = RouteProp<RootStackParamList, "BrewLogEditScreen">;
 type EditScreenNavigationProp = NativeStackNavigationProp<
@@ -50,28 +50,21 @@ const BrewLogEditScreen: React.FC = () => {
   const [showRoasterDatePicker, setShowRoasterDatePicker] = useState(false);
 
   // Brew method options
-  const brewMethods = [
-    "Pour Over",
-    "French Press",
-    "Cold Brew",
-    "Cold Drip",
-    "Brew Bar",
-  ];
+  const brewMethods = ["Pour Over", "French Press", "Cold Brew", "Brew Bar"];
 
   // Get brewing method icon
   const getBrewMethodIcon = (brewMethod: string) => {
     switch (brewMethod) {
       case "French Press":
-        return require("../../assets/components/brew-log-components/icons/french_press.png");
+        return require("../../assets/graphics/brewing-methods/french-press.png");
       case "Pour Over":
-        return require("../../assets/components/brew-log-components/icons/pour_over.png");
+        return require("../../assets/graphics/brewing-methods/pour-over.png");
       case "Cold Brew":
-      case "Cold Drip":
-        return require("../../assets/components/brew-log-components/icons/cold_brew.png");
+        return require("../../assets/graphics/brewing-methods/cold-brew.png");
       case "Brew Bar":
-        return require("../../assets/components/brew-log-components/icons/brew_bar.png");
+        return require("../../assets/graphics/brewing-methods/brew-bar.png");
       default:
-        return require("../../assets/components/brew-log-components/icons/pour_over.png");
+        return require("../../assets/graphics/brewing-methods/pour-over.png");
     }
   };
 
@@ -482,10 +475,8 @@ const BrewLogEditScreen: React.FC = () => {
               source={
                 editableData.image.startsWith("http")
                   ? { uri: editableData.image }
-                  : editableData.image.includes(
-                        "BrewLogEditScreenPlaceholderInstruction.png"
-                      )
-                    ? require("../../assets/nonclickable-visual-elements/brewLog/BrewLogEditScreenPlaceholderInstruction.png")
+                  : editableData.image.includes("brew-log-placeholder.png")
+                    ? require("../../assets/graphics/brew-log/brew-log-placeholder.png")
                     : { uri: editableData.image }
               }
               style={styles.brewImage}
@@ -558,7 +549,7 @@ const BrewLogEditScreen: React.FC = () => {
             <View style={styles.editableBrewDataBlock}>
               <View style={styles.iconContainer}>
                 <Image
-                  source={require("../../assets/icons/brewLog/coffee_bean.png")}
+                  source={require("../../assets/graphics/brew-log/coffee-bean.png")}
                   style={styles.brewDataIcon}
                   resizeMode="contain"
                 />
@@ -577,7 +568,7 @@ const BrewLogEditScreen: React.FC = () => {
             <View style={styles.editableBrewDataBlock}>
               <View style={styles.iconContainer}>
                 <Image
-                  source={require("../../assets/icons/brewLog/coffee_bean.png")}
+                  source={require("../../assets/graphics/brew-log/coffee-bean.png")}
                   style={styles.brewDataIcon}
                   resizeMode="contain"
                 />
@@ -596,7 +587,7 @@ const BrewLogEditScreen: React.FC = () => {
             <View style={styles.editableBrewDataBlock}>
               <View style={styles.iconContainer}>
                 <Image
-                  source={require("../../assets/icons/brewLog/water-drop.png")}
+                  source={require("../../assets/graphics/brew-log/water-drop.png")}
                   style={styles.brewDataIcon}
                   resizeMode="contain"
                 />
@@ -617,7 +608,7 @@ const BrewLogEditScreen: React.FC = () => {
             <View style={styles.editableBrewDataBlock}>
               <View style={styles.iconContainer}>
                 <Image
-                  source={require("../../assets/icons/brewLog/scale.png")}
+                  source={require("../../assets/graphics/brew-log/scale.png")}
                   style={styles.brewDataIcon}
                   resizeMode="contain"
                 />
@@ -636,7 +627,7 @@ const BrewLogEditScreen: React.FC = () => {
             <View style={styles.editableBrewDataBlock}>
               <View style={styles.iconContainer}>
                 <Image
-                  source={require("../../assets/icons/brewLog/clock.png")}
+                  source={require("../../assets/graphics/brew-log/clock.png")}
                   style={styles.brewDataIcon}
                   resizeMode="contain"
                 />
@@ -655,7 +646,7 @@ const BrewLogEditScreen: React.FC = () => {
             <View style={styles.editableBrewDataBlock}>
               <View style={styles.iconContainer}>
                 <Image
-                  source={require("../../assets/icons/brewLog/thermometer.png")}
+                  source={require("../../assets/graphics/brew-log/thermometer.png")}
                   style={styles.brewDataIcon}
                   resizeMode="contain"
                 />

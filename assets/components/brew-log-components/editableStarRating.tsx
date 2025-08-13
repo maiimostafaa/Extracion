@@ -1,25 +1,29 @@
-import React from 'react';
-import { View, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import React from "react";
+import { View, StyleSheet, Image, TouchableOpacity } from "react-native";
+import { AntDesign } from "@expo/vector-icons";
 
 interface BrewLogRatingStarsProps {
   rating: number; // Float between 0 and 5
   onRatingChange?: (rating: number) => void; // Optional - makes it interactive
 }
 
-const BrewLogRatingStars: React.FC<BrewLogRatingStarsProps> = ({ rating, onRatingChange }) => {
+const BrewLogRatingStars: React.FC<BrewLogRatingStarsProps> = ({
+  rating,
+  onRatingChange,
+}) => {
   // Round down the rating to get the number of filled stars
   const filledStars = Math.floor(rating);
   const maxStars = 5;
 
   const handleStarTap = (starIndex: number) => {
     if (!onRatingChange) return; // Not interactive
-    
+
     const newRating = starIndex + 1; // Star index is 0-based, rating is 1-based
-    
+
     // If tapping the same star that represents the current rating, reset to 0
     // Otherwise, set to the new rating
-    const finalRating = (rating === newRating) ? 0 : newRating;
-    
+    const finalRating = rating === newRating ? 0 : newRating;
+
     onRatingChange(finalRating);
   };
 
@@ -27,7 +31,7 @@ const BrewLogRatingStars: React.FC<BrewLogRatingStarsProps> = ({ rating, onRatin
     <View style={styles.starsContainer}>
       {Array.from({ length: maxStars }, (_, index) => {
         const StarComponent = onRatingChange ? TouchableOpacity : View;
-        
+
         return (
           <StarComponent
             key={`star-${index}-${rating}`}
@@ -35,13 +39,14 @@ const BrewLogRatingStars: React.FC<BrewLogRatingStarsProps> = ({ rating, onRatin
             activeOpacity={onRatingChange ? 0.7 : 1}
             style={onRatingChange ? styles.interactiveStar : undefined}
           >
-            <Image
-              source={require('./icons/RatingStar.png')}
+            <AntDesign
+              name={"star"}
+              size={30}
               style={[
                 styles.star,
-                index < filledStars 
-                  ? { tintColor: '#FFD700' } // Yellow/gold for filled stars
-                  : { tintColor: '#CCCCCC' } // Gray for empty stars
+                index < filledStars
+                  ? { color: "#FFD700" } // Yellow/gold for filled stars
+                  : { color: "#CCCCCC" }, // Gray for empty stars
               ]}
             />
           </StarComponent>
@@ -53,15 +58,15 @@ const BrewLogRatingStars: React.FC<BrewLogRatingStarsProps> = ({ rating, onRatin
 
 const styles = StyleSheet.create({
   starsContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     paddingVertical: 12,
     marginBottom: 30,
   },
   star: {
-    width: 26,
-    height: 26,
+    width: 30,
+    height: 30,
     marginHorizontal: 5,
   },
   interactiveStar: {

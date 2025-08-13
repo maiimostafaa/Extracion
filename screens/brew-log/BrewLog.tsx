@@ -22,16 +22,16 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../../navigation/AppNavigator";
 import Header from "../../navigation/Header";
-import BrewLogFilterButton from "../../assets/components/brew-log-components/brewLogFilterButton";
-import { brewLogFilter } from "../../assets/types/BrewLog/brewLogFilter";
-import BrewLogFilterSelector from "../../assets/components/brew-log-components/brewLogFilterSelector";
-import BrewLogEntryCard from "../../assets/components/brew-log-components/brewLogEntryCard";
+import BrewLogFilterButton from "../../assets/components/brew-log-components/filterButton";
+import { brewLogFilter } from "../../assets/types/brew-log/brew-log-filter";
+import BrewLogFilterSelector from "../../assets/components/brew-log-components/filterSelector";
+import BrewLogEntryCard from "../../assets/components/brew-log-components/entryCard";
 import {
   brewLogEntry,
   coffeeBeanDetail,
   brewDetail,
-} from "../../assets/types/BrewLog/brewLogEntry";
-import { loadBrewLogs } from "../../brewLogStorage";
+} from "../../assets/types/brew-log/brew-log-entry";
+import { loadBrewLogs } from "../../assets/local-storage/brewLogStorage";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -267,8 +267,7 @@ export default function BrewLogScreen() {
     date: new Date(),
     name: "New Brew Log",
     brewMethod: "Pour Over",
-    image:
-      "../../assets/nonclickable-visual-elements/brewLog/BrewLogEditScreenPlaceholderInstruction.png",
+    image: "../../assets/graphics/brew-log/brew-log-placeholder.png",
     coffeeBeanDetail: {
       coffeeName: "",
       origin: "",

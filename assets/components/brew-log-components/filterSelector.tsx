@@ -1,7 +1,7 @@
 import React from "react";
 import { View, ScrollView, StyleSheet } from "react-native";
-import BrewLogFilterButton from "./brewLogFilterButton";
-import { brewLogFilter } from "../../types/BrewLog/brewLogFilter";
+import BrewLogFilterButton from "./filterButton";
+import { brewLogFilter } from "../../types/brew-log/brew-log-filter";
 
 type filterOptions =
   | "All"
@@ -21,10 +21,26 @@ const BrewLogFilterSelector: React.FC<BrewLogFilterSelectorProps> = ({
 }) => {
   const filterOptions: brewLogFilter[] = [
     { id: 5, label: "All" },
-    { id: 1, icon: require("./icons/pour_over.png"), label: "Pour Over" },
-    { id: 2, icon: require("./icons/cold_brew.png"), label: "Cold Brew" },
-    { id: 3, icon: require("./icons/brew_bar.png"), label: "Brew Bar" },
-    { id: 4, icon: require("./icons/french_press.png"), label: "French Press" },
+    {
+      id: 1,
+      icon: require("../../graphics/brewing-methods/pour-over.png"),
+      label: "Pour Over",
+    },
+    {
+      id: 2,
+      icon: require("../../graphics/brewing-methods/cold-brew.png"),
+      label: "Cold Brew",
+    },
+    {
+      id: 3,
+      icon: require("../../graphics/brewing-methods/brew-bar.png"),
+      label: "Brew Bar",
+    },
+    {
+      id: 4,
+      icon: require("../../graphics/brewing-methods/french-press.png"),
+      label: "French Press",
+    },
   ];
 
   return (

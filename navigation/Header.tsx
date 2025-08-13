@@ -29,7 +29,7 @@ export default function Header({ tintColor = "#fff" }: CustomHeaderProps) {
       {/* Top Row: Logo + Icons */}
       <View style={styles.topRow}>
         <Image
-          source={require("../assets/nonclickable-visual-elements/getthepong-logo.png")}
+          source={require("../assets/graphics/logos/get-the-pong.png")}
           style={[styles.logo, { tintColor }]} // Apply tintColor to the logo
         />
         <View style={styles.iconRow}>

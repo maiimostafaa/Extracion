@@ -9,7 +9,7 @@ import {
 } from "react-native";
 
 // Import the coffee machine image
-const coffeeMachineImage = require("../../nonclickable-visual-elements/extracion_coffeeMachine.png");
+const coffeeMachineImage = require("../../graphics/extracion/extracion-coffee-machine.png");
 
 interface BrewingMethodCardProps {
   title: string;

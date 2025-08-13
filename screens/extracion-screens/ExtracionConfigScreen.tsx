@@ -54,43 +54,43 @@ const ExtracionConfigScreen: React.FC = () => {
       id: "extra-coarse",
       name: "extra-coarse",
       feelsLike: "rock salt",
-      icon: require("../../assets/icons/extracion/grindSizeIcons/extra-coarse.png"),
+      icon: require("../../assets/graphics/extracion/grind-size-icons/extra-coarse.png"),
     },
     {
       id: "coarse",
       name: "coarse",
       feelsLike: "sea salt",
-      icon: require("../../assets/icons/extracion/grindSizeIcons/coarse.png"),
+      icon: require("../../assets/graphics/extracion/grind-size-icons/coarse.png"),
     },
     {
       id: "medium-coarse",
       name: "medium-coarse",
       feelsLike: "rough sand",
-      icon: require("../../assets/icons/extracion/grindSizeIcons/medium-coarse.png"),
+      icon: require("../../assets/graphics/extracion/grind-size-icons/medium-coarse.png"),
     },
     {
       id: "medium",
       name: "medium",
       feelsLike: "sand",
-      icon: require("../../assets/icons/extracion/grindSizeIcons/medium.png"),
+      icon: require("../../assets/graphics/extracion/grind-size-icons/medium.png"),
     },
     {
       id: "medium-fine",
       name: "medium-fine",
       feelsLike: "table salt",
-      icon: require("../../assets/icons/extracion/grindSizeIcons/medium-fine.png"),
+      icon: require("../../assets/graphics/extracion/grind-size-icons/medium-fine.png"),
     },
     {
       id: "fine",
       name: "fine",
       feelsLike: "sugar",
-      icon: require("../../assets/icons/extracion/grindSizeIcons/fine.png"),
+      icon: require("../../assets/graphics/extracion/grind-size-icons/fine.png"),
     },
     {
       id: "extra-fine",
       name: "extra-fine",
       feelsLike: "flour",
-      icon: require("../../assets/icons/extracion/grindSizeIcons/extra-fine.png"),
+      icon: require("../../assets/graphics/extracion/grind-size-icons/extra-fine.png"),
     },
   ];
 
@@ -310,7 +310,7 @@ const ExtracionConfigScreen: React.FC = () => {
                 onPress={handleNavigateToCoffeeBeans}
               >
                 <Image
-                  source={require("../../assets/icons/extracion_coffeebean.png")}
+                  source={require("../../assets/graphics/extracion/config-graphics/extracion-coffeebean.png")}
                   style={styles.navIcon}
                 />
                 <Text style={styles.navText}>select coffee beans</Text>
@@ -328,7 +328,7 @@ const ExtracionConfigScreen: React.FC = () => {
           <View style={styles.content}>
             {/* Cup counter icon */}
             <Image
-              source={require("../../assets/nonclickable-visual-elements/extracion_config_cupCountIcon.png")}
+              source={require("../../assets/graphics/extracion/config-graphics/cup-count-icon.png")}
               style={styles.cupIcon}
             />
             {/* Cup Counter */}
@@ -419,7 +419,7 @@ const ExtracionConfigScreen: React.FC = () => {
               <>
                 {/* French Press Icon */}
                 <Image
-                  source={require("../../assets/nonclickable-visual-elements/extracion_frenchPressLogo.png")}
+                  source={require("../../assets/graphics/extracion/tutorial-graphics/french-press-bitonal.png")}
                   style={styles.frenchPressIcon}
                 />
 
@@ -444,7 +444,7 @@ const ExtracionConfigScreen: React.FC = () => {
             {tutorialStep === 1 && (
               <>
                 <Image
-                  source={require("../../assets/nonclickable-visual-elements/extracion_kettleIcon.png")}
+                  source={require("../../assets/graphics/extracion/tutorial-graphics/extracion-kettle.png")}
                   style={styles.kettleIcon}
                 />
                 <Text style={styles.kettleTitle}>Boil the kettle</Text>
@@ -458,7 +458,7 @@ const ExtracionConfigScreen: React.FC = () => {
             {tutorialStep === 2 && (
               <>
                 <Image
-                  source={require("../../assets/nonclickable-visual-elements/extracion_grinder.png")}
+                  source={require("../../assets/graphics/extracion/tutorial-graphics/extracion-grinder.png")}
                   style={styles.kettleIcon}
                 />
                 <Text style={styles.kettleTitle}>
@@ -474,7 +474,7 @@ const ExtracionConfigScreen: React.FC = () => {
             {tutorialStep === 3 && (
               <>
                 <Image
-                  source={require("../../assets/nonclickable-visual-elements/extracion_takeOutFilter.png")}
+                  source={require("../../assets/graphics/extracion/tutorial-graphics/extracion-take-out-filter.png")}
                   style={styles.takeOutFilter}
                 />
                 <Text style={styles.kettleTitle}>
@@ -486,7 +486,7 @@ const ExtracionConfigScreen: React.FC = () => {
             {tutorialStep === 4 && (
               <>
                 <Image
-                  source={require("../../assets/nonclickable-visual-elements/extracion_checkMark.png")}
+                  source={require("../../assets/graphics/extracion/tutorial-graphics/extracion-checkmark.png")}
                   style={styles.kettleIcon}
                 />
                 <Text style={styles.kettleTitle}>Turn on Extracion</Text>

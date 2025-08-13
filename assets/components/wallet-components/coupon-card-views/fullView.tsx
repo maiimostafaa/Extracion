@@ -74,7 +74,7 @@ const FullView: React.FC<FullViewProps> = ({ coupon: propCoupon }) => {
         </View>
       </Modal>
       <ImageBackground
-        source={require("../../../backgrounds/component-backgrounds/coupon-details.png")}
+        source={require("../../../graphics/backgrounds/component-backgrounds/coupon-details.png")}
         style={styles.background}
       >
         <View style={styles.contentContainer}>

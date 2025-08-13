@@ -261,7 +261,7 @@ export default function HomeScreen() {
           >
             <TouchableOpacity onPress={() => setShowShopModal(true)}>
               <ImageBackground
-                source={require("../../assets/backgrounds/button-backgrounds/barista-classes-bg.png")}
+                source={require("../../assets/graphics/backgrounds/button-backgrounds/barista-classes-bg.png")}
                 style={styles.imageContainer}
                 imageStyle={{ borderRadius: 10 }}
               ></ImageBackground>
@@ -270,14 +270,14 @@ export default function HomeScreen() {
               onPress={() => navigation.navigate("CafeFinderScreen")}
             >
               <ImageBackground
-                source={require("../../assets/backgrounds/button-backgrounds/cafe-finder-bg.png")}
+                source={require("../../assets/graphics/backgrounds/button-backgrounds/cafe-finder-bg.png")}
                 style={styles.imageContainer}
                 imageStyle={{ borderRadius: 10 }}
               ></ImageBackground>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => setShowShopModal(true)}>
               <ImageBackground
-                source={require("../../assets/backgrounds/button-backgrounds/cafe-event-bg.png")}
+                source={require("../../assets/graphics/backgrounds/button-backgrounds/cafe-event-bg.png")}
                 style={{ width: 200, height: 250, borderRadius: 10 }}
                 imageStyle={{ borderRadius: 10 }}
               ></ImageBackground>

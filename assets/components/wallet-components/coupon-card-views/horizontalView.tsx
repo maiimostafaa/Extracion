@@ -35,7 +35,7 @@ const HorizontalView: React.FC<HorizontalViewProps> = ({ coupon }) => {
       ]}
     >
       <ImageBackground
-        source={require("../../../backgrounds/component-backgrounds/coupon.png")}
+        source={require("../../../graphics/backgrounds/component-backgrounds/coupon.png")}
         style={styles.background}
       >
         <View style={styles.contentContainer}>
@@ -71,7 +71,6 @@ const HorizontalView: React.FC<HorizontalViewProps> = ({ coupon }) => {
             </View>
           </View>
         </View>
-        S
       </ImageBackground>
     </View>
   );

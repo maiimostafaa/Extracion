@@ -8,7 +8,7 @@ import Svg, {
   Polygon,
 } from "react-native-svg";
 
-const beanIcon = require("../../icons/extracion_coffeebean.png");
+const beanIcon = require("../../graphics/extracion/config-graphics/extracion-coffeebean.png");
 const { width } = Dimensions.get("window");
 
 // Configuration constants

@@ -18,11 +18,11 @@ import {
 } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../navigation/AppNavigator";
-import { brewLogEntry } from "../../assets/types/BrewLog/brewLogEntry";
-import TastingWheel from "../../assets/components/brew-log-components/TastingWheel";
-import BrewLogBrewDataBlock from "../../assets/components/brew-log-components/brewLogBrewDataBlock";
-import BrewLogRatingStars from "../../assets/components/brew-log-components/BrewLogRatingStars";
-import { loadBrewLogs } from "../../brewLogStorage";
+import { brewLogEntry } from "../../assets/types/brew-log/brew-log-entry";
+import TastingWheel from "../../assets/components/brew-log-components/tastingWheel";
+import BrewLogBrewDataBlock from "../../assets/components/brew-log-components/brewDataBlock";
+import BrewLogRatingStars from "../../assets/components/brew-log-components/editableStarRating";
+import { loadBrewLogs } from "../../assets/local-storage/brewLogStorage";
 
 type DetailScreenRouteProp = RouteProp<
   RootStackParamList,
@@ -49,16 +49,15 @@ const BrewLogDetailScreen: React.FC = () => {
   const getBrewMethodIcon = (brewMethod: string) => {
     switch (brewMethod) {
       case "French Press":
-        return require("../../assets/components/brew-log-components/icons/french_press.png");
+        return require("../../assets/graphics/brewing-methods/french-press.png");
       case "Pour Over":
-        return require("../../assets/components/brew-log-components/icons/pour_over.png");
+        return require("../../assets/graphics/brewing-methods/pour-over.png");
       case "Cold Brew":
-      case "Cold Drip":
-        return require("../../assets/components/brew-log-components/icons/cold_brew.png");
+        return require("../../assets/graphics/brewing-methods/cold-brew.png");
       case "Brew Bar":
-        return require("../../assets/components/brew-log-components/icons/brew_bar.png");
+        return require("../../assets/graphics/brewing-methods/brew-bar.png");
       default:
-        return require("../../assets/components/brew-log-components/icons/pour_over.png");
+        return require("../../assets/graphics/brewing-methods/pour-over.png");
     }
   };
 
@@ -185,10 +184,8 @@ const BrewLogDetailScreen: React.FC = () => {
             source={
               currentBrewLogEntry.image.startsWith("http")
                 ? { uri: currentBrewLogEntry.image }
-                : currentBrewLogEntry.image.includes(
-                      "BrewLogEditScreenPlaceholderInstruction.png"
-                    )
-                  ? require("../../assets/nonclickable-visual-elements/brewLog/BrewLogEditScreenPlaceholderInstruction.png")
+                : currentBrewLogEntry.image.includes("brew-log-placeholder.png")
+                  ? require("../../assets/graphics/brew-log/brew-log-placeholder.png")
                   : { uri: currentBrewLogEntry.image }
             }
             style={styles.brewImage}
@@ -233,20 +230,20 @@ const BrewLogDetailScreen: React.FC = () => {
         <View style={styles.brewDataGrid}>
           <View style={styles.gridRow}>
             <BrewLogBrewDataBlock
-              iconPath={require("../../assets/icons/brewLog/coffee_bean.png")}
+              iconPath={require("../../assets/graphics/brew-log/coffee-bean.png")}
               title="Grind Size"
               value={currentBrewLogEntry.brewDetail.grindSize}
               valueColor="white"
             />
             <BrewLogBrewDataBlock
-              iconPath={require("../../assets/icons/brewLog/coffee_bean.png")}
+              iconPath={require("../../assets/graphics/brew-log/coffee-bean.png")}
               title="Weight (g)"
               value={currentBrewLogEntry.brewDetail.beanWeight}
               valueColor="white"
               // unit="g"
             />
             <BrewLogBrewDataBlock
-              iconPath={require("../../assets/icons/brewLog/water-drop.png")}
+              iconPath={require("../../assets/graphics/brew-log/water-drop.png")}
               title="Water (ml)"
               value={currentBrewLogEntry.brewDetail.waterAmount}
               valueColor="white"
@@ -255,7 +252,7 @@ const BrewLogDetailScreen: React.FC = () => {
           </View>
           <View style={styles.gridRow}>
             <BrewLogBrewDataBlock
-              iconPath={require("../../assets/icons/brewLog/scale.png")}
+              iconPath={require("../../assets/graphics/brew-log/scale.png")}
               title="Ratio"
               value={
                 currentBrewLogEntry.brewDetail.ratio
@@ -265,7 +262,7 @@ const BrewLogDetailScreen: React.FC = () => {
               valueColor="white"
             />
             <BrewLogBrewDataBlock
-              iconPath={require("../../assets/icons/brewLog/clock.png")}
+              iconPath={require("../../assets/graphics/brew-log/clock.png")}
               title="Brew Time"
               value={
                 currentBrewLogEntry.brewDetail.brewTime
@@ -275,7 +272,7 @@ const BrewLogDetailScreen: React.FC = () => {
               valueColor="white"
             />
             <BrewLogBrewDataBlock
-              iconPath={require("../../assets/icons/brewLog/thermometer.png")}
+              iconPath={require("../../assets/graphics/brew-log/thermometer.png")}
               title="Temperature"
               value={currentBrewLogEntry.brewDetail.temperature}
               valueColor="white"

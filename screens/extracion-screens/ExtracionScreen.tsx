@@ -20,17 +20,17 @@ import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../../navigation/AppNavigator";
 import Header from "../../navigation/Header";
-import BrewingMethodCard from "../../assets/components/extracion-components/BrewingMethodCard";
+import BrewingMethodCard from "../../assets/components/extracion-components/brewingMethodCard";
 import { Ionicons } from "@expo/vector-icons";
 
-import useBLE from "../../useBLE";
+import useBLE from "../../services/useBLE";
 import { useBLEContext } from "../../context/BLEContext";
 
 // Import images for each brewing method
-const frenchPressImage = require("../../assets/nonclickable-visual-elements/extracion_coffeeMachine.png");
-const pourOverImage = require("../../assets/nonclickable-visual-elements/extracion_coffeeMachine.png");
-const coldDripImage = require("../../assets/nonclickable-visual-elements/extracion_coffeeMachine.png");
-const brewBarImage = require("../../assets/nonclickable-visual-elements/extracion_coffeeMachine.png");
+const frenchPressImage = require("../../assets/graphics/extracion/extracion-coffee-machine.png");
+const pourOverImage = require("../../assets/graphics/extracion/extracion-coffee-machine.png");
+const coldDripImage = require("../../assets/graphics/extracion/extracion-coffee-machine.png");
+const brewBarImage = require("../../assets/graphics/extracion/extracion-coffee-machine.png");
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -393,7 +393,7 @@ export default function ExtractionScreen() {
   return (
     <ImageBackground
       style={styles.background}
-      source={require("../../assets/backgrounds/screen-backgrounds/bg-extracion.png")}
+      source={require("../../assets/graphics/backgrounds/screen-backgrounds/bg-extracion.png")}
     >
       <ScrollView style={styles.container}>
         <SafeAreaView style={styles.container}>
@@ -504,7 +504,7 @@ export default function ExtractionScreen() {
                         }}
                       >
                         <Image
-                          source={require("../../assets/nonclickable-visual-elements/coffee press unfilled.png")}
+                          source={require("../../assets/graphics/extracion/bluetooth-modal/coffee-press-unfilled.png")}
                           style={styles.frenchPressModalIcon}
                         />
                         <Text style={styles.modalTitle}>
@@ -579,7 +579,7 @@ export default function ExtractionScreen() {
                             }}
                           >
                             <Image
-                              source={require("../../assets/nonclickable-visual-elements/coffee press unfilled.png")}
+                              source={require("../../assets/graphics/extracion/bluetooth-modal/coffee-press-unfilled.png")}
                               style={styles.frenchPressModalIcon}
                             />
                             <Text style={styles.modalTitle}>
@@ -645,7 +645,7 @@ export default function ExtractionScreen() {
                             }}
                           >
                             <Image
-                              source={require("../../assets/nonclickable-visual-elements/coffee press unfilled.png")}
+                              source={require("../../assets/graphics/extracion/bluetooth-modal/coffee-press-unfilled.png")}
                               style={styles.frenchPressModalIcon}
                             />
                             <Text style={styles.modalTitle}>
@@ -747,7 +747,7 @@ export default function ExtractionScreen() {
                         }}
                       >
                         <Image
-                          source={require("../../assets/nonclickable-visual-elements/coffee press unfilled.png")}
+                          source={require("../../assets/graphics/extracion/bluetooth-modal/coffee-press-unfilled.png")}
                           style={styles.frenchPressModalIcon}
                         />
                         <Text style={styles.modalTitle}>
