@@ -1,3 +1,10 @@
+/**
+ * brew-data-block.tsx
+ * 
+ * A reusable component that displays brewing parameter data with an icon, title, and value in a styled block format.
+ * This component is used in both the brewlog edit and view pages.
+ */
+
 import React from "react";
 import { View, Text, Image, StyleSheet } from "react-native";
 
@@ -14,7 +21,7 @@ const BrewLogBrewDataBlock: React.FC<brewLogBrewDataBlockProps> = ({
   title,
   value,
   unit = "",
-  valueColor = "#8CDBED", // Default to light blue for backward compatibility
+  valueColor = "#8CDBED",
 }) => {
   const displayValue = value || "enter value";
   const isPlaceholder = !value || value === 0 || value === "0";
@@ -33,17 +40,19 @@ const BrewLogBrewDataBlock: React.FC<brewLogBrewDataBlockProps> = ({
 };
 
 const styles = StyleSheet.create({
+  // Main container (overall block layout)
   container: {
     flex: 1,
-    // backgroundColor: "#666666",
     borderRadius: 8,
     padding: 12, // Reduced padding slightly to give more space for text
     alignItems: "center",
     justifyContent: "center",
     minHeight: 100,
-    margin: 2, // Reduced margin to give more width to each block
+    margin: 2,
     minWidth: 100, // Add minimum width to prevent over-shrinking
   },
+  
+  // Icon section (top of component)
   iconContainer: {
     marginBottom: 10,
   },
@@ -52,6 +61,8 @@ const styles = StyleSheet.create({
     height: 36,
     tintColor: "#FFFFFF",
   },
+  
+  // Title section (middle of component)
   title: {
     fontSize: 14,
     color: "white",
@@ -59,12 +70,14 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontFamily: 'cardRegular',
   },
+  
+  // Value section (bottom of component)
   value: {
     fontSize: 14,
     fontWeight: "500",
     textAlign: "center",
     fontFamily: 'cardRegular',
-    // Color will be set dynamically via props
+    // Color will be set dynamically via props depending on whether it is in edit state or not
   },
   placeholderValue: {
     color: "#999999",

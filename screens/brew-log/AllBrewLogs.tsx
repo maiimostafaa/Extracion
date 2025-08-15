@@ -102,7 +102,7 @@ export default function BrewLogScreen() {
     date: new Date(),
     name: "New Brew Log",
     brewMethod: "Pour Over",
-    image: "../../assets/graphics/brew-log/brew-log-placeholder.png",
+    image: "brew-log-placeholder.png",
     coffeeBeanDetail: {
       coffeeName: "",
       origin: "",
