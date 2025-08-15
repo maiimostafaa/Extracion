@@ -1,3 +1,9 @@
+/**
+ * EntryEdit.tsx
+ * 
+ * The screen that allows users to edit or create new brew log entries, including all brewing parameters, tasting notes, and photos.
+ */
+
 import React, { useState } from "react";
 import {
   View,
@@ -12,17 +18,8 @@ import {
   Platform,
   Alert,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import DateTimePicker from "@react-native-community/datetimepicker";
-import * as ImagePicker from "expo-image-picker";
-import * as FileSystem from "expo-file-system";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { RootStackParamList } from "../../navigation/AppNavigator";
 import { brewLogEntry } from "../../assets/types/brew-log/brew-log-entry";
-import TastingWheel from "../../assets/components/brew-log-components/tasting-wheel";
-import BrewLogBrewDataBlock from "../../assets/components/brew-log-components/brew-data-block";
-import BrewLogRatingStars from "../../assets/components/brew-log-components/editable-star-rating";
 import {
   addBrewLog,
   loadBrewLogs,
@@ -30,6 +27,15 @@ import {
   deleteBrewLog,
   storeImagePermanently,
 } from "../../assets/local-storage/brewLogStorage";
+import { Ionicons } from "@expo/vector-icons";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import * as ImagePicker from "expo-image-picker";
+import * as FileSystem from "expo-file-system";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { RootStackParamList } from "../../navigation/AppNavigator";
+import TastingWheel from "../../assets/components/brew-log-components/tasting-wheel";
+import BrewLogBrewDataBlock from "../../assets/components/brew-log-components/brew-data-block";
+import BrewLogRatingStars from "../../assets/components/brew-log-components/editable-star-rating";
 
 type EditScreenRouteProp = RouteProp<RootStackParamList, "BrewLogEditScreen">;
 type EditScreenNavigationProp = NativeStackNavigationProp<
@@ -846,6 +852,7 @@ const BrewLogEditScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
+  // Container and background styles (top-level)
   container: {
     flex: 1,
     backgroundColor: "#333333", // Match header background to extend to top
@@ -856,6 +863,8 @@ const styles = StyleSheet.create({
       // iOS doesn't get the marginTop
     }),
   },
+  
+  // Header section (top of screen)
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -922,11 +931,15 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     fontFamily: "cardRegular",
   },
+  
+  // Main content area (scrollable content)
   scrollView: {
     flex: 1,
     padding: 22,
     backgroundColor: "#58595B",
   },
+  
+  // Date and brew method section (top of content)
   dateBrewMethodContainer: {
     alignItems: "center",
     justifyContent: "center",
@@ -963,6 +976,8 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     fontFamily: "cardRegular",
   },
+  
+  // Image section (below date/brew method)
   imageContainer: {
     alignItems: "center",
     marginTop: 22,
@@ -990,6 +1005,8 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontFamily: "cardRegular",
   },
+  
+  // Content sections (General, Brew Data, etc.)
   contentContainer: {
     alignItems: "center",
     marginBottom: 16,
@@ -1011,6 +1028,8 @@ const styles = StyleSheet.create({
     textAlign: "left",
     fontFamily: "cardRegular",
   },
+  
+  // Info rows (used in General section)
   infoRow: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -1036,6 +1055,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
     fontFamily: "cardRegular",
   },
+  
+  // Brew data grid section
   brewDataGrid: {
     marginBottom: 0,
   },
@@ -1081,6 +1102,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
     borderBottomWidth: 0,
   },
+  
+  // Rating section
   ratingContainer: {
     alignItems: "center",
   },
@@ -1108,6 +1131,8 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#666666",
   },
+  
+  // Delete button section (bottom of content)
   deleteButtonContainer: {
     marginTop: 10,
     marginBottom: 30,
@@ -1128,6 +1153,8 @@ const styles = StyleSheet.create({
     fontWeight: "400",
     fontFamily: "cardRegular",
   },
+  
+  // Modal styles (overlays)
   modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(0, 0, 0, 0.5)",

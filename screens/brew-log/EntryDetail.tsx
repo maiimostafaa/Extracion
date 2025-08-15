@@ -1,3 +1,9 @@
+/**
+ * EntryDetail.tsx
+ * 
+ * The screen that displays detailed information about a specific brew log entry, allowing users to view all brewing parameters, tasting notes, and overall rating.
+ */
+
 import React, { useState, useCallback } from "react";
 import {
   View,
@@ -9,20 +15,20 @@ import {
   Image,
   Platform,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
 import {
   useNavigation,
   useRoute,
   RouteProp,
   useFocusEffect,
 } from "@react-navigation/native";
+import { brewLogEntry } from "../../assets/types/brew-log/brew-log-entry";
+import { loadBrewLogs } from "../../assets/local-storage/brewLogStorage";
+import { Ionicons } from "@expo/vector-icons";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../navigation/AppNavigator";
-import { brewLogEntry } from "../../assets/types/brew-log/brew-log-entry";
 import TastingWheel from "../../assets/components/brew-log-components/tasting-wheel";
 import BrewLogBrewDataBlock from "../../assets/components/brew-log-components/brew-data-block";
 import BrewLogRatingStars from "../../assets/components/brew-log-components/editable-star-rating";
-import { loadBrewLogs } from "../../assets/local-storage/brewLogStorage";
 
 type DetailScreenRouteProp = RouteProp<
   RootStackParamList,
@@ -297,6 +303,7 @@ const BrewLogDetailScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
+  // Container and background styles (top-level)
   container: {
     flex: 1,
     backgroundColor: "#333333", // Match header background to extend to top
@@ -307,6 +314,8 @@ const styles = StyleSheet.create({
       // iOS doesn't get the marginTop
     }),
   },
+  
+  // Header section (top of screen)
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -354,11 +363,15 @@ const styles = StyleSheet.create({
     fontWeight: "400", // Slightly lighter weight for iOS style
     fontFamily: "cardRegular",
   },
+  
+  // Main content area (scrollable content)
   scrollView: {
     flex: 1,
     padding: 22,
     backgroundColor: "#58595B", // Original content background color
   },
+  
+  // Date and brew method section (top of content)
   dateBrewMethodContainer: {
     alignItems: "center",
     justifyContent: "center",
@@ -395,6 +408,8 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     fontFamily: "cardRegular",
   },
+  
+  // Image section (below date/brew method)
   imageContainer: {
     alignItems: "center",
     marginTop: 22,
@@ -405,6 +420,8 @@ const styles = StyleSheet.create({
     height: 216,
     borderRadius: 10,
   },
+  
+  // Content sections (General, Brew Data, etc.)
   contentContainer: {
     alignItems: "center",
     marginBottom: 16,
@@ -426,6 +443,8 @@ const styles = StyleSheet.create({
     textAlign: "left",
     fontFamily: "cardRegular",
   },
+  
+  // Info rows (used in General section)
   infoRow: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -450,6 +469,8 @@ const styles = StyleSheet.create({
     textAlign: "right",
     fontFamily: "cardRegular",
   },
+  
+  // Brew data grid section
   brewDataGrid: {
     marginBottom: 0,
   },
