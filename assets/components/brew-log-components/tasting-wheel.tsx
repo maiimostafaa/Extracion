@@ -1,7 +1,8 @@
-// README
-// This file contains the tasting wheel that is used in EntryDetail and EntryEdit screens.
-// The tasting wheel renders both in a editable (touchable) and a viewing version.
-
+/**
+ * tasting-wheel.tsx
+ * 
+ * An interactive circular tasting wheel component that displays coffee taste attributes organized by categories (Aroma, Taste, Mouth Feel) with visual indicators for ratings.
+ */
 
 import React from 'react';
 import { View, Text, StyleSheet, Dimensions } from 'react-native';
@@ -282,6 +283,7 @@ const TastingWheel: React.FC<TastingWheelProps> = ({ tasteRating, onTasteRatingC
 };
 
 const styles = StyleSheet.create({
+  // Main container (centers the circular wheel)
   container: {
     alignItems: 'center',
     justifyContent: 'center',

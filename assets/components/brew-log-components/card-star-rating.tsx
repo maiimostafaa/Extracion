@@ -1,3 +1,9 @@
+/**
+ * card-star-rating.tsx
+ * 
+ * A read-only star rating component that displays a numeric rating as filled stars with partial fill support.
+ */
+
 import React from "react";
 import { View, StyleSheet, Text, Platform } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
@@ -71,10 +77,13 @@ const StarRating: React.FC<StarRatingProps> = ({
 };
 
 const styles = StyleSheet.create({
+  // Main container (horizontal layout for stars and rating text)
   container: {
     flexDirection: "row",
     alignItems: "center",
   },
+  
+  // Rating text (displays numeric value next to stars)
   ratingText: {
     fontFamily: "cardRegular",
     color: "#58595B",

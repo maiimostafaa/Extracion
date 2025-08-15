@@ -1,3 +1,9 @@
+/**
+ * editable-star-rating.tsx
+ * 
+ * An interactive star rating component that allows users to select a rating by tapping on stars, with optional read-only mode.
+ */
+
 import React from "react";
 import { View, StyleSheet, Image, TouchableOpacity } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
@@ -57,6 +63,7 @@ const BrewLogRatingStars: React.FC<BrewLogRatingStarsProps> = ({
 };
 
 const styles = StyleSheet.create({
+  // Main container (horizontal layout for stars)
   starsContainer: {
     flexDirection: "row",
     alignItems: "center",
@@ -64,11 +71,15 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     marginBottom: 30,
   },
+  
+  // Individual star styling
   star: {
     width: 30,
     height: 30,
     marginHorizontal: 5,
   },
+  
+  // Interactive star touch target
   interactiveStar: {
     padding: 4, // Add some padding for better touch target
   },

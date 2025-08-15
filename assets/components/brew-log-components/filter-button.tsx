@@ -1,3 +1,9 @@
+/**
+ * filter-button.tsx
+ * 
+ * A filter button component that displays brewing method options with icons and handles selection state.
+ */
+
 import React from "react";
 import {
   View,
@@ -48,6 +54,7 @@ const BrewLogFilterButton: React.FC<brewLogFilterButtonProps> = ({
 };
 
 const styles = StyleSheet.create({
+  // Default button state (unselected)
   container: {
     width: 60,
     height: 60,
@@ -73,6 +80,8 @@ const styles = StyleSheet.create({
     fontFamily: "cardRegular",
     lineHeight: 11,
   },
+  
+  // Selected button state
   containerSelected: {
     width: 60,
     height: 60,
