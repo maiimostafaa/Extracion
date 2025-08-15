@@ -1,8 +1,14 @@
+/**
+ * entry-card.tsx
+ * 
+ * A card component that displays brew log entry information with navigation to detail and edit screens.
+ */
+
 import React from "react";
 import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
-import { Ionicons, Feather } from "@expo/vector-icons";
-import { brewLogEntry } from "../../types/brew-log/brew-log-entry";
 import { useNavigation } from "@react-navigation/native";
+import { brewLogEntry } from "../../types/brew-log/brew-log-entry";
+import { Ionicons, Feather } from "@expo/vector-icons";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../../../navigation/AppNavigator";
 import StarRating from "./card-star-rating";
@@ -95,6 +101,7 @@ const BrewLogEntryCard: React.FC<brewLogEntryCardProps> = ({
 };
 
 const styles = StyleSheet.create({
+  // Main container (overall card layout)
   container: {
     width: "100%",
     aspectRatio: 190 / 300,
@@ -103,6 +110,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#ffffff",
     overflow: "hidden", // Prevent content from spilling out
   },
+  
+  // Image section (top of card)
   image: {
     width: "100%",
     height: "55%", // Use percentage of container height instead of aspect ratio
@@ -110,6 +119,8 @@ const styles = StyleSheet.create({
     maxWidth: 160,
     alignSelf: "center",
   },
+  
+  // Content section (below image)
   contentContainer: {
     height: "40%", // Fixed height for content area
     marginTop: 8,
@@ -133,9 +144,13 @@ const styles = StyleSheet.create({
     marginVertical: 4,
     fontFamily: "cardRegular",
   },
+  
+  // Rating section (middle of content)
   ratingContainer: {
     marginVertical: 0,
   },
+  
+  // Bottom section (date and edit button)
   bottomRow: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -150,6 +165,8 @@ const styles = StyleSheet.create({
     fontFamily: "cardRegular",
     lineHeight: 22,
   },
+  
+  // Edit button (bottom-right)
   editButtonWrapper: {
     zIndex: 1,
   },

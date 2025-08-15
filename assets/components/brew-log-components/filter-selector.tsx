@@ -1,7 +1,13 @@
+/**
+ * filter-selector.tsx
+ * 
+ * A horizontal scrollable selector component that displays brewing method filter options as buttons.
+ */
+
 import React from "react";
 import { View, ScrollView, StyleSheet } from "react-native";
-import BrewLogFilterButton from "./filter-button";
 import { brewLogFilter } from "../../types/brew-log/brew-log-filter";
+import BrewLogFilterButton from "./filter-button";
 
 type filterOptions =
   | "All"
@@ -67,14 +73,19 @@ const BrewLogFilterSelector: React.FC<BrewLogFilterSelectorProps> = ({
 };
 
 const styles = StyleSheet.create({
+  // Main container (fixed height container)
   container: {
     height: 80,
   },
+  
+  // Scrollable content area
   scrollContent: {
     alignItems: "center",
     paddingVertical: 10,
     paddingHorizontal: 16,
   },
+  
+  // Individual button wrapper (spacing between buttons)
   buttonWrapper: {
     marginHorizontal: 8,
   },

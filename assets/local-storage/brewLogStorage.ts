@@ -74,18 +74,23 @@ export const validateImagePath = async (imagePath: string): Promise<string> => {
       return imagePath;
     }
 
+    // Check if it's already the placeholder path
+    if (imagePath.includes("brew-log-placeholder.png")) {
+      return imagePath;
+    }
+
     // Check if the local file exists
     const fileInfo = await FileSystem.getInfoAsync(imagePath);
     if (fileInfo.exists) {
       return imagePath;
     }
 
-    // If file doesn't exist, return a fallback image
+    // If file doesn't exist, return a fallback placeholder identifier
     console.warn(`Image file not found: ${imagePath}`);
-    return "../../assets/graphics/brew-log/brew-log-placeholder.png";
+    return "brew-log-placeholder.png";
   } catch (error) {
     console.error("Error validating image path:", error);
-    return "../../assets/graphics/brew-log/brew-log-placeholder.png";
+    return "brew-log-placeholder.png";
   }
 };
 
