@@ -1,29 +1,40 @@
-import React, { useState, useEffect } from "react";
+// README
+// This screen prompts the user to confirm their email address after signing up.
+// It provides a back button, a thank-you message, and a button to confirm email
+// (navigating the user to the Landing screen).
+
+// -------------------- Imports --------------------
+import React from "react";
 import {
   StyleSheet,
   View,
   Text,
-  TextInput,
   TouchableOpacity,
   Image,
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
   ScrollView,
-  ImageBackground,
   Dimensions,
 } from "react-native";
+
+// Navigation imports
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../../navigation/AppNavigator";
+
+// Icon import
 import { Ionicons } from "@expo/vector-icons";
 
+// -------------------- Navigation Types --------------------
 type LoginScreenNavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
-const windowWidth = Dimensions.get("window").width;
+// -------------------- Constants --------------------
+const windowWidth = Dimensions.get("window").width; // device width used for responsive layout
+
+// -------------------- Component --------------------
 export default function SignUpScreen() {
+  // Navigation object for routing actions
   const navigation = useNavigation<LoginScreenNavigationProp>();
 
+  // Handler: Navigate to Landing screen (reset navigation stack)
   const handlePress = () => {
     navigation.reset({
       index: 0,
@@ -31,12 +42,14 @@ export default function SignUpScreen() {
     });
   };
 
+  // Handler: Go back to previous screen
   const handleBack = () => {
     navigation.goBack();
   };
 
   return (
-    <ImageBackground style={styles.background}>
+    <View style={styles.background}>
+      {/* ---------- Header: back button + centered logo ---------- */}
       <View style={styles.header}>
         <Ionicons
           name="chevron-back"
@@ -53,63 +66,49 @@ export default function SignUpScreen() {
         </View>
       </View>
 
+      {/* ---------- Scrollable content: message + confirm button ---------- */}
       <ScrollView contentContainerStyle={styles.scrollContent}>
+        {/* Thank-you and confirmation instructions */}
         <View style={styles.textContainer}>
-          <Text
-            style={{
-              fontSize: 19,
-              color: "#58595B",
-              textAlign: "center",
-              fontFamily: "cardRegular",
-              lineHeight: 30,
-              marginBottom: 15,
-            }}
-          >
+          <Text style={[styles.text, { marginBottom: 15 }]}>
             Thank you for signing up with Extracion!
           </Text>
-          <Text style={styles.text}>
-            <Text style={styles.text}>Please confirm your</Text>
-          </Text>
+          <Text style={styles.text}>Please confirm your</Text>
           <Text style={styles.text}>email address</Text>
-          <Text style={styles.text}>
-            <Text style={styles.text}>by clicking the button below</Text>
-          </Text>
+          <Text style={styles.text}>by clicking the button below</Text>
         </View>
 
+        {/* Button: triggers handlePress to confirm email and go to Landing */}
         <TouchableOpacity style={styles.submitButton} onPress={handlePress}>
           <Text style={styles.submitButtonText}>Confirm Email Address</Text>
         </TouchableOpacity>
       </ScrollView>
-      <View
-        style={{
-          width: "100%",
-          flexDirection: "column",
-          justifyContent: "flex-end",
-          padding: 70,
-          alignItems: "center",
-        }}
-      >
+
+      {/* ---------- Footer: Extracion logo ---------- */}
+      <View style={styles.footerStyle}>
         <Image
           source={require("../../assets/graphics/logos/extracion.png")}
-          style={{ tintColor: "#58595B", resizeMode: "contain", height: 30 }}
+          style={styles.footerLogo}
         />
       </View>
-    </ImageBackground>
+    </View>
   );
 }
 
+// -------------------- Styles --------------------
 const styles = StyleSheet.create({
-  container: {
+  // Screen background container
+  background: {
     flex: 1,
+    resizeMode: "cover",
   },
-  scrollContent: {
-    flexGrow: 1,
-    padding: 24,
-    justifyContent: "center",
-  },
-  formContainer: {
-    width: "100%",
+  // Header container with back button and centered logo
+  header: {
+    flexDirection: "row",
     alignItems: "center",
+    paddingHorizontal: 16,
+    paddingTop: "11%",
+    zIndex: 10,
   },
   logoContainer: {
     flexDirection: "row",
@@ -123,44 +122,13 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     tintColor: "#000000",
   },
-  submitButton: {
-    backgroundColor: "#8CDBED",
-    padding: 10,
-    marginTop: 60,
-    borderRadius: 30,
-    alignItems: "center",
-    alignSelf: "center",
-    width: "90%", // Full width of the wrapper
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 3, // Reduced from 3 for better centering
-    },
-    shadowOpacity: 0.25, // Reduced for more subtle shadow
-    shadowRadius: 2, // Increased for softer shadow
-    elevation: 5, // Reduced elevation for Android
+  // ScrollView content wrapper
+  scrollContent: {
+    flexGrow: 1,
+    padding: 24,
+    justifyContent: "center",
   },
-  submitButtonText: {
-    color: "#58595B",
-    fontSize: 18,
-    fontFamily: "cardRegular",
-  },
-  background: {
-    flex: 1,
-    resizeMode: "cover",
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 16,
-    paddingTop: "11%",
-    zIndex: 10,
-  },
-  backButton: {
-    marginRight: 12,
-    padding: 8,
-  },
-
+  // Grey rounded container for instructional text
   textContainer: {
     backgroundColor: "#E5E5E6",
     borderRadius: 20,
@@ -179,5 +147,41 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontFamily: "cardRegular",
     lineHeight: 30,
+  },
+  // Confirm button styling
+  submitButton: {
+    backgroundColor: "#8CDBED",
+    padding: 10,
+    marginTop: 60,
+    borderRadius: 30,
+    alignItems: "center",
+    alignSelf: "center",
+    width: "90%",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 2,
+    elevation: 5,
+  },
+  submitButtonText: {
+    color: "#58595B",
+    fontSize: 18,
+    fontFamily: "cardRegular",
+  },
+  // Footer logo styling
+  footerStyle: {
+    width: "100%",
+    flexDirection: "column",
+    justifyContent: "flex-end",
+    padding: 70,
+    alignItems: "center",
+  },
+  footerLogo: {
+    tintColor: "#58595B",
+    resizeMode: "contain",
+    height: 30,
   },
 });

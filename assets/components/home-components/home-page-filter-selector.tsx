@@ -1,19 +1,34 @@
+// README
+// Horizontal filter selector for the Home page.
+// Features:
+// - Displays a row of filter buttons (All, Coffee Recipe, KOL Featuring, Promotion).
+// - Highlights the currently selected filter.
+// - Calls `onFilterChange` when a filter is selected.
+// Notes:
+// - Uses BrewLogFilterButton component for consistent styling with other filter buttons.
+// - Accepts `selectedFilter` from parent to determine which filter is active.
+// - Parent component must handle state for `selectedFilter` and pass `onFilterChange` handler.
+
+// -------------------- Imports --------------------
 import React from "react";
-import { View, ScrollView, StyleSheet } from "react-native";
+import { View, StyleSheet } from "react-native";
 import BrewLogFilterButton from "../brew-log-components/filter-button";
 import { brewLogFilter } from "../../types/brew-log/brew-log-filter";
 
+// -------------------- Types --------------------
 type filterOptions = "All" | "Coffee Recipe" | "KOL Featuring" | "Promotion";
 
 interface HomePageFilterSelectorProps {
-  selectedFilter: filterOptions; // Current value stored on the screen
-  onFilterChange: (filter: filterOptions) => void; // Function in order to update the parent
+  selectedFilter: filterOptions; // Currently selected filter label
+  onFilterChange: (filter: filterOptions) => void; // Callback to update selected filter in parent
 }
 
+// -------------------- Component --------------------
 const HomePageFilterSelector: React.FC<HomePageFilterSelectorProps> = ({
   selectedFilter,
   onFilterChange,
 }) => {
+  // Static list of available filter options
   const filterOptions: brewLogFilter[] = [
     {
       id: 1,
@@ -40,14 +55,15 @@ const HomePageFilterSelector: React.FC<HomePageFilterSelectorProps> = ({
   return (
     <View style={styles.container}>
       <View style={styles.scrollContent}>
+        {/* Map through each filter option and render a BrewLogFilterButton */}
         {filterOptions.map((filterOption) => (
           <View key={filterOption.id} style={styles.buttonWrapper}>
             <BrewLogFilterButton
               brewLogFilter={filterOption}
-              isSelected={selectedFilter === filterOption.label}
+              isSelected={selectedFilter === filterOption.label} // Determine if this filter is active
               onPress={() => {
-                console.log("Button pressed:", filterOption.label); // This is just to test whether it can actually read the change from the button or not
-                onFilterChange(filterOption.label as filterOptions);
+                console.log("Button pressed:", filterOption.label); // Debug: logs selected filter
+                onFilterChange(filterOption.label as filterOptions); // Update parent state
               }}
             />
           </View>
@@ -57,19 +73,20 @@ const HomePageFilterSelector: React.FC<HomePageFilterSelectorProps> = ({
   );
 };
 
+// -------------------- Styles --------------------
 const styles = StyleSheet.create({
   container: {
-    height: 80,
+    height: 80, // Fixed height for the filter selector row
   },
   scrollContent: {
     alignItems: "center",
     paddingVertical: 10,
-
-    flexDirection: "row",
+    flexDirection: "row", // Horizontal layout for buttons
   },
   buttonWrapper: {
-    marginHorizontal: 8,
+    marginHorizontal: 8, // Spacing between buttons
   },
 });
 
+// -------------------- Export --------------------
 export default HomePageFilterSelector;

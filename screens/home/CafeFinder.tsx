@@ -1,3 +1,19 @@
+// README
+// Cafe Finder screen for locating and viewing partner cafés on a map.
+// Features:
+// - Displays user's current location on a map.
+// - Shows partner café markers with details.
+// - Search bar for café names.
+// - Filter buttons for distance and price.
+// - Action buttons for viewing orders and saved cafés.
+// - Sliding modal with café list that can be expanded, collapsed, or minimized.
+// - Map adjusts dynamically based on modal state.
+// Notes:
+// - Currently uses mock café data (replaceable with Google Places API).
+// - Location permission is required for full functionality.
+// - Sliding modal animation values are tuned for smoothness; avoid altering unless necessary.
+// -------------------- Imports --------------------
+// Core React and hooks
 import React, {
   useState,
   useEffect,
@@ -5,6 +21,7 @@ import React, {
   useMemo,
   useCallback,
 } from "react";
+// React Native UI components & APIs
 import {
   StyleSheet,
   View,
@@ -17,23 +34,32 @@ import {
   Animated,
   PanResponder,
 } from "react-native";
+// Safe area handling
 import { SafeAreaView } from "react-native-safe-area-context";
+// Custom navigation header
 import Header from "../../navigation/Header";
+// Map components & types
 import MapView, { Marker, Region } from "react-native-maps";
+// Location services
 import * as Location from "expo-location";
+// Icons
 import { Feather, Ionicons } from "@expo/vector-icons";
+// Custom cafe card component
 import CafeFinderCard from "../../assets/components/home-components/cafe-finder-card";
+// Cafe type definition
 import { Cafe } from "../../assets/types/cafe";
 
+// -------------------- Constants --------------------
 const { width, height } = Dimensions.get("window");
 
 export default function CafeFinderScreen() {
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [searchText, setSearchText] = useState("");
+  // -------------------- State --------------------
+  const [errorMsg, setErrorMsg] = useState<string | null>(null); // Error messages for location issues
+  const [searchText, setSearchText] = useState(""); // Search bar text
   const [userLocation, setUserLocation] = useState<{
     latitude: number;
     longitude: number;
-  } | null>(null);
+  } | null>(null); // User's coordinates
   const [region, setRegion] = useState<Region>({
     latitude: 37.78825,
     longitude: -122.4324,
@@ -41,28 +67,23 @@ export default function CafeFinderScreen() {
     longitudeDelta: 0.0421,
   });
 
-  // Map reference for programmatic control
-  const mapRef = useRef<MapView>(null);
+  // -------------------- Refs --------------------
+  const mapRef = useRef<MapView>(null); // MapView reference for controlling the map
+  const slideAnim = useRef(new Animated.Value(height * 0.65)).current; // Modal Y position animation value
 
-  // Animation for sliding modal - start lower on screen
-  const slideAnim = useRef(new Animated.Value(height * 0.65)).current; // Start lower (65% from top)
+  // -------------------- Layout Constants --------------------
+  const UI_ELEMENTS_HEIGHT = 160; // Combined height of header, search, and filter UI
+  const MODAL_TOP_POSITION = UI_ELEMENTS_HEIGHT; // Fully expanded modal position
+  const MODAL_COLLAPSED_POSITION = height * 0.65; // Half-expanded modal position
+  const MODAL_MINIMIZED_POSITION = height * 0.95; // Almost hidden modal position
 
-  // Calculate the top position based on UI elements
-  // Header (padding 8 + content ~44) + Search (padding 12 + content ~44) + Filter (padding 12 + content ~40) ≈ 160px
-  const UI_ELEMENTS_HEIGHT = 160;
-  const MODAL_TOP_POSITION = UI_ELEMENTS_HEIGHT; // Position right under filter buttons
-  const MODAL_COLLAPSED_POSITION = height * 0.65; // Middle position (65% from top)
-  const MODAL_MINIMIZED_POSITION = height * 0.95; // Minimized position (95% from top, thinner)
-
-  // Mock partner cafés data - replace with actual Google Places API call
+  // -------------------- Mock Data --------------------
+  // Partner cafes list - to be replaced with Google Places API results
   const partnerCafes: Cafe[] = [
     {
-      id: "ChIJN1t_tDeuEmsRUsoyG83frY4", // Google Place ID format
+      id: "ChIJN1t_tDeuEmsRUsoyG83frY4",
       name: "Brewed Awakenings Café",
-      coordinate: {
-        latitude: 37.78825,
-        longitude: -122.4324,
-      },
+      coordinate: { latitude: 37.78825, longitude: -122.4324 },
       rating: 4.3,
       image:
         "https://images.unsplash.com/photo-1447933601403-0c6688de566e?w=400&h=400&fit=crop",
@@ -72,10 +93,7 @@ export default function CafeFinderScreen() {
     {
       id: "ChIJd8BlQ2BZwokRAFUEcm_qrcA",
       name: "Morning Roast",
-      coordinate: {
-        latitude: 37.79825,
-        longitude: -122.4224,
-      },
+      coordinate: { latitude: 37.79825, longitude: -122.4224 },
       rating: 4.1,
       image:
         "https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=400&h=400&fit=crop",
@@ -84,10 +102,7 @@ export default function CafeFinderScreen() {
     {
       id: "ChIJrTLr-GyuEmsRBfy61i59si0",
       name: "Artisan Coffee Co.",
-      coordinate: {
-        latitude: 37.78025,
-        longitude: -122.4424,
-      },
+      coordinate: { latitude: 37.78025, longitude: -122.4424 },
       rating: 4.5,
       image:
         "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400&h=400&fit=crop",
@@ -96,6 +111,8 @@ export default function CafeFinderScreen() {
     },
   ];
 
+  // -------------------- Effects --------------------
+  // Request location permission & fetch user location
   useEffect(() => {
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
@@ -103,7 +120,6 @@ export default function CafeFinderScreen() {
         setErrorMsg("Permission to access location was denied");
         return;
       }
-
       let location = await Location.getCurrentPositionAsync({});
       const userCoords = {
         latitude: location.coords.latitude,
@@ -111,14 +127,15 @@ export default function CafeFinderScreen() {
       };
       setUserLocation(userCoords);
       setRegion({
-        latitude: userCoords.latitude,
-        longitude: userCoords.longitude,
+        ...userCoords,
         latitudeDelta: 0.0922,
         longitudeDelta: 0.0421,
       });
     })();
   }, []);
 
+  // -------------------- Event Handlers --------------------
+  // Tap on a cafe marker
   const handleMarkerPress = useCallback((cafe: Cafe) => {
     Alert.alert(
       cafe.name,
@@ -127,11 +144,12 @@ export default function CafeFinderScreen() {
     );
   }, []);
 
+  // Tap on a cafe card
   const handleCafeCardPress = useCallback((cafe: Cafe) => {
     console.log("Cafe selected:", cafe.name);
   }, []);
 
-  // Handle re-centering map to user's current location
+  // Recenter map to user location
   const handleRecenterMap = useCallback(async () => {
     try {
       let { status } = await Location.requestForegroundPermissionsAsync();
@@ -142,14 +160,12 @@ export default function CafeFinderScreen() {
         );
         return;
       }
-
       let location = await Location.getCurrentPositionAsync({});
-      const newUserLocation = {
+      setUserLocation({
         latitude: location.coords.latitude,
         longitude: location.coords.longitude,
-      };
-      setUserLocation(newUserLocation);
-    } catch (error) {
+      });
+    } catch {
       Alert.alert(
         "Error",
         "Unable to get your current location. Please try again."
@@ -157,64 +173,57 @@ export default function CafeFinderScreen() {
     }
   }, []);
 
-  // Handle pan gesture for sliding modal using PanResponder
+  // -------------------- Modal State --------------------
   type ModalState = "expanded" | "collapsed" | "minimized";
   const [modalState, setModalState] = useState<ModalState>("collapsed");
-  const dragStartPosition = useRef(0);
-  const lastKnownPosition = useRef(height * 0.65); // Track the actual position
+  const dragStartPosition = useRef(0); // Start position when dragging begins
+  const lastKnownPosition = useRef(height * 0.65); // Position of modal after last animation
 
-  // Adjust map region based on modal state to keep user location centered in visible area
+  // Adjust map region based on modal state
   const adjustMapForModalState = useCallback(
     (modalState: ModalState) => {
       if (!userLocation || !mapRef.current) return;
-
-      // Calculate the visible height of the map based on modal state
       let visibleMapHeight: number;
       let verticalOffset: number;
 
       switch (modalState) {
         case "expanded":
-          // Modal covers most of the map, only top portion visible
           visibleMapHeight = MODAL_TOP_POSITION - UI_ELEMENTS_HEIGHT;
-          verticalOffset = -((height - MODAL_TOP_POSITION) / 4); // Shift up to center in visible area
+          verticalOffset = -((height - MODAL_TOP_POSITION) / 4);
           break;
         case "collapsed":
-          // Modal covers lower half, upper half visible
           visibleMapHeight = MODAL_COLLAPSED_POSITION - UI_ELEMENTS_HEIGHT;
-          verticalOffset = -((height - MODAL_COLLAPSED_POSITION) / 6); // Shift up slightly
+          verticalOffset = -((height - MODAL_COLLAPSED_POSITION) / 6);
           break;
         case "minimized":
-          // Most of map visible, slight shift
           visibleMapHeight = MODAL_MINIMIZED_POSITION - UI_ELEMENTS_HEIGHT;
-          verticalOffset = 0; // No shift needed
+          verticalOffset = 0;
           break;
         default:
           visibleMapHeight = height - UI_ELEMENTS_HEIGHT;
           verticalOffset = 0;
       }
 
-      // Calculate appropriate delta values based on visible height
       const baseLatitudeDelta = 0.0922;
-      const baseVisibleHeight = height * 0.6; // Reference height
+      const baseVisibleHeight = height * 0.6;
       const heightRatio = visibleMapHeight / baseVisibleHeight;
       const adjustedLatitudeDelta = Math.max(
         baseLatitudeDelta * (1 / Math.sqrt(heightRatio)),
         0.005
       );
 
-      // Apply vertical offset to center user location in visible area
       const adjustedLatitude =
         userLocation.latitude + verticalOffset * adjustedLatitudeDelta * 0.0001;
 
-      const newRegion = {
-        latitude: adjustedLatitude,
-        longitude: userLocation.longitude,
-        latitudeDelta: adjustedLatitudeDelta,
-        longitudeDelta: 0.0421 * (1 / Math.sqrt(heightRatio)),
-      };
-
-      // Animate to new region
-      mapRef.current.animateToRegion(newRegion, 800);
+      mapRef.current.animateToRegion(
+        {
+          latitude: adjustedLatitude,
+          longitude: userLocation.longitude,
+          latitudeDelta: adjustedLatitudeDelta,
+          longitudeDelta: 0.0421 * (1 / Math.sqrt(heightRatio)),
+        },
+        800
+      );
     },
     [
       userLocation,
@@ -226,11 +235,10 @@ export default function CafeFinderScreen() {
     ]
   );
 
-  // Handle modal toggle - cycles through the three states
+  // Cycle modal through states
   const toggleModal = useCallback(() => {
     let targetValue: number;
     let newState: ModalState;
-
     switch (modalState) {
       case "minimized":
         targetValue = MODAL_COLLAPSED_POSITION;
@@ -245,16 +253,13 @@ export default function CafeFinderScreen() {
         newState = "collapsed";
         break;
     }
-
     Animated.spring(slideAnim, {
       toValue: targetValue,
-      useNativeDriver: true, // Use native driver for better performance
+      useNativeDriver: true,
       tension: 100,
       friction: 8,
     }).start(() => {
-      // Ensure position is synced when animation completes
       lastKnownPosition.current = targetValue;
-      // Adjust map region after animation completes
       adjustMapForModalState(newState);
     });
     setModalState(newState);
@@ -267,71 +272,47 @@ export default function CafeFinderScreen() {
     adjustMapForModalState,
   ]);
 
-  // Memoize modal state text to reduce re-renders
-  const modalStateText = useMemo(() => {
-    switch (modalState) {
-      case "expanded":
-        return "Partner Cafés";
-      case "collapsed":
-        return "Partner Cafés";
-      case "minimized":
-        return "";
-      default:
-        return "Partner Cafés";
-    }
-  }, [modalState]);
+  // Modal title text
+  const modalStateText = useMemo(
+    () => (modalState === "minimized" ? "" : "Partner Cafés"),
+    [modalState]
+  );
 
-  // Initialize the current modal position when the component mounts
+  // Initialize modal position
   useEffect(() => {
     lastKnownPosition.current = MODAL_COLLAPSED_POSITION;
   }, [MODAL_COLLAPSED_POSITION]);
 
+  // -------------------- PanResponder --------------------
   const panResponder = useRef(
     PanResponder.create({
-      onStartShouldSetPanResponder: (evt, gestureState) => true,
-      onMoveShouldSetPanResponder: (evt, gestureState) => {
-        // Only respond to vertical gestures with significant movement
-        return (
-          Math.abs(gestureState.dy) > Math.abs(gestureState.dx) &&
-          Math.abs(gestureState.dy) > 10
-        );
-      },
-      onPanResponderGrant: (evt, gestureState) => {
-        // Use the last known position as the starting point for the drag
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: (_, g) =>
+        Math.abs(g.dy) > Math.abs(g.dx) && Math.abs(g.dy) > 10,
+      onPanResponderGrant: () => {
         dragStartPosition.current = lastKnownPosition.current;
-        // Don't update state during drag to reduce re-renders
       },
-      onPanResponderMove: (evt, gestureState) => {
-        const newValue = dragStartPosition.current + gestureState.dy;
-        // Allow the modal to follow finger more naturally with softer constraints
-        const constrainedValue = Math.max(
-          MODAL_TOP_POSITION - 20, // Allow slight over-scroll at top
-          Math.min(newValue, MODAL_MINIMIZED_POSITION + 50) // Allow slight over-scroll at bottom
+      onPanResponderMove: (_, g) => {
+        const newValue = dragStartPosition.current + g.dy;
+        slideAnim.setValue(
+          Math.max(
+            MODAL_TOP_POSITION - 20,
+            Math.min(newValue, MODAL_MINIMIZED_POSITION + 50)
+          )
         );
-        slideAnim.setValue(constrainedValue);
       },
-      onPanResponderRelease: (evt, gestureState) => {
-        const threshold = 80; // Increased threshold for more deliberate gestures
-        const currentPosition = dragStartPosition.current + gestureState.dy;
-
-        // Determine the closest state based on final position, not gesture direction
-        const distanceToExpanded = Math.abs(
-          currentPosition - MODAL_TOP_POSITION
-        );
-        const distanceToCollapsed = Math.abs(
-          currentPosition - MODAL_COLLAPSED_POSITION
-        );
-        const distanceToMinimized = Math.abs(
-          currentPosition - MODAL_MINIMIZED_POSITION
-        );
-
+      onPanResponderRelease: (_, g) => {
+        const threshold = 80;
+        const currentPosition = dragStartPosition.current + g.dy;
+        const dist = {
+          expanded: Math.abs(currentPosition - MODAL_TOP_POSITION),
+          collapsed: Math.abs(currentPosition - MODAL_COLLAPSED_POSITION),
+          minimized: Math.abs(currentPosition - MODAL_MINIMIZED_POSITION),
+        };
         let targetValue: number;
         let newState: ModalState;
-
-        // If it's a strong gesture in one direction, respect that
-        if (Math.abs(gestureState.dy) > threshold) {
-          if (gestureState.dy < 0) {
-            // Strong upward gesture - prefer higher states
+        if (Math.abs(g.dy) > threshold) {
+          if (g.dy < 0) {
             if (
               currentPosition <=
               (MODAL_TOP_POSITION + MODAL_COLLAPSED_POSITION) / 2
@@ -343,7 +324,6 @@ export default function CafeFinderScreen() {
               newState = "collapsed";
             }
           } else {
-            // Strong downward gesture - prefer lower states
             if (
               currentPosition >=
               (MODAL_COLLAPSED_POSITION + MODAL_MINIMIZED_POSITION) / 2
@@ -356,34 +336,23 @@ export default function CafeFinderScreen() {
             }
           }
         } else {
-          // Small movement - snap to the nearest state
-          const minDistance = Math.min(
-            distanceToExpanded,
-            distanceToCollapsed,
-            distanceToMinimized
-          );
-
-          if (minDistance === distanceToExpanded) {
-            targetValue = MODAL_TOP_POSITION;
-            newState = "expanded";
-          } else if (minDistance === distanceToCollapsed) {
-            targetValue = MODAL_COLLAPSED_POSITION;
-            newState = "collapsed";
-          } else {
-            targetValue = MODAL_MINIMIZED_POSITION;
-            newState = "minimized";
-          }
+          const minKey = Object.entries(dist).reduce((a, b) =>
+            b[1] < a[1] ? b : a
+          )[0] as ModalState;
+          targetValue = {
+            expanded: MODAL_TOP_POSITION,
+            collapsed: MODAL_COLLAPSED_POSITION,
+            minimized: MODAL_MINIMIZED_POSITION,
+          }[minKey];
+          newState = minKey;
         }
-
         Animated.spring(slideAnim, {
           toValue: targetValue,
-          useNativeDriver: true, // Use native driver for better performance
+          useNativeDriver: true,
           tension: 100,
           friction: 8,
         }).start(() => {
-          // Ensure position is synced when animation completes
           lastKnownPosition.current = targetValue;
-          // Adjust map region after animation completes
           adjustMapForModalState(newState);
         });
         setModalState(newState);
@@ -392,13 +361,12 @@ export default function CafeFinderScreen() {
     })
   ).current;
 
-  // Sync map region with user location and modal state
+  // Sync map region with modal state changes
   useEffect(() => {
-    if (userLocation) {
-      adjustMapForModalState(modalState);
-    }
+    if (userLocation) adjustMapForModalState(modalState);
   }, [userLocation, modalState, adjustMapForModalState]);
 
+  // -------------------- Render --------------------
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}
@@ -406,7 +374,7 @@ export default function CafeFinderScreen() {
         <Header tintColor="#000" />
       </View>
 
-      {/* Search Bar */}
+      {/* Search bar */}
       <View style={styles.searchContainer}>
         <View style={styles.searchBar}>
           <Feather
@@ -425,7 +393,7 @@ export default function CafeFinderScreen() {
         </View>
       </View>
 
-      {/* Filter and Action Buttons */}
+      {/* Filter & action buttons */}
       <View style={styles.filterContainer}>
         <View style={styles.filterButtons}>
           <TouchableOpacity style={styles.filterButton}>
@@ -437,7 +405,6 @@ export default function CafeFinderScreen() {
             <Feather name="chevron-down" size={16} color="#fff" />
           </TouchableOpacity>
         </View>
-
         <View style={styles.actionButtons}>
           <TouchableOpacity style={styles.actionButton}>
             <Ionicons name="receipt-outline" size={20} color="#666" />
@@ -450,23 +417,20 @@ export default function CafeFinderScreen() {
         </View>
       </View>
 
-      {/* Map View */}
+      {/* Map */}
       <View style={styles.mapContainer}>
         <MapView
           style={styles.map}
           region={region}
           onRegionChangeComplete={setRegion}
-          showsUserLocation={true}
-          showsMyLocationButton={false} // Disable default button, we'll use our custom one
-          ref={mapRef} // Attach ref to MapView
+          showsUserLocation
+          showsMyLocationButton={false}
+          ref={mapRef}
         >
           {partnerCafes.map((cafe) => (
             <Marker
               key={cafe.id}
-              coordinate={{
-                latitude: cafe.coordinate.latitude,
-                longitude: cafe.coordinate.longitude,
-              }}
+              coordinate={cafe.coordinate}
               title={cafe.name}
               description={`Rating: ${cafe.rating}/5`}
               onPress={() => handleMarkerPress(cafe)}
@@ -474,28 +438,23 @@ export default function CafeFinderScreen() {
             />
           ))}
         </MapView>
-
-        {/* Custom My Location Button */}
         <TouchableOpacity
           style={styles.myLocationButton}
           onPress={handleRecenterMap}
-          activeOpacity={0.8}
         >
           <Ionicons name="locate" size={24} color="#1E9BD6" />
         </TouchableOpacity>
       </View>
 
-      {/* Sliding Modal for Cafe List */}
+      {/* Sliding modal */}
       <Animated.View
         style={[
           styles.slidingModal,
-          {
-            transform: [{ translateY: slideAnim }],
-          },
+          { transform: [{ translateY: slideAnim }] },
         ]}
-        needsOffscreenAlphaCompositing={false} // Performance optimization
+        needsOffscreenAlphaCompositing={false}
       >
-        {/* Draggable Handle Area */}
+        {/* Handle */}
         <View style={styles.modalHandleArea} {...panResponder.panHandlers}>
           <TouchableOpacity
             onPress={toggleModal}
@@ -513,8 +472,6 @@ export default function CafeFinderScreen() {
               ]}
             />
           </TouchableOpacity>
-
-          {/* Modal State Indicator */}
           <View style={styles.modalStateIndicator}>
             <Text style={styles.modalStateText}>{modalStateText}</Text>
             {modalState !== "minimized" && (
@@ -525,32 +482,32 @@ export default function CafeFinderScreen() {
           </View>
         </View>
 
-        {/* Scrollable Content - This should scroll independently and be hidden when minimized */}
+        {/* Cafe list */}
         {modalState !== "minimized" && (
           <ScrollView
             style={styles.cafeList}
             contentContainerStyle={styles.cafeListContent}
             showsVerticalScrollIndicator={false}
-            bounces={true}
+            bounces
             scrollEventThrottle={16}
-            removeClippedSubviews={true} // Performance optimization
+            removeClippedSubviews
           >
             {partnerCafes.map((cafe) => (
               <CafeFinderCard
                 key={cafe.id}
                 name={cafe.name}
-                location="Central, Hong Kong" // Placeholder for now - will come from Google Places API
+                location="Central, Hong Kong"
                 rating={cafe.rating}
                 image={{ uri: cafe.image }}
                 onPress={() => handleCafeCardPress(cafe)}
               />
             ))}
-            {/* Spacer to ensure last card is fully visible */}
             <View style={styles.bottomSpacer} />
           </ScrollView>
         )}
       </Animated.View>
 
+      {/* Error message */}
       {errorMsg && (
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>{errorMsg}</Text>
@@ -560,20 +517,11 @@ export default function CafeFinderScreen() {
   );
 }
 
+// -------------------- Styles --------------------
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    width,
-    backgroundColor: "#F5F5F5",
-  },
-  header: {
-    paddingHorizontal: 16,
-    paddingBottom: 0,
-  },
-  searchContainer: {
-    paddingHorizontal: 16,
-    paddingBottom: 12,
-  },
+  container: { flex: 1, width, backgroundColor: "#F5F5F5" },
+  header: { paddingHorizontal: 16, paddingBottom: 0 },
+  searchContainer: { paddingHorizontal: 16, paddingBottom: 12 },
   searchBar: {
     flexDirection: "row",
     alignItems: "center",
@@ -582,15 +530,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
   },
-  searchIcon: {
-    marginRight: 8,
-  },
-  searchInput: {
-    flex: 1,
-    fontSize: 16,
-    color: "#333",
-    fontFamily: "main",
-  },
+  searchIcon: { marginRight: 8 },
+  searchInput: { flex: 1, fontSize: 16, color: "#333", fontFamily: "main" },
   filterContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -598,10 +539,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingBottom: 12,
   },
-  filterButtons: {
-    flexDirection: "row",
-    gap: 8,
-  },
+  filterButtons: { flexDirection: "row", gap: 8 },
   filterButton: {
     flexDirection: "row",
     alignItems: "center",
@@ -611,31 +549,12 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     gap: 4,
   },
-  filterButtonText: {
-    color: "#fff",
-    fontSize: 14,
-    fontFamily: "main",
-  },
-  actionButtons: {
-    flexDirection: "row",
-    gap: 16,
-  },
-  actionButton: {
-    alignItems: "center",
-    gap: 2,
-  },
-  actionButtonText: {
-    fontSize: 12,
-    color: "#666",
-    fontFamily: "main",
-  },
-  mapContainer: {
-    flex: 1,
-    backgroundColor: "#fff",
-  },
-  map: {
-    flex: 1,
-  },
+  filterButtonText: { color: "#fff", fontSize: 14, fontFamily: "main" },
+  actionButtons: { flexDirection: "row", gap: 16 },
+  actionButton: { alignItems: "center", gap: 2 },
+  actionButtonText: { fontSize: 12, color: "#666", fontFamily: "main" },
+  mapContainer: { flex: 1, backgroundColor: "#fff" },
+  map: { flex: 1 },
   myLocationButton: {
     position: "absolute",
     top: 16,
@@ -647,10 +566,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 5,
@@ -660,19 +576,15 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    height: height, // Full height to allow proper positioning
+    height,
     backgroundColor: "#fff",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    // Simplified shadow for better performance during animations
     shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: -2,
-    },
-    shadowOpacity: 0.15, // Reduced opacity
-    shadowRadius: 4, // Reduced radius
-    elevation: 8, // Reduced elevation
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 8,
   },
   modalHandleArea: {
     paddingTop: 12,
@@ -701,12 +613,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#D0D0D0",
     borderRadius: 2,
   },
-  modalHandleExpanded: {
-    backgroundColor: "#1E9BD6",
-  },
-  modalHandleMinimized: {
-    backgroundColor: "#999",
-  },
+  modalHandleExpanded: { backgroundColor: "#1E9BD6" },
+  modalHandleMinimized: { backgroundColor: "#999" },
   modalStateIndicator: {
     alignItems: "center",
     paddingTop: 8,
@@ -724,26 +632,14 @@ const styles = StyleSheet.create({
     fontFamily: "main",
     marginTop: 2,
   },
-  cafeList: {
-    flex: 1,
-    paddingHorizontal: 16,
-    paddingTop: 8,
-  },
-  cafeListContent: {
-    paddingBottom: 100, // Extra padding for tab bar and safe area
-  },
-  bottomSpacer: {
-    height: 120, // Generous spacer to ensure last card is fully visible above tab bar
-  },
+  cafeList: { flex: 1, paddingHorizontal: 16, paddingTop: 8 },
+  cafeListContent: { paddingBottom: 100 },
+  bottomSpacer: { height: 120 },
   errorContainer: {
     padding: 16,
     backgroundColor: "#FF6B6B",
     margin: 16,
     borderRadius: 8,
   },
-  errorText: {
-    color: "#FFF",
-    textAlign: "center",
-    fontFamily: "main",
-  },
+  errorText: { color: "#FFF", textAlign: "center", fontFamily: "main" },
 });

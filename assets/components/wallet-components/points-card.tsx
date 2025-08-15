@@ -1,3 +1,15 @@
+// README
+// Flip card component for displaying user loyalty points and membership information.
+// Features:
+// - Front side: shows balance, membership level, expiry date, and a QR button icon.
+// - Back side: shows a scannable QR code and the QR data with a copy-to-clipboard button.
+// - Tap the card to flip between front and back using smooth animations.
+// Notes:
+// - Uses react-native-reanimated for flip animation.
+// - QR code is generated using react-native-qrcode-svg.
+// - Styling is fixed to a card background image for brand consistency.
+
+// -------------------- Imports --------------------
 import React, { useState } from "react";
 import {
   StyleSheet,
@@ -5,9 +17,7 @@ import {
   Text,
   TouchableWithoutFeedback,
   ImageBackground,
-  ImageStyle,
   TouchableOpacity,
-  SafeAreaView,
 } from "react-native";
 import Animated, {
   useSharedValue,
@@ -19,19 +29,22 @@ import Animated, {
 import QRCode from "react-native-qrcode-svg";
 import { Ionicons } from "@expo/vector-icons";
 import * as Clipboard from "expo-clipboard";
-import { Alert } from "react-native";
+
+// -------------------- Dimensions --------------------
 const width = require("react-native").Dimensions.get("window").width;
 
+// -------------------- Component --------------------
 const FlipCard = ({
-  balance = 150.0,
-  name = "Chua Tai Man",
-  qrData = "11001010101",
-  expDate = "31/12/2025",
-  membership = "Silver",
+  balance = 150.0, // Points balance
+  name = "Chua Tai Man", // Cardholder's name
+  qrData = "11001010101", // Data encoded in QR code
+  expDate = "31/12/2025", // Expiry date for membership
+  membership = "Silver", // Membership tier
 }) => {
-  const rotate = useSharedValue(0);
-  const [flipped, setFlipped] = useState(false);
+  const rotate = useSharedValue(0); // Shared value for animation state
+  const [flipped, setFlipped] = useState(false); // Track if card is flipped
 
+  // Front card animation style
   const frontAnimatedStyle = useAnimatedStyle(() => {
     const rotateY = interpolate(
       rotate.value,
@@ -46,6 +59,7 @@ const FlipCard = ({
     };
   });
 
+  // Back card animation style
   const backAnimatedStyle = useAnimatedStyle(() => {
     const rotateY = interpolate(
       rotate.value,
@@ -60,6 +74,7 @@ const FlipCard = ({
     };
   });
 
+  // Toggle flip state
   const flipCard = () => {
     setFlipped((prev) => !prev);
     rotate.value = withTiming(flipped ? 0 : 180, { duration: 500 });
@@ -69,6 +84,7 @@ const FlipCard = ({
     <View style={styles.container}>
       <TouchableWithoutFeedback onPress={flipCard}>
         <View style={styles.cardWrapper}>
+          {/* ---------- Front Side ---------- */}
           <Animated.View
             style={[styles.card, styles.cardFront, frontAnimatedStyle]}
           >
@@ -77,13 +93,18 @@ const FlipCard = ({
               style={styles.background}
               imageStyle={{ borderRadius: 15 }}
             >
+              {/* Top row: QR data + membership */}
               <View style={styles.topContainer}>
                 <Text style={styles.bitString}>{qrData}</Text>
                 <Text style={styles.membership}>{membership} Member</Text>
               </View>
+
+              {/* Points balance */}
               <View style={styles.amountContainer}>
                 <Text style={styles.amount}>${balance.toFixed(2)}</Text>
               </View>
+
+              {/* Bottom row: name + expiry + QR icon */}
               <View style={styles.bottomContainer}>
                 <View style={styles.bottomTextContainer}>
                   <Text style={styles.name}>{name}</Text>
@@ -97,6 +118,7 @@ const FlipCard = ({
             </ImageBackground>
           </Animated.View>
 
+          {/* ---------- Back Side ---------- */}
           <Animated.View
             style={[styles.card, styles.cardBack, backAnimatedStyle]}
           >
@@ -106,13 +128,15 @@ const FlipCard = ({
               imageStyle={{ borderRadius: 15 }}
             >
               <View style={styles.qrContainer}>
+                {/* QR Code */}
                 <View style={styles.qrCodeWrapper}>
                   <QRCode value={qrData} size={150} />
                 </View>
 
+                {/* Copy QR data to clipboard */}
                 <TouchableOpacity
                   onPress={() => Clipboard.setStringAsync(qrData)}
-                  style={[styles.qrButton]}
+                  style={styles.qrButton}
                 >
                   <Ionicons name="copy-outline" size={22} color="#8CDBED" />
                   <Text style={styles.bitStringCopy}>{qrData}</Text>
@@ -126,6 +150,7 @@ const FlipCard = ({
   );
 };
 
+// -------------------- Styles --------------------
 const styles = StyleSheet.create({
   container: {
     width: "100%",
@@ -142,7 +167,7 @@ const styles = StyleSheet.create({
     resizeMode: "cover",
   },
   card: {
-    width: "100%", // keep
+    width: "100%",
     height: "40%",
     alignItems: "center",
     justifyContent: "center",
@@ -155,14 +180,14 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 15,
     left: 0,
-    width: "100%", // take full width of parent
-    height: "100%", // take full height of parent
+    width: "100%",
+    height: "100%",
     borderRadius: 15,
     overflow: "hidden",
   },
   cardBack: {
     top: 15,
-    width: "100%", // take full width of parent
+    width: "100%",
     height: "100%",
     borderRadius: 15,
     overflow: "hidden",
@@ -248,23 +273,6 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     overflow: "hidden",
   },
-  topContainerBack: {
-    flexDirection: "row",
-    justifyContent: "center",
-    width: "100%",
-    padding: 10,
-  },
-  amountBack: {
-    fontSize: 35,
-    fontWeight: "bold",
-    color: "#fff",
-  },
-  canBeUsed: {
-    fontSize: 20,
-    color: "#fff",
-    marginTop: 10,
-    fontFamily: "cardBold",
-  },
   qrContainer: {
     flex: 1,
     alignItems: "center",
@@ -272,10 +280,11 @@ const styles = StyleSheet.create({
   },
   qrCodeWrapper: {
     backgroundColor: "#fff",
-    padding: 10, // Add padding around the QR code
+    padding: 10,
     marginBottom: 20,
     borderRadius: 10,
   },
 });
 
+// -------------------- Export --------------------
 export default FlipCard;

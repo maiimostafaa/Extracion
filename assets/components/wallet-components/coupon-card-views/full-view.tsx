@@ -1,51 +1,69 @@
-import React from "react";
+// README
+// Full coupon detail view component.
+// Features:
+// - Displays complete coupon details including logo, discount, promo image, description, terms, and QR code.
+// - Allows QR code to be enlarged in a modal popup when tapped.
+// - Supports both receiving coupon data via props and via React Navigation route params.
+// - Handles active/inactive coupons with opacity and disables QR interaction if expired.
+// Notes:
+// - Designed for the "FullCoupon" screen in navigation.
+// - QR code is generated using `react-native-qrcode-svg`.
+// - Background styling uses a coupon detail image from local assets.
+
+// -------------------- Imports --------------------
+import React, { useState } from "react";
 import {
   View,
   Text,
   Image,
   StyleSheet,
-  ScrollView,
   ImageBackground,
   TouchableOpacity,
   Modal,
 } from "react-native";
 import QRCode from "react-native-qrcode-svg";
-import { useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { Feather } from "@expo/vector-icons";
 import { coupon } from "../../../types/coupon";
 import { RouteProp, useRoute } from "@react-navigation/native";
 import { RootStackParamList } from "../../../../navigation/AppNavigator";
 
+// -------------------- Navigation Types --------------------
 type FullCouponRouteProp = RouteProp<RootStackParamList, "FullCoupon">;
+
+// -------------------- Props --------------------
 interface FullViewProps {
-  coupon: coupon;
+  coupon: coupon; // Coupon data (can also be received from route params)
 }
 
+// -------------------- Component --------------------
 const FullView: React.FC<FullViewProps> = ({ coupon: propCoupon }) => {
   const route = useRoute<FullCouponRouteProp>();
+
+  // Prefer prop coupon; fallback to route params
   const coupon = propCoupon || route.params.coupon;
-  const [isQRCodeVisible, setQRCodeVisible] = useState(false); // State for modal visibility
 
-  const showQRCode = () => {
-    setQRCodeVisible(true); // Show the QR code popup
-  };
+  // State to control QR code modal visibility
+  const [isQRCodeVisible, setQRCodeVisible] = useState(false);
 
-  const hideQRCode = () => {
-    setQRCodeVisible(false); // Hide the QR code popup
-  };
+  // Show QR code modal
+  const showQRCode = () => setQRCodeVisible(true);
 
+  // Hide QR code modal
+  const hideQRCode = () => setQRCodeVisible(false);
+
+  // Format discount string based on type
   const formatDiscount = () => {
     if (coupon.discountType === "percentage") {
       return `${coupon.discountValue}% Off`;
     }
     if (coupon.discountType === "fixed") {
       return `$${coupon.discountValue} Off`;
-    } else {
-      return `${coupon.item} `;
     }
+    return `${coupon.item} `;
   };
 
+  // Format expiry date into readable format
   const formatExpiryDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString("en-AU", {
@@ -57,9 +75,10 @@ const FullView: React.FC<FullViewProps> = ({ coupon: propCoupon }) => {
 
   return (
     <View style={[styles.container, { opacity: coupon.isActive ? 1 : 0.5 }]}>
+      {/* ---------- QR Code Modal ---------- */}
       <Modal
         visible={isQRCodeVisible}
-        transparent={true}
+        transparent
         animationType="fade"
         onRequestClose={hideQRCode}
       >
@@ -73,11 +92,14 @@ const FullView: React.FC<FullViewProps> = ({ coupon: propCoupon }) => {
           </View>
         </View>
       </Modal>
+
+      {/* ---------- Coupon Background ---------- */}
       <ImageBackground
         source={require("../../../graphics/backgrounds/component-backgrounds/coupon-details.png")}
         style={styles.background}
       >
         <View style={styles.contentContainer}>
+          {/* ---------- Top Section: Logo + Discount ---------- */}
           <View style={styles.topContainer}>
             <View style={styles.logoContainer}>
               <Image
@@ -89,6 +111,8 @@ const FullView: React.FC<FullViewProps> = ({ coupon: propCoupon }) => {
               <Text style={styles.title}>{formatDiscount()}</Text>
             </View>
           </View>
+
+          {/* ---------- Promo Image ---------- */}
           <View
             style={{
               width: "100%",
@@ -105,6 +129,8 @@ const FullView: React.FC<FullViewProps> = ({ coupon: propCoupon }) => {
               resizeMode="cover"
             />
           </View>
+
+          {/* ---------- Description + Terms ---------- */}
           <View style={styles.middleContainer}>
             <Text style={styles.description}>{coupon.description}</Text>
             <View style={styles.termsContainer}>
@@ -119,18 +145,24 @@ const FullView: React.FC<FullViewProps> = ({ coupon: propCoupon }) => {
               )}
             </View>
           </View>
+
+          {/* ---------- Bottom Section: QR + Expiry Info ---------- */}
           <View style={styles.halfContainer}>
+            {/* QR code display */}
             <View style={styles.qrContainer}>
               <QRCode value={coupon.QRcode} size={180} />
             </View>
 
             <View style={styles.bottomContainer}>
+              {/* QR Code expand button */}
               <TouchableOpacity
-                onPress={coupon.isActive ? showQRCode : undefined} // Only allow press if the coupon is active
-                disabled={!coupon.isActive} // Disable the button if the coupon is expired
+                onPress={coupon.isActive ? showQRCode : undefined}
+                disabled={!coupon.isActive}
               >
                 <Feather name="arrow-up-right" size={32} color="#078CC9" />
               </TouchableOpacity>
+
+              {/* Expiry date + Expired label */}
               <View style={styles.expiredInfoContainer}>
                 <Text style={styles.expiry}>
                   Valid until {formatExpiryDate(coupon.expirationDate)}
@@ -139,6 +171,8 @@ const FullView: React.FC<FullViewProps> = ({ coupon: propCoupon }) => {
                   <Text style={styles.expiredText}>EXPIRED</Text>
                 )}
               </View>
+
+              {/* Info icon (non-functional placeholder) */}
               <Ionicons
                 name="information-circle-outline"
                 size={32}
@@ -152,6 +186,7 @@ const FullView: React.FC<FullViewProps> = ({ coupon: propCoupon }) => {
   );
 };
 
+// -------------------- Styles --------------------
 const styles = StyleSheet.create({
   background: {
     width: "100%",
@@ -200,10 +235,6 @@ const styles = StyleSheet.create({
     left: 40,
     width: "100%",
   },
-  inactive: {
-    opacity: 0.5,
-    backgroundColor: "#f5f5f5",
-  },
   logo: {
     width: 60,
     height: 60,
@@ -217,7 +248,6 @@ const styles = StyleSheet.create({
     height: "20%",
     justifyContent: "center",
   },
-
   title: {
     fontSize: 30,
     fontWeight: "regular",
@@ -273,7 +303,7 @@ const styles = StyleSheet.create({
   },
   modalBackground: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)", // Semi-transparent background
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -287,7 +317,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 4,
-    elevation: 5, // For Android shadow
+    elevation: 5,
   },
   qrPopupTitle: {
     fontSize: 18,
@@ -307,12 +337,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
   },
-  showQRText: {
-    fontSize: 16,
-    color: "#078CC9",
-    textAlign: "center",
-    marginTop: 20,
-  },
   image: {
     width: 170,
     height: 170,
@@ -321,4 +345,5 @@ const styles = StyleSheet.create({
   },
 });
 
+// -------------------- Export --------------------
 export default FullView;

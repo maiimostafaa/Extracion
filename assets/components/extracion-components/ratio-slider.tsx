@@ -1,3 +1,17 @@
+// README
+// Coffee brewing ratio slider component.
+// Features:
+// - Displays brewing ratio in "1:XX" format.
+// - Interactive slider allows adjusting ratio between MIN_RATIO and MAX_RATIO.
+// - Slider is reversed: left = stronger brew (lower ratio), right = lighter brew (higher ratio).
+// - Coffee bean icon is used as the slider thumb.
+// - Gradient background visually indicates strength progression.
+// Notes:
+// - Uses `@miblanchard/react-native-slider` for slider functionality.
+// - The polygon shape with gradient is rendered using `react-native-svg`.
+// - Constants MIN_RATIO and MAX_RATIO define range (default: 10 to 20).
+
+// -------------------- Imports --------------------
 import React from "react";
 import { View, Text, StyleSheet, Image, Dimensions } from "react-native";
 import { Slider } from "@miblanchard/react-native-slider";
@@ -8,40 +22,46 @@ import Svg, {
   Polygon,
 } from "react-native-svg";
 
+// Coffee bean icon for the slider thumb
 const beanIcon = require("../../graphics/extracion/config-graphics/extracion-coffeebean.png");
 const { width } = Dimensions.get("window");
 
-// Configuration constants
-const MIN_RATIO = 10;
-const MAX_RATIO = 20;
-const SLIDER_HEIGHT = 40;
-const THUMB_SIZE = 40; // Increased from 32 to 40
+// -------------------- Constants --------------------
+const MIN_RATIO = 10; // Lightest brew ratio
+const MAX_RATIO = 20; // Strongest brew ratio
+const SLIDER_HEIGHT = 40; // Height of slider track and background
+const THUMB_SIZE = 40; // Size of slider thumb icon
 
+// -------------------- Props --------------------
 interface Props {
-  ratio: number;
-  onChange: (value: number) => void;
+  ratio: number; // Current brew ratio
+  onChange: (value: number) => void; // Callback when ratio changes
 }
 
+// -------------------- Component --------------------
 const CoffeeRatioSlider: React.FC<Props> = ({ ratio, onChange }) => {
-  // Convert ratio to slider value (0-1) - reversed so left=20, right=10
+  // Convert ratio to normalized slider value (0 to 1)
+  // Slider is reversed so that left = MAX_RATIO, right = MIN_RATIO
   const sliderValue = (MAX_RATIO - ratio) / (MAX_RATIO - MIN_RATIO);
 
+  // Handle slider value change
   const handleSliderChange = (values: number[]) => {
-    const normalizedValue = values[0]; // 0 to 1
-    // Reverse the calculation: 0 = MAX_RATIO (20), 1 = MIN_RATIO (10)
+    const normalizedValue = values[0]; // Value between 0 and 1
+    // Reverse calculation to get new ratio
     const newRatio = Math.round(
       MAX_RATIO - normalizedValue * (MAX_RATIO - MIN_RATIO)
     );
     onChange(newRatio);
   };
+
   return (
     <View style={styles.container}>
-      {/* Ratio Display */}
+      {/* ---------- Ratio Display ---------- */}
       <Text style={styles.ratioText}>1:{ratio}</Text>
 
-      {/* Slider Container with Background */}
+      {/* ---------- Slider with Gradient Background ---------- */}
       <View style={styles.sliderWrapper}>
-        {/* Gradient Background Triangle */}
+        {/* Background gradient polygon */}
         <View style={styles.gradientContainer}>
           <Svg
             height={SLIDER_HEIGHT}
@@ -53,7 +73,6 @@ const CoffeeRatioSlider: React.FC<Props> = ({ ratio, onChange }) => {
             <Defs>
               <SvgGradient id="coffeeGradient" x1="0" y1="0" x2="1" y2="0">
                 <Stop offset="0" stopColor="#F79E1B" stopOpacity="1" />
-                {/* <Stop offset="0.6" stopColor="#E76F51" stopOpacity="1" /> */}
                 <Stop offset="1" stopColor="#965F29" stopOpacity="1" />
               </SvgGradient>
             </Defs>
@@ -61,7 +80,7 @@ const CoffeeRatioSlider: React.FC<Props> = ({ ratio, onChange }) => {
           </Svg>
         </View>
 
-        {/* Slider */}
+        {/* Slider track & thumb */}
         <View style={styles.sliderContainer}>
           <Slider
             value={sliderValue}
@@ -82,7 +101,7 @@ const CoffeeRatioSlider: React.FC<Props> = ({ ratio, onChange }) => {
         </View>
       </View>
 
-      {/* Labels */}
+      {/* ---------- Labels ---------- */}
       <View style={styles.labelRow}>
         <Text style={styles.label}>light</Text>
         <Text style={styles.label}>strong</Text>
@@ -91,6 +110,7 @@ const CoffeeRatioSlider: React.FC<Props> = ({ ratio, onChange }) => {
   );
 };
 
+// -------------------- Styles --------------------
 const styles = StyleSheet.create({
   container: {
     width: "100%",
@@ -110,7 +130,7 @@ const styles = StyleSheet.create({
     height: SLIDER_HEIGHT,
     position: "relative",
     marginBottom: 16,
-    marginTop: 0, // Added margin to shift slider down
+    marginTop: 0,
   },
   gradientContainer: {
     position: "absolute",
@@ -118,7 +138,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    overflow: "hidden", // Removed borderRadius for sharp corners
+    overflow: "hidden",
   },
   gradientSvg: {
     position: "absolute",
@@ -132,7 +152,7 @@ const styles = StyleSheet.create({
     height: SLIDER_HEIGHT,
     justifyContent: "center",
     zIndex: 1,
-    paddingTop: 18, // Push the slider track (and coffee bean) down within the gradient
+    paddingTop: 18, // Push track & thumb down into gradient
   },
   track: {
     height: 4,
@@ -177,4 +197,5 @@ const styles = StyleSheet.create({
   },
 });
 
+// -------------------- Export --------------------
 export default CoffeeRatioSlider;

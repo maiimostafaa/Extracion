@@ -1,3 +1,17 @@
+// README
+// BLE hook for connecting to "thePong" devices and streaming temperature/weight data.
+// Features:
+// - Android permission handling (API < 31 vs >= 31).
+// - Scan for STM32WB/thePong devices, de-duplicate, and auto-stop after 15s.
+// - Connect with service/characteristic discovery and robust disconnect sequence.
+// - Stream temperature & weight characteristics; parse raw BLE payloads.
+// - Exposes state (devices, connection, scanning, readings) and actions.
+// Notes:
+// - UUIDs are fixed to thePong service & characteristics (temperature/weight).
+// - Keep imports/order EXACT (as provided) to avoid build issues.
+// - No code logic, names, or behavior changed—comments only.
+
+// -------------------- Imports (unchanged) --------------------
 import { useState, useEffect } from "react";
 import { PermissionsAndroid, Platform, Alert } from "react-native";
 import * as ExpoDevice from "expo-device";
@@ -8,20 +22,25 @@ import {
   Device,
 } from "react-native-ble-plx";
 
-// thePong device specifications
+// -------------------- thePong GATT Profile --------------------
+// Service + characteristic UUIDs exposed by the device firmware.
 const THEPONG_SERVICE_UUID = "00001860-0000-1000-8000-00805f9b34fb";
 const TEMPERATURE_CHARACTERISTIC_UUID = "00002a6e-0000-1000-8000-00805f9b34fb";
 const WEIGHT_CHARACTERISTIC_UUID = "00002a9d-0000-1000-8000-00805f9b34fb";
 
+// Single shared BLE manager instance
 const bleManager = new BleManager();
 
 function useBLE() {
-  const [allDevices, setAllDevices] = useState<Device[]>([]);
-  const [connectedDevice, setConnectedDevice] = useState<Device | null>(null);
-  const [isScanning, setIsScanning] = useState(false);
-  const [temperature, setTemperature] = useState(0);
-  const [weight, setWeight] = useState(0);
+  // -------------------- Hook State --------------------
+  const [allDevices, setAllDevices] = useState<Device[]>([]); // Discovered devices list
+  const [connectedDevice, setConnectedDevice] = useState<Device | null>(null); // Currently connected device
+  const [isScanning, setIsScanning] = useState(false); // Scanning flag
+  const [temperature, setTemperature] = useState(0); // Latest temperature reading (°C)
+  const [weight, setWeight] = useState(0); // Latest weight reading (g)
 
+  // -------------------- Android 12L/13+ Permissions --------------------
+  // Requests BLUETOOTH_SCAN / BLUETOOTH_CONNECT / ACCESS_FINE_LOCATION on API 31+
   const requestAndroid31Permissions = async () => {
     const bluetoothScanPermission = await PermissionsAndroid.request(
       PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN,
@@ -55,6 +74,8 @@ function useBLE() {
     );
   };
 
+  // -------------------- Cross‑Platform Permission Entry --------------------
+  // Android < 31: ACCESS_FINE_LOCATION; Android >= 31: BLE scan/connect + fine location; iOS: allowed by default here.
   const requestPermissions = async () => {
     if (Platform.OS === "android") {
       if ((ExpoDevice.platformApiLevel ?? -1) < 31) {
@@ -78,35 +99,37 @@ function useBLE() {
     }
   };
 
+  // -------------------- Connect --------------------
+  // Connects to selected device, discovers services/characteristics, installs disconnect listener, and starts streaming.
   const connectToDevice = async (device: Device) => {
     try {
-      console.log('Connecting to device:', device.id);
+      console.log("Connecting to device:", device.id);
       const deviceConnection = await bleManager.connectToDevice(device.id);
       setConnectedDevice(deviceConnection);
       await deviceConnection.discoverAllServicesAndCharacteristics();
       bleManager.stopDeviceScan();
       setIsScanning(false);
 
-      // Monitor connection state - this will detect unexpected disconnections
+      // Monitor connection state - detects unexpected disconnections
       deviceConnection.onDisconnected((error, disconnectedDevice) => {
-        console.log('Device disconnected:', disconnectedDevice?.id);
+        console.log("Device disconnected:", disconnectedDevice?.id);
         if (error) {
-          console.log('Disconnection error:', error);
+          console.log("Disconnection error:", error);
         }
-        
+
         // Clear app state when device disconnects
         setConnectedDevice(null);
         setTemperature(0);
         setWeight(0);
-        
+
         // Log the disconnection reason
         if (error && error.errorCode) {
-          console.log('Disconnection reason code:', error.errorCode);
+          console.log("Disconnection reason code:", error.errorCode);
         }
       });
 
       startStreamingData(deviceConnection);
-      console.log('Device connection established successfully');
+      console.log("Device connection established successfully");
       // Removed success alert - connection status is now shown in the modal
     } catch (e) {
       console.log("FAILED TO CONNECT", e);
@@ -114,83 +137,94 @@ function useBLE() {
     }
   };
 
+  // -------------------- Disconnect --------------------
+  // Performs a cautious multi-step disconnect to help STM32WB fully reset and resume advertising.
   const disconnectFromDevice = async () => {
     if (connectedDevice) {
       try {
-        console.log('Starting proper disconnect sequence for device:', connectedDevice.id);
-        
-        // Step 1: Stop any ongoing characteristic monitoring FIRST
-        // This is crucial - we need to stop all subscriptions before disconnecting
+        console.log(
+          "Starting proper disconnect sequence for device:",
+          connectedDevice.id
+        );
+
+        // 1) Stop any ongoing characteristic monitoring (cancel transactions)
         try {
-          await bleManager.cancelTransaction('temperature');
-          await bleManager.cancelTransaction('weight');
-          console.log('Cancelled characteristic monitoring transactions');
+          await bleManager.cancelTransaction("temperature");
+          await bleManager.cancelTransaction("weight");
+          console.log("Cancelled characteristic monitoring transactions");
         } catch (monitorError) {
-          console.log('Error stopping monitoring (may not be active):', monitorError);
+          console.log(
+            "Error stopping monitoring (may not be active):",
+            monitorError
+          );
         }
-        
-        // Step 2: Stop all characteristic monitoring for this device
+
+        // 2) Cancel any device-level subscriptions
         try {
-          // This ensures all subscriptions are properly cancelled
           await connectedDevice.cancelConnection();
-          console.log('Cancelled all device subscriptions');
+          console.log("Cancelled all device subscriptions");
         } catch (subscriptionError) {
-          console.log('Error cancelling subscriptions:', subscriptionError);
+          console.log("Error cancelling subscriptions:", subscriptionError);
         }
-        
-        // Step 3: Stop device scanning (if active)
+
+        // 3) Stop scanning if still running
         try {
           await bleManager.stopDeviceScan();
         } catch (scanError) {
-          console.log('Error stopping scan:', scanError);
+          console.log("Error stopping scan:", scanError);
         }
-        
-        // Step 4: Check if device is still connected before attempting disconnect
+
+        // 4) Check connection state before GATT disconnect
         const isConnected = await connectedDevice.isConnected();
         if (isConnected) {
-          console.log('Device is connected, initiating proper GATT disconnect...');
-          
-          // Step 5: Perform a proper GATT disconnection
-          // This sends the proper BLE disconnect packet to the peripheral
+          console.log(
+            "Device is connected, initiating proper GATT disconnect..."
+          );
+
+          // 5) Issue GATT disconnect
           await bleManager.cancelDeviceConnection(connectedDevice.id);
-          console.log('GATT disconnect command sent');
-          
-          // Step 6: Wait for the disconnect to fully propagate to the STM32WB device
-          // STM32WB devices may need extra time to process the disconnect and restart advertising
-          console.log('Waiting for STM32WB device to process disconnect...');
-          await new Promise(resolve => setTimeout(resolve, 1500));
-          
-          // Step 7: Verify disconnection status
+          console.log("GATT disconnect command sent");
+
+          // 6) Give the STM32WB time to process disconnect & restart advertising
+          console.log("Waiting for STM32WB device to process disconnect...");
+          await new Promise((resolve) => setTimeout(resolve, 1500));
+
+          // 7) Verify disconnection; force cancel if still connected
           try {
             const stillConnected = await connectedDevice.isConnected();
             if (stillConnected) {
-              console.log('WARNING: Device may still think it is connected');
-              // Force disconnect if needed
+              console.log("WARNING: Device may still think it is connected");
               try {
                 await connectedDevice.cancelConnection();
-                console.log('Forced additional disconnect');
+                console.log("Forced additional disconnect");
               } catch (forceError) {
-                console.log('Force disconnect also failed:', forceError);
+                console.log("Force disconnect also failed:", forceError);
               }
             } else {
-              console.log('✅ Device successfully disconnected and should return to advertising');
+              console.log(
+                "✅ Device successfully disconnected and should return to advertising"
+              );
             }
           } catch (checkError) {
-            // This is actually expected when device is properly disconnected
-            console.log('✅ Device disconnected (connection check failed as expected)');
+            // Expected when fully disconnected
+            console.log(
+              "✅ Device disconnected (connection check failed as expected)"
+            );
           }
         } else {
-          console.log('Device was already disconnected');
+          console.log("Device was already disconnected");
         }
-        
-        // Step 8: Clear all application state
+
+        // 8) Clear application state
         setConnectedDevice(null);
         setTemperature(0);
         setWeight(0);
-        
-        console.log('✅ Complete disconnect sequence finished - STM32WB should be advertising again');
+
+        console.log(
+          "✅ Complete disconnect sequence finished - STM32WB should be advertising again"
+        );
       } catch (error) {
-        console.log('❌ Error during disconnect sequence:', error);
+        console.log("❌ Error during disconnect sequence:", error);
         // Force clear the state even if disconnect fails
         setConnectedDevice(null);
         setTemperature(0);
@@ -199,26 +233,31 @@ function useBLE() {
     }
   };
 
+  // -------------------- Helpers: De-dup & Scan --------------------
   const isDuplicateDevice = (devices: Device[], nextDevice: Device) =>
     devices.findIndex((device) => nextDevice.id === device.id) > -1;
 
+  // Scans for devices, filters by name, auto-stops after 15s. Optional delay helps after disconnect.
   const scanForPeripherals = (forceDelay = false) => {
     const startScan = () => {
       setIsScanning(true);
       setAllDevices([]);
-      
+
       bleManager.startDeviceScan(null, null, (error, device) => {
         if (error) {
-          console.log('Scan error:', error);
+          console.log("Scan error:", error);
           setIsScanning(false);
           return;
         }
 
         // Filter for STM32WB devices and thePong devices with names
         if (device && (device.name || device.localName)) {
-          const deviceName = device.name || device.localName || '';
-          if (deviceName.includes('STM32WB') || deviceName.includes('thePongLocalName')) {
-            console.log('Found thePong device:', deviceName, device.id);
+          const deviceName = device.name || device.localName || "";
+          if (
+            deviceName.includes("STM32WB") ||
+            deviceName.includes("thePongLocalName")
+          ) {
+            console.log("Found thePong device:", deviceName, device.id);
             setAllDevices((prevState: Device[]) => {
               if (!isDuplicateDevice(prevState, device)) {
                 return [...prevState, device];
@@ -236,15 +275,19 @@ function useBLE() {
       }, 15000);
     };
 
-    // Add delay if requested (after disconnection) to let STM32WB device reset and restart advertising
+    // Delay to allow device to restart advertising after a disconnect
     if (forceDelay) {
-      console.log('Waiting 3 seconds before scanning to let STM32WB device restart advertising...');
+      console.log(
+        "Waiting 3 seconds before scanning to let STM32WB device restart advertising..."
+      );
       setTimeout(startScan, 3000);
     } else {
       startScan();
     }
   };
 
+  // -------------------- Parsers: Temperature & Weight --------------------
+  // BLE values are base64 strings; parse into numeric readings.
   const parseTemperature = (base64Data: string): number => {
     try {
       const binaryString = atob(base64Data);
@@ -253,7 +296,7 @@ function useBLE() {
         bytes[i] = binaryString.charCodeAt(i);
       }
 
-      // Try interpreting as 32-bit integer first (little-endian)
+      // Interpret as uint32 (LE) then scale: value / 100 => °C
       const view = new DataView(bytes.buffer);
       const intValue = view.getUint32(0, true); // true for little-endian
       return intValue / 100; // Real temperature = data / 100
@@ -269,11 +312,10 @@ function useBLE() {
       const binaryString = atob(base64Data);
       if (binaryString.length < 3) return 0;
 
-      // Ignore first byte, use bytes 1 and 2 as uint16
+      // Ignore first byte, use bytes 1 and 2 as uint16 (LE)
       const byte1 = binaryString.charCodeAt(1);
       const byte2 = binaryString.charCodeAt(2);
 
-      // Combine bytes as uint16 (little-endian)
       const uint16Value = byte1 | (byte2 << 8);
       return uint16Value / 20; // Real weight = data / 20
     } catch (error) {
@@ -282,6 +324,8 @@ function useBLE() {
     }
   };
 
+  // -------------------- Characteristic Monitors --------------------
+  // Handlers invoked by monitorCharacteristicForService for temperature & weight.
   const onTemperatureUpdate = (
     error: BleError | null,
     characteristic: Characteristic | null
@@ -316,6 +360,8 @@ function useBLE() {
     setWeight(weightValue);
   };
 
+  // -------------------- Streaming --------------------
+  // Starts characteristic monitoring for thePong's temperature & weight.
   const startStreamingData = async (device: Device) => {
     if (device) {
       try {
@@ -340,6 +386,8 @@ function useBLE() {
     }
   };
 
+  // -------------------- Global BLE State Listener --------------------
+  // Warn user when Bluetooth is turned off.
   useEffect(() => {
     const subscription = bleManager.onStateChange((state) => {
       if (state === "PoweredOff") {
@@ -353,6 +401,7 @@ function useBLE() {
     return () => subscription.remove();
   }, []);
 
+  // -------------------- Public API --------------------
   return {
     connectToDevice,
     disconnectFromDevice,

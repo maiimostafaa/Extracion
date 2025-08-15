@@ -1,57 +1,62 @@
-import React, { useState, useEffect, useRef } from "react";
+// README
+// Main Wallet screen for displaying user's membership card and available coupons.
+// Features:
+// - Header with navigation controls.
+// - FlipCard component displaying membership details (QR code, balance, membership tier).
+// - Horizontal scroll list of available coupons in compact format.
+// Notes:
+// - Uses mock data for coupons (replace with API data when backend is connected).
+// - Coupon cards navigate to their respective detail screens if hooked up in navigation.
+// - All visual styles are defined locally in this file.
+
+// -------------------- Imports --------------------
+import React from "react";
 import {
   StyleSheet,
   View,
   Text,
   ScrollView,
   Dimensions,
-  TouchableOpacity,
   SafeAreaView,
-  ImageBackground,
-  FlatList,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import { useNavigation, useFocusEffect } from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../../../navigation/AppNavigator";
+
+// Custom components
 import Header from "../../../navigation/Header";
-import FlipCard from "../../../assets/components/wallet-components/points-card"; // adjust path if needed
-import CouponCard from "../../../assets/components/wallet-components/coupon-card"; // adjust path as needed
+import FlipCard from "../../../assets/components/wallet-components/points-card";
+import CouponCard from "../../../assets/components/wallet-components/coupon-card";
+
+// Mock data
 import { mockCoupons } from "../../../assets/mock_data/mock-coupons";
 import { coupon } from "../../../assets/types/coupon";
-import AllCouponsScreen from "./AllCoupons";
 
+// -------------------- Navigation Types --------------------
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
+// -------------------- Layout Constants --------------------
 const { width } = Dimensions.get("window");
 
+// -------------------- Component --------------------
 export default function WalletScreen() {
   const navigation = useNavigation<NavigationProp>();
 
-  const renderCouponItem = ({
-    item,
-    index,
-  }: {
-    item: coupon;
-    index: number;
-  }) => (
-    <View style={styles.couponCardWrapper}>
-      <CouponCard coupon={item} initialViewMode="compact" />
-    </View>
-  );
-
   return (
     <SafeAreaView style={styles.container}>
+      {/* ---------- Header section ---------- */}
       <View style={styles.header}>
         <Header tintColor="#000" />
       </View>
 
-      {/* Main Content - No ScrollView */}
+      {/* ---------- Main Content ---------- */}
       <View style={styles.content}>
-        {/* Card */}
+        {/* Wallet title */}
         <View style={styles.section}>
           <Text style={styles.headerTitle}>my wallet</Text>
         </View>
+
+        {/* FlipCard membership card */}
         <View style={styles.cardContainer}>
           <FlipCard
             balance={150}
@@ -62,8 +67,9 @@ export default function WalletScreen() {
           />
         </View>
 
-        {/* coupons */}
+        {/* ---------- Coupons section ---------- */}
         <View style={styles.couponSection}>
+          {/* Section title - navigates to AllCoupons screen */}
           <Text
             style={styles.headerTitle}
             onPress={() => navigation.navigate("AllCoupons")}
@@ -71,6 +77,7 @@ export default function WalletScreen() {
             coupons
           </Text>
 
+          {/* Horizontal coupon list */}
           <View style={styles.couponListContainer}>
             <ScrollView
               horizontal
@@ -78,7 +85,6 @@ export default function WalletScreen() {
               scrollEventThrottle={16}
               decelerationRate="fast"
               bounces={true}
-              scrollEnabled={true}
               contentContainerStyle={styles.couponScrollContent}
               style={{ flex: 1 }}
             >
@@ -90,6 +96,7 @@ export default function WalletScreen() {
                     index < mockCoupons.length - 1 && styles.couponSpacing,
                   ]}
                 >
+                  {/* Compact coupon card */}
                   <CouponCard coupon={coupon} initialViewMode="compact" />
                 </View>
               ))}
@@ -101,11 +108,12 @@ export default function WalletScreen() {
   );
 }
 
+// -------------------- Styles --------------------
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     width: width,
-    backgroundColor: "f5f5f5",
+    backgroundColor: "f5f5f5", // Light background
   },
   cardContainer: {
     width: "100%",
@@ -135,32 +143,23 @@ const styles = StyleSheet.create({
   couponSection: {
     padding: 16,
     width: "100%",
-    marginTop: 10, // Reduced from 30 to move coupons up
+    marginTop: 10,
   },
   couponListContainer: {
     height: 130,
     marginTop: 10,
   },
-  couponScrollView: {
-    marginTop: 10,
-    maxHeight: 130, // Constrain height to prevent conflicts
-  },
   couponScrollContent: {
     paddingVertical: 5,
     paddingHorizontal: 0,
-    alignItems: "flex-start", // Align items to start instead of center
+    alignItems: "flex-start",
   },
   couponCardWrapper: {
     marginTop: 10,
-    width: 220, // Fixed width for horizontal scrolling
-    height: 110, // Fixed height for compact view
+    width: 220,
+    height: 110,
   },
   couponSpacing: {
-    marginRight: 18, // Spacing between cards
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#333",
+    marginRight: 18,
   },
 });

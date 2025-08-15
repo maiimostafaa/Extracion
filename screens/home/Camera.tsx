@@ -1,4 +1,14 @@
-import React, { useState, useEffect, useRef } from 'react';
+// README
+// Camera screen for scanning either coffee labels or QR codes.
+// Features:
+// - Camera permission handling.
+// - iOS lens selection to default to main camera (1x).
+// - Toggle between label scan and QR scan modes.
+// - Capture button (currently placeholder alert).
+// - Back button in header.
+
+// -------------------- Imports --------------------
+import React, { useState, useEffect, useRef } from "react";
 import {
   StyleSheet,
   View,
@@ -8,70 +18,83 @@ import {
   Alert,
   Dimensions,
   Platform,
-} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
-import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
+import { CameraView, useCameraPermissions } from "expo-camera";
 
+// -------------------- Component --------------------
 export default function CameraScreen() {
-  const [scanMode, setScanMode] = useState<'label' | 'QR'>('label');
+  // Current scan mode: 'label' for coffee packaging, 'QR' for QR codes
+  const [scanMode, setScanMode] = useState<"label" | "QR">("label");
+
+  // Camera permissions
   const [permission, requestPermission] = useCameraPermissions();
-  const [selectedLens, setSelectedLens] = useState<string>('builtInWideAngleCamera');
+
+  // Selected lens (iOS only - defaults to main camera if found)
+  const [selectedLens, setSelectedLens] = useState<string>(
+    "builtInWideAngleCamera"
+  );
+
   const navigation = useNavigation();
   const cameraRef = useRef<CameraView>(null);
 
+  // -------------------- Request permission if not granted --------------------
   useEffect(() => {
     if (!permission?.granted) {
       requestPermission();
     }
   }, [permission]);
 
-  // Get available lenses and select the main camera (1x) - iOS only
+  // -------------------- iOS: Get available lenses and choose main camera --------------------
   useEffect(() => {
     const getMainCamera = async () => {
-      if (Platform.OS === 'ios' && cameraRef.current && permission?.granted) {
+      if (Platform.OS === "ios" && cameraRef.current && permission?.granted) {
         try {
           const lenses = await cameraRef.current.getAvailableLensesAsync();
-          console.log('Available lenses:', lenses);
-          
-          // Try to find the main camera lens (typically builtInDualCamera or builtInTripleCamera for main lens)
-          // On newer iPhones, these often correspond to the 1x main camera
-          const mainLens = lenses.find(lens => 
-            lens.includes('builtInDualCamera') || 
-            lens.includes('builtInTripleCamera') ||
-            lens.includes('builtInTelephotoCamera')
-          ) || lenses[0]; // fallback to first available
-          
-          console.log('Selected lens:', mainLens);
+          console.log("Available lenses:", lenses);
+
+          // Attempt to pick the main lens (builtInDualCamera, builtInTripleCamera, or telephoto)
+          const mainLens =
+            lenses.find(
+              (lens) =>
+                lens.includes("builtInDualCamera") ||
+                lens.includes("builtInTripleCamera") ||
+                lens.includes("builtInTelephotoCamera")
+            ) || lenses[0]; // fallback to first available lens
+
+          console.log("Selected lens:", mainLens);
           setSelectedLens(mainLens);
         } catch (error) {
-          console.log('Error getting lenses:', error);
+          console.log("Error getting lenses:", error);
         }
       }
     };
 
     if (permission?.granted) {
-      // Small delay to ensure camera is mounted
+      // Delay to ensure camera is mounted before fetching lenses
       setTimeout(getMainCamera, 500);
     }
   }, [permission?.granted]);
 
+  // -------------------- Capture button handler --------------------
   const handleCapture = () => {
-    // Placeholder for actual capture functionality
+    // Placeholder - replace with actual capture logic
     Alert.alert(
-      'Photo Captured',
-      scanMode === 'label'
-        ? 'Coffee label captured! Processing...'
-        : 'QR code captured! Processing...'
+      "Photo Captured",
+      scanMode === "label"
+        ? "Coffee label captured! Processing..."
+        : "QR code captured! Processing..."
     );
   };
 
+  // -------------------- Navigation back --------------------
   const handleBack = () => {
     navigation.goBack();
   };
 
+  // -------------------- Permission Loading State --------------------
   if (!permission) {
-    // Camera permissions are still loading
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.cameraContainer}>
@@ -81,13 +104,16 @@ export default function CameraScreen() {
     );
   }
 
+  // -------------------- Permission Not Granted State --------------------
   if (!permission.granted) {
-    // Camera permissions are not granted yet
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.cameraContainer}>
           <Text style={styles.placeholderText}>Camera permission required</Text>
-          <TouchableOpacity style={styles.permissionButton} onPress={requestPermission}>
+          <TouchableOpacity
+            style={styles.permissionButton}
+            onPress={requestPermission}
+          >
             <Text style={styles.permissionButtonText}>Grant Permission</Text>
           </TouchableOpacity>
         </View>
@@ -95,9 +121,10 @@ export default function CameraScreen() {
     );
   }
 
+  // -------------------- Main UI --------------------
   return (
     <SafeAreaView style={styles.container}>
-      {/* Black Header with Back Button */}
+      {/* Header with Back Button */}
       <View style={styles.header}>
         <TouchableOpacity onPress={handleBack} style={styles.backButton}>
           <Ionicons name="chevron-back" size={28} color="#fff" />
@@ -110,52 +137,55 @@ export default function CameraScreen() {
           ref={cameraRef}
           style={styles.camera}
           facing="back"
-          {...(Platform.OS === 'ios' && { selectedLens: selectedLens })}
+          {...(Platform.OS === "ios" && { selectedLens: selectedLens })}
           barcodeScannerSettings={{
-            barcodeTypes: scanMode === 'QR' ? ['qr'] : [],
+            barcodeTypes: scanMode === "QR" ? ["qr"] : [],
           }}
         >
-          {/* Overlay for scan mode indication */}
+          {/* Scan mode overlay text */}
           <View style={styles.scanOverlay}>
             <Text style={styles.scanModeText}>
-              {scanMode === 'label' ? 'Position coffee label in frame' : 'Position QR code in frame'}
+              {scanMode === "label"
+                ? "Position coffee label in frame"
+                : "Position QR code in frame"}
             </Text>
           </View>
         </CameraView>
       </View>
 
-      
       {/* Mode Toggle Slider */}
       <View style={styles.toggleContainer}>
         <View style={styles.toggleSlider}>
+          {/* Label Mode Button */}
           <TouchableOpacity
             style={[
               styles.toggleOption,
-              scanMode === 'label' && styles.toggleOptionActive,
+              scanMode === "label" && styles.toggleOptionActive,
             ]}
-            onPress={() => setScanMode('label')}
+            onPress={() => setScanMode("label")}
           >
             <Text
               style={[
                 styles.toggleText,
-                scanMode === 'label' && styles.toggleTextActive,
+                scanMode === "label" && styles.toggleTextActive,
               ]}
             >
               Label
             </Text>
           </TouchableOpacity>
-          
+
+          {/* QR Mode Button */}
           <TouchableOpacity
             style={[
               styles.toggleOption,
-              scanMode === 'QR' && styles.toggleOptionActive,
+              scanMode === "QR" && styles.toggleOptionActive,
             ]}
-            onPress={() => setScanMode('QR')}
+            onPress={() => setScanMode("QR")}
           >
             <Text
               style={[
                 styles.toggleText,
-                scanMode === 'QR' && styles.toggleTextActive,
+                scanMode === "QR" && styles.toggleTextActive,
               ]}
             >
               QR
@@ -170,110 +200,109 @@ export default function CameraScreen() {
           <View style={styles.captureButtonInner} />
         </TouchableOpacity>
       </View>
-
-      
     </SafeAreaView>
   );
 }
 
+// -------------------- Styles --------------------
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000',
+    backgroundColor: "#000",
   },
   header: {
-    backgroundColor: '#000000',
+    backgroundColor: "#000000",
     paddingHorizontal: 16,
     paddingTop: 8,
     paddingBottom: 16,
   },
   backButton: {
-    alignSelf: 'flex-start',
+    alignSelf: "flex-start",
   },
   cameraContainer: {
     flex: 1,
-    backgroundColor: '#000',
+    backgroundColor: "#000",
   },
   camera: {
     flex: 1,
   },
   cameraPlaceholder: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     padding: 40,
   },
   placeholderText: {
-    color: '#666',
+    color: "#666",
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginTop: 16,
-    textAlign: 'center',
+    textAlign: "center",
   },
   placeholderSubtext: {
-    color: '#888',
+    color: "#888",
     fontSize: 14,
     marginTop: 8,
-    textAlign: 'center',
+    textAlign: "center",
   },
   permissionButton: {
-    backgroundColor: '#8CDBED',
+    backgroundColor: "#8CDBED",
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 8,
     marginTop: 16,
   },
   permissionButtonText: {
-    color: '#000',
+    color: "#000",
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   scanOverlay: {
     flex: 1,
-    justifyContent: 'flex-end',
-    alignItems: 'center',
+    justifyContent: "flex-end",
+    alignItems: "center",
     paddingBottom: 40,
   },
   scanModeText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
-    textAlign: 'center',
-    backgroundColor: 'rgba(0,0,0,0.7)',
+    textAlign: "center",
+    backgroundColor: "rgba(0,0,0,0.7)",
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 8,
   },
   captureContainer: {
-    backgroundColor: '#000',
-    alignItems: 'center',
+    backgroundColor: "#000",
+    alignItems: "center",
     paddingVertical: 20,
   },
   captureButton: {
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: '#fff',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "#fff",
+    justifyContent: "center",
+    alignItems: "center",
     borderWidth: 3,
-    borderColor: '#333',
+    borderColor: "#333",
   },
   captureButtonInner: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
   },
   toggleContainer: {
-    backgroundColor: '#000',
+    backgroundColor: "#000",
     paddingHorizontal: 40,
     paddingBottom: 0,
     paddingTop: 10,
-    alignItems: 'center',
+    alignItems: "center",
   },
   toggleSlider: {
-    flexDirection: 'row',
-    backgroundColor: '#58595B',
+    flexDirection: "row",
+    backgroundColor: "#58595B",
     borderRadius: 20,
     padding: 3,
     width: 160,
@@ -283,17 +312,17 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 16,
     borderRadius: 17,
-    alignItems: 'center',
+    alignItems: "center",
   },
   toggleOptionActive: {
-    backgroundColor: '#8CDBED',
+    backgroundColor: "#8CDBED",
   },
   toggleText: {
     fontSize: 14,
-    fontWeight: '600',
-    color: '#fff',
+    fontWeight: "600",
+    color: "#fff",
   },
   toggleTextActive: {
-    color: '#000',
+    color: "#000",
   },
-}); 
+});

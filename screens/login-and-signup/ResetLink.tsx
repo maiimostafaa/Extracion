@@ -1,29 +1,38 @@
-import React, { useState, useEffect } from "react";
+// README
+// This screen confirms that a password reset link was sent.
+// It shows a header with a back button, a confirmation message, and a button to go to Login.
+// Visuals and behavior preserved exactly; comments and small clean-ups only.
+
+// -------------------- Imports --------------------
+import React from "react";
 import {
   StyleSheet,
   View,
   Text,
-  TextInput,
   TouchableOpacity,
   Image,
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
   ScrollView,
   ImageBackground,
   Dimensions,
 } from "react-native";
+
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../../navigation/AppNavigator";
+
 import { Ionicons } from "@expo/vector-icons";
 
+// -------------------- Navigation Types --------------------
 type LoginScreenNavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
+// -------------------- Constants --------------------
 const windowWidth = Dimensions.get("window").width;
+
+// -------------------- Component --------------------
 export default function SignUpScreen() {
   const navigation = useNavigation<LoginScreenNavigationProp>();
 
+  // Handler: go to the Login screen (Landing) and reset stack
   const handlePress = () => {
     navigation.reset({
       index: 0,
@@ -31,12 +40,14 @@ export default function SignUpScreen() {
     });
   };
 
+  // Handler: return to previous screen
   const handleBack = () => {
     navigation.goBack();
   };
 
   return (
     <ImageBackground style={styles.background}>
+      {/* ---------- Header: back button + centered logo ---------- */}
       <View style={styles.header}>
         <Ionicons
           name="chevron-back"
@@ -44,6 +55,9 @@ export default function SignUpScreen() {
           color="#000"
           style={{ padding: 16 }}
           onPress={handleBack}
+          accessibilityRole="button"
+          accessibilityLabel="Go back"
+          accessibilityHint="Returns to the previous screen"
         />
         <View style={styles.logoContainer}>
           <Image
@@ -53,21 +67,25 @@ export default function SignUpScreen() {
         </View>
       </View>
 
+      {/* ---------- Content: confirmation text + action button ---------- */}
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.textContainer}>
-          <Text style={styles.text}>
-            <Text style={styles.text}>Link sent ! Check your email</Text>
-          </Text>
-
-          <Text style={styles.text}>
-            <Text style={styles.text}>to reset your password</Text>
-          </Text>
+          <Text style={styles.text}>Link sent ! Check your email</Text>
+          <Text style={styles.text}>to reset your password</Text>
         </View>
 
-        <TouchableOpacity style={styles.submitButton} onPress={handlePress}>
+        <TouchableOpacity
+          style={styles.submitButton}
+          onPress={handlePress}
+          accessibilityRole="button"
+          accessibilityLabel="Log In"
+          accessibilityHint="Navigates to the login screen"
+        >
           <Text style={styles.submitButtonText}>Log In</Text>
         </TouchableOpacity>
       </ScrollView>
+
+      {/* ---------- Footer: brand mark ---------- */}
       <View
         style={{
           width: "100%",
@@ -86,6 +104,7 @@ export default function SignUpScreen() {
   );
 }
 
+// -------------------- Styles --------------------
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -148,7 +167,6 @@ const styles = StyleSheet.create({
     marginRight: 12,
     padding: 8,
   },
-
   textContainer: {
     backgroundColor: "#E5E5E6",
     borderRadius: 20,
@@ -157,7 +175,6 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     padding: 20,
     marginTop: 20,
-
     width: "90%",
     height: windowWidth * 0.8,
   },
