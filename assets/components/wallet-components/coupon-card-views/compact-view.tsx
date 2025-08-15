@@ -1,27 +1,38 @@
+// README
+// Compact coupon card layout for displaying brief coupon details.
+// Features:
+// - Shows organization logo, discount, organization name, and expiry date.
+// - Displays "EXPIRED" label if the coupon is inactive.
+// - Formats percentage, fixed amount, or item-based discounts.
+// - Formats expiry date in "Day Month Year" format (Australian English).
+// Notes:
+// - Designed to be used within CouponCard's "compact" mode.
+// - Styling is optimized for horizontal list or grid placement.
+
+// -------------------- Imports --------------------
 import React from "react";
 import { View, Text, Image, StyleSheet } from "react-native";
-import { TouchableOpacity } from "react-native";
 import { coupon } from "../../../types/coupon";
-import { useNavigation, useFocusEffect } from "@react-navigation/native";
-import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import type { RootStackParamList } from "../../../../navigation/AppNavigator";
 
+// -------------------- Props --------------------
 interface CompactViewProps {
-  coupon: coupon;
+  coupon: coupon; // Coupon data (discount, organization, expiry, status)
 }
 
+// -------------------- Component --------------------
 const CompactView: React.FC<CompactViewProps> = ({ coupon }) => {
+  // Format the discount string based on type (percentage, fixed, item)
   const formatDiscount = () => {
     if (coupon.discountType === "percentage") {
       return `${coupon.discountValue}% OFF`;
     }
     if (coupon.discountType === "fixed") {
       return `$${coupon.discountValue} OFF`;
-    } else {
-      return `${coupon.item} `;
     }
+    return `${coupon.item} `;
   };
 
+  // Format expiry date to readable format (e.g., "31 December 2025")
   const formatExpiryDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString("en-AU", {
@@ -33,9 +44,12 @@ const CompactView: React.FC<CompactViewProps> = ({ coupon }) => {
 
   return (
     <View style={[styles.container, !coupon.isActive && styles.inactive]}>
+      {/* ---------- Logo Section ---------- */}
       <View style={styles.logoContainer}>
         <Image source={{ uri: coupon.organizationLogo }} style={styles.logo} />
       </View>
+
+      {/* ---------- Text Details Section ---------- */}
       <View style={styles.textsContainer}>
         <Text style={styles.title}>{formatDiscount()}</Text>
         <Text style={styles.organization}>{coupon.organization}</Text>
@@ -48,6 +62,7 @@ const CompactView: React.FC<CompactViewProps> = ({ coupon }) => {
   );
 };
 
+// -------------------- Styles --------------------
 const styles = StyleSheet.create({
   container: {
     alignItems: "flex-start",
@@ -78,15 +93,12 @@ const styles = StyleSheet.create({
     width: "30%",
     height: "100%",
     justifyContent: "center",
-    borderWidth: 0,
-    borderRadius: 1,
     borderRightWidth: 2,
     borderRightColor: "#ccc",
   },
   title: {
     fontSize: 20,
     fontWeight: "bold",
-    justifyContent: "flex-start",
     marginTop: "4%",
   },
   expiry: {
@@ -110,4 +122,5 @@ const styles = StyleSheet.create({
   },
 });
 
+// -------------------- Export --------------------
 export default CompactView;

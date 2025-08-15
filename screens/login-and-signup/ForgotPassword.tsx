@@ -1,4 +1,9 @@
-import React, { useState, useEffect } from "react";
+// README
+// This screen lets a user enter their registered email to receive a password reset link.
+// Visuals and behavior are preserved exactly; comments and small clean-ups added.
+
+// -------------------- Imports --------------------
+import React from "react";
 import {
   StyleSheet,
   View,
@@ -6,34 +11,42 @@ import {
   TextInput,
   TouchableOpacity,
   Image,
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
   ScrollView,
-  ImageBackground,
   Dimensions,
 } from "react-native";
+
+// Navigation imports
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../../navigation/AppNavigator";
+
+// Icon import
 import { Ionicons } from "@expo/vector-icons";
 
+// -------------------- Navigation Types --------------------
 type LoginScreenNavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
-const windowWidth = Dimensions.get("window").width;
+// -------------------- Constants --------------------
+const windowWidth = Dimensions.get("window").width; // used for responsive container height
+
+// -------------------- Component --------------------
 export default function SignUpScreen() {
+  // Navigation instance for routing
   const navigation = useNavigation<LoginScreenNavigationProp>();
 
+  // Handler: proceed to the reset-link screen
   const handlePress = () => {
     navigation.navigate("ResetLink");
   };
 
+  // Handler: go back to previous screen
   const handleBack = () => {
     navigation.goBack();
   };
 
   return (
-    <ImageBackground style={styles.background}>
+    <View style={styles.background}>
+      {/* ---------- Header: back button + centered logo ---------- */}
       <View style={styles.header}>
         <Ionicons
           name="chevron-back"
@@ -41,6 +54,9 @@ export default function SignUpScreen() {
           color="#000"
           style={{ padding: 16 }}
           onPress={handleBack}
+          accessibilityRole="button"
+          accessibilityLabel="Go back"
+          accessibilityHint="Returns to the previous screen"
         />
         <View style={styles.logoContainer}>
           <Image
@@ -50,7 +66,9 @@ export default function SignUpScreen() {
         </View>
       </View>
 
+      {/* ---------- Scrollable content: instructions + email input + submit ---------- */}
       <ScrollView contentContainerStyle={styles.scrollContent}>
+        {/* Instructional text */}
         <View style={styles.textContainer}>
           <Text style={styles.text}>
             <Text style={styles.text}>Enter your registered email</Text>
@@ -60,6 +78,8 @@ export default function SignUpScreen() {
             <Text style={styles.text}>link</Text>
           </Text>
         </View>
+
+        {/* Email field + Submit */}
         <View style={{ alignSelf: "center", width: "100%" }}>
           <View style={styles.inputWrapper}>
             <TextInput
@@ -70,32 +90,35 @@ export default function SignUpScreen() {
               // onChangeText={setEmail}
               keyboardType="email-address"
               autoCapitalize="none"
+              accessibilityLabel="Email address"
+              accessibilityHint="Enter the email you used to sign up"
             />
           </View>
 
-          <TouchableOpacity style={styles.submitButton} onPress={handlePress}>
+          <TouchableOpacity
+            style={styles.submitButton}
+            onPress={handlePress}
+            accessibilityRole="button"
+            accessibilityLabel="Submit email"
+            accessibilityHint="Sends a password reset link to your email"
+          >
             <Text style={styles.submitButtonText}>Submit</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
-      <View
-        style={{
-          width: "100%",
-          flexDirection: "column",
-          justifyContent: "flex-end",
-          padding: 70,
-          alignItems: "center",
-        }}
-      >
+
+      {/* ---------- Footer: brand mark ---------- */}
+      <View style={styles.footerStyle}>
         <Image
           source={require("../../assets/graphics/logos/extracion.png")}
-          style={{ tintColor: "#58595B", resizeMode: "contain", height: 30 }}
+          style={styles.footerLogo}
         />
       </View>
-    </ImageBackground>
+    </View>
   );
 }
 
+// -------------------- Styles --------------------
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -128,15 +151,15 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     alignItems: "center",
     alignSelf: "center",
-    width: "90%", // Full width of the wrapper
+    width: "90%", // full width of the wrapper
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
-      height: 3, // Reduced from 3 for better centering
+      height: 3,
     },
-    shadowOpacity: 0.25, // Reduced for more subtle shadow
-    shadowRadius: 2, // Increased for softer shadow
-    elevation: 5, // Reduced elevation for Android
+    shadowOpacity: 0.25,
+    shadowRadius: 2,
+    elevation: 5,
   },
   submitButtonText: {
     color: "#58595B",
@@ -160,7 +183,7 @@ const styles = StyleSheet.create({
   input: {
     padding: 10,
     fontSize: 16,
-    borderRadius: 30, // optional, but keeps inner corners consistent
+    borderRadius: 30, // keeps inner corners consistent
     fontFamily: "cardRegular",
     color: "#58595B",
   },
@@ -179,7 +202,6 @@ const styles = StyleSheet.create({
     marginRight: 12,
     padding: 8,
   },
-
   textContainer: {
     backgroundColor: "#E5E5E6",
     borderRadius: 20,
@@ -198,5 +220,17 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontFamily: "cardRegular",
     lineHeight: 30,
+  },
+  footerStyle: {
+    width: "100%",
+    flexDirection: "column",
+    justifyContent: "flex-end",
+    padding: 70,
+    alignItems: "center",
+  },
+  footerLogo: {
+    tintColor: "#58595B",
+    resizeMode: "contain",
+    height: 30,
   },
 });

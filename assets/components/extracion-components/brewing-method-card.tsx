@@ -1,3 +1,15 @@
+// README
+// Reusable card component for selecting a brewing method in the coffee app.
+// Features:
+// - Displays an image (custom or default coffee machine) and a title.
+// - Highlights visually when selected (border color + background change).
+// - Accepts a custom image and an onPress handler for interaction.
+// Notes:
+// - Designed for use in brewing method selection screens.
+// - Supports accessibility for touch by using TouchableOpacity.
+// - Default image is located in `graphics/extracion/method-card/`.
+
+// -------------------- Imports --------------------
 import React from "react";
 import {
   View,
@@ -8,16 +20,18 @@ import {
   ImageSourcePropType,
 } from "react-native";
 
-// Import the coffee machine image
+// Default coffee machine image if no image prop is provided
 const coffeeMachineImage = require("../../graphics/extracion/method-card/extracion-coffee-machine.png");
 
+// -------------------- Props --------------------
 interface BrewingMethodCardProps {
-  title: string;
-  image?: ImageSourcePropType;
-  onPress?: () => void;
-  isSelected?: boolean;
+  title: string; // Brewing method title (e.g., "Espresso", "Pour Over")
+  image?: ImageSourcePropType; // Optional custom image for the card
+  onPress?: () => void; // Optional tap handler
+  isSelected?: boolean; // Whether this card is currently selected
 }
 
+// -------------------- Component --------------------
 const BrewingMethodCard: React.FC<BrewingMethodCardProps> = ({
   title,
   image,
@@ -28,19 +42,19 @@ const BrewingMethodCard: React.FC<BrewingMethodCardProps> = ({
     <TouchableOpacity
       style={styles.container}
       onPress={onPress}
-      activeOpacity={0.8}
+      activeOpacity={0.8} // Slight fade effect on press
     >
       <View style={[styles.card, isSelected && styles.selectedCard]}>
-        {/* Image Container */}
+        {/* ---------- Image Section ---------- */}
         <View style={styles.imageContainer}>
           <Image
-            source={image || coffeeMachineImage}
+            source={image || coffeeMachineImage} // Use provided image or default
             style={styles.image}
             resizeMode="contain"
           />
         </View>
 
-        {/* Title */}
+        {/* ---------- Title Section ---------- */}
         <View style={styles.titleContainer}>
           <Text style={styles.title}>{title}</Text>
           <View style={styles.underline} />
@@ -50,6 +64,7 @@ const BrewingMethodCard: React.FC<BrewingMethodCardProps> = ({
   );
 };
 
+// -------------------- Styles --------------------
 const styles = StyleSheet.create({
   container: {
     marginLeft: "17%",
@@ -57,12 +72,12 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: "#FFFFFF",
     borderRadius: 16,
-    padding: 40, // Increased padding
+    padding: 40, // Increased padding for spacious layout
     alignItems: "center",
     justifyContent: "center",
-    minHeight: 440, // Much taller to match the screenshot
-    minWidth: 240, // Wider
-    maxWidth: 240, // Wider max
+    minHeight: 440, // Matches design proportions
+    minWidth: 240,
+    maxWidth: 240,
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
@@ -75,7 +90,7 @@ const styles = StyleSheet.create({
     borderColor: "#F0F0F0",
   },
   selectedCard: {
-    borderColor: "#007AFF",
+    borderColor: "#007AFF", // Blue highlight when selected
     backgroundColor: "#F0F8FF",
   },
   imageContainer: {
@@ -109,12 +124,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   title: {
-    fontSize: 22, // Larger text to match design
-
+    fontSize: 22, // Larger text for emphasis
     color: "#58595B",
     textAlign: "center",
     lineHeight: 28,
-    marginTop: 8, // Add some space above the title
+    marginTop: 8, // Space between image and title
     fontFamily: "cardRegular",
   },
   underline: {
@@ -126,4 +140,5 @@ const styles = StyleSheet.create({
   },
 });
 
+// -------------------- Export --------------------
 export default BrewingMethodCard;

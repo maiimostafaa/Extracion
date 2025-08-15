@@ -1,4 +1,17 @@
-import React, { useState, useRef } from 'react';
+// README
+// Shop WebView Modal for displaying an embedded Shopify storefront.
+// Features:
+// - Fullscreen modal with a header containing close, back, and reload buttons.
+// - WebView that loads the Shopify store.
+// - Loading indicator while pages load.
+// - Error state with retry option when the store cannot be loaded.
+// Notes:
+// - Uses react-native-webview for rendering the store.
+// - Tracks navigation state to enable/disable back navigation.
+// - All state resets when the modal is closed.
+
+// -------------------- Imports --------------------
+import React, { useState, useRef } from "react";
 import {
   Modal,
   View,
@@ -9,64 +22,67 @@ import {
   StatusBar,
   ActivityIndicator,
   Alert,
-} from 'react-native';
-import { WebView } from 'react-native-webview';
-import { Ionicons } from '@expo/vector-icons';
+} from "react-native";
+import { WebView } from "react-native-webview";
+import { Ionicons } from "@expo/vector-icons";
 
+// -------------------- Props --------------------
 interface ShopWebViewModalProps {
-  visible: boolean;
-  onClose: () => void;
+  visible: boolean; // Whether the modal is visible
+  onClose: () => void; // Function to close the modal
 }
 
-export default function ShopWebViewModal({ visible, onClose }: ShopWebViewModalProps) {
-  const [loading, setLoading] = useState(false); // Start with false, let WebView control it
-  const [error, setError] = useState(false);
-  const [canGoBack, setCanGoBack] = useState(false);
-  const webViewRef = useRef<WebView | null>(null);
+// -------------------- Component --------------------
+export default function ShopWebViewModal({
+  visible,
+  onClose,
+}: ShopWebViewModalProps) {
+  // State variables for UI control
+  const [loading, setLoading] = useState(false); // Controls loading spinner visibility
+  const [error, setError] = useState(false); // Tracks if an error occurred
+  const [canGoBack, setCanGoBack] = useState(false); // Tracks if WebView can navigate back
+  const webViewRef = useRef<WebView | null>(null); // Ref to control the WebView
 
+  // -------------------- Handlers --------------------
   const handleLoadStart = () => {
-    console.log('WebView: Load Start');
+    console.log("WebView: Load Start");
     setLoading(true);
     setError(false);
   };
 
   const handleLoadEnd = () => {
-    console.log('WebView: Load End');
+    console.log("WebView: Load End");
     setLoading(false);
   };
 
   const handleError = () => {
-    console.log('WebView: Error occurred');
+    console.log("WebView: Error occurred");
     setLoading(false);
     setError(true);
   };
 
   const handleNavigationStateChange = (navState: any) => {
-    console.log('WebView: Navigation state change', {
+    console.log("WebView: Navigation state change", {
       url: navState.url,
       loading: navState.loading,
       canGoBack: navState.canGoBack,
-      canGoForward: navState.canGoForward
+      canGoForward: navState.canGoForward,
     });
-    
-    setCanGoBack(navState.canGoBack);
-    
-    // CRITICAL: Use the navigation state's loading property as the source of truth
-    // This handles cases where onLoadStart/onLoadEnd don't fire properly for back navigation
-    setLoading(navState.loading);
+    setCanGoBack(navState.canGoBack); // Update back navigation availability
+    setLoading(navState.loading); // Keep loading state in sync with WebView
   };
 
   const handleLoadProgress = ({ nativeEvent }: any) => {
-    console.log('WebView: Load progress', nativeEvent.progress);
+    console.log("WebView: Load progress", nativeEvent.progress);
     if (nativeEvent.progress === 1) {
-      console.log('WebView: Progress reached 100%, ensuring loading stops');
+      console.log("WebView: Progress reached 100%, ensuring loading stops");
       setLoading(false);
     }
   };
 
   const handleGoBack = () => {
     if (webViewRef.current && canGoBack) {
-      console.log('WebView: Going back');
+      console.log("WebView: Going back");
       webViewRef.current.goBack();
     }
   };
@@ -79,13 +95,14 @@ export default function ShopWebViewModal({ visible, onClose }: ShopWebViewModalP
   };
 
   const handleClose = () => {
-    // Reset all state when closing
-    setLoading(false); // Start fresh when reopening
+    // Reset all state when closing modal
+    setLoading(false);
     setError(false);
     setCanGoBack(false);
     onClose();
   };
 
+  // -------------------- Render --------------------
   return (
     <Modal
       visible={visible}
@@ -95,29 +112,37 @@ export default function ShopWebViewModal({ visible, onClose }: ShopWebViewModalP
     >
       <SafeAreaView style={styles.container}>
         <StatusBar barStyle="dark-content" backgroundColor="#fff" />
-        
-        {/* Header */}
+
+        {/* ---------- Header ---------- */}
         <View style={styles.header}>
+          {/* Close button */}
           <TouchableOpacity style={styles.closeButton} onPress={handleClose}>
             <Ionicons name="close" size={24} color="#333" />
           </TouchableOpacity>
-          
+
+          {/* Header title */}
           <Text style={styles.headerTitle}>Extracion Shop</Text>
-          
+
+          {/* Back + Reload buttons */}
           <View style={styles.headerActions}>
             {canGoBack && (
-              <TouchableOpacity style={styles.backButton} onPress={handleGoBack}>
+              <TouchableOpacity
+                style={styles.backButton}
+                onPress={handleGoBack}
+              >
                 <Ionicons name="arrow-back" size={24} color="#333" />
               </TouchableOpacity>
             )}
-            
-            <TouchableOpacity style={styles.reloadButton} onPress={handleReload}>
+            <TouchableOpacity
+              style={styles.reloadButton}
+              onPress={handleReload}
+            >
               <Ionicons name="refresh" size={20} color="#333" />
             </TouchableOpacity>
           </View>
         </View>
 
-        {/* Loading Indicator */}
+        {/* ---------- Loading Indicator ---------- */}
         {loading && (
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color="#8CDBED" />
@@ -125,7 +150,7 @@ export default function ShopWebViewModal({ visible, onClose }: ShopWebViewModalP
           </View>
         )}
 
-        {/* Error State */}
+        {/* ---------- Error State ---------- */}
         {error && (
           <View style={styles.errorContainer}>
             <Ionicons name="warning-outline" size={48} color="#FF6B6B" />
@@ -139,11 +164,11 @@ export default function ShopWebViewModal({ visible, onClose }: ShopWebViewModalP
           </View>
         )}
 
-        {/* WebView */}
+        {/* ---------- WebView ---------- */}
         {!error && (
           <WebView
             ref={webViewRef}
-            source={{ uri: 'https://0hyx14-11.myshopify.com/' }}
+            source={{ uri: "https://0hyx14-11.myshopify.com/" }}
             style={styles.webView}
             onLoadStart={handleLoadStart}
             onLoadEnd={handleLoadEnd}
@@ -163,14 +188,12 @@ export default function ShopWebViewModal({ visible, onClose }: ShopWebViewModalP
             showsHorizontalScrollIndicator={false}
             decelerationRate="normal"
             contentInsetAdjustmentBehavior="automatic"
-            onHttpError={(syntheticEvent) => {
-              const { nativeEvent } = syntheticEvent;
-              console.warn('WebView HTTP error: ', nativeEvent);
+            onHttpError={({ nativeEvent }) => {
+              console.warn("WebView HTTP error: ", nativeEvent);
               handleError();
             }}
-            onRenderProcessGone={(syntheticEvent) => {
-              const { nativeEvent } = syntheticEvent;
-              console.warn('WebView render process gone: ', nativeEvent);
+            onRenderProcessGone={({ nativeEvent }) => {
+              console.warn("WebView render process gone: ", nativeEvent);
               handleError();
             }}
           />
@@ -180,37 +203,38 @@ export default function ShopWebViewModal({ visible, onClose }: ShopWebViewModalP
   );
 }
 
+// -------------------- Styles --------------------
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E5E5',
-    backgroundColor: '#fff',
+    borderBottomColor: "#E5E5E5",
+    backgroundColor: "#fff",
   },
   closeButton: {
     padding: 8,
     borderRadius: 20,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: "#F5F5F5",
   },
   headerTitle: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
+    fontWeight: "600",
+    color: "#333",
     flex: 1,
-    textAlign: 'center',
+    textAlign: "center",
     marginHorizontal: 16,
   },
   headerActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   backButton: {
     padding: 8,
@@ -223,53 +247,53 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   loadingContainer: {
-    position: 'absolute',
+    position: "absolute",
     top: 120,
     left: 0,
     right: 0,
     bottom: 0,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#fff',
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#fff",
     zIndex: 1,
   },
   loadingText: {
     marginTop: 16,
     fontSize: 16,
-    color: '#666',
-    fontFamily: 'cardRegular',
+    color: "#666",
+    fontFamily: "cardRegular",
   },
   errorContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     padding: 32,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
   },
   errorTitle: {
     fontSize: 20,
-    fontWeight: '600',
-    color: '#333',
+    fontWeight: "600",
+    color: "#333",
     marginTop: 16,
     marginBottom: 8,
-    textAlign: 'center',
+    textAlign: "center",
   },
   errorMessage: {
     fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
+    color: "#666",
+    textAlign: "center",
     lineHeight: 24,
     marginBottom: 24,
   },
   retryButton: {
-    backgroundColor: '#8CDBED',
+    backgroundColor: "#8CDBED",
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 8,
   },
   retryButtonText: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
+    fontWeight: "600",
+    color: "#333",
   },
 });

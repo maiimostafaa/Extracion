@@ -1,3 +1,8 @@
+// README
+// Sign-up screen where the user creates a new account.
+// Includes a title dropdown (Miss, Ms., Mr., Mrs., Mx.), fields for name, username, email,
+// password, and confirm password. After signing up, user is taken to the ConfirmEmail screen.
+
 import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
@@ -19,16 +24,19 @@ import type { RootStackParamList } from "../../navigation/AppNavigator";
 import { Ionicons } from "@expo/vector-icons";
 import DropDownPicker from "react-native-dropdown-picker";
 
+// Navigation type for typed route names
 type LoginScreenNavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function SignUpScreen() {
   const navigation = useNavigation<LoginScreenNavigationProp>();
+
+  // ---------------- State variables ----------------
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [name, setName] = useState("");
   const [title, setTitle] = useState("");
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(false); // dropdown open/close
   const [items, setItems] = useState([
     { label: "Miss", value: "Miss" },
     { label: "Ms.", value: "Ms." },
@@ -38,14 +46,15 @@ export default function SignUpScreen() {
   ]);
   const [username, setUsername] = useState("");
 
-  // Animation value for smooth transitions
+  // Animation value to create space under the dropdown when open
   const animatedHeight = useState(new Animated.Value(0))[0];
 
-  // Handle dropdown open/close with animation
+  // ---------------- Effects ----------------
+  // Animate spacer height to avoid overlapping UI when dropdown opens
   useEffect(() => {
     if (open) {
       Animated.timing(animatedHeight, {
-        toValue: 190, // Adjust this value based on your dropdown height
+        toValue: 190, // adjust if dropdown height changes
         duration: 200,
         useNativeDriver: false,
       }).start();
@@ -58,21 +67,27 @@ export default function SignUpScreen() {
     }
   }, [open]);
 
+  // ---------------- Handlers ----------------
   const handleLogin = () => {
+    // On sign up, go to ConfirmEmail screen
     navigation.navigate("ConfirmEmail");
   };
 
   const handleBack = () => {
+    // Go back to previous screen
     navigation.goBack();
   };
 
+  // ---------------- Render ----------------
   return (
     <ImageBackground style={styles.background} imageStyle={{ opacity: 0.5 }}>
+      {/* Avoid keyboard covering inputs */}
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
         keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}
       >
+        {/* Header with back button and centered logo */}
         <View style={styles.header}>
           <Ionicons
             name="chevron-back"
@@ -89,11 +104,12 @@ export default function SignUpScreen() {
           </View>
         </View>
 
+        {/* Scrollable form content */}
         <ScrollView
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
         >
-          {/* Dropdown container with higher zIndex */}
+          {/* Dropdown for title selection */}
           <View style={styles.dropdownWrapper}>
             <DropDownPicker
               open={open}
@@ -114,12 +130,13 @@ export default function SignUpScreen() {
               }}
               listMode="SCROLLVIEW"
             />
-
-            {/* Animated spacer that expands when dropdown is open */}
+            {/* Spacer expands/collapses under dropdown */}
             <Animated.View style={{ height: animatedHeight }} />
           </View>
 
+          {/* Input fields */}
           <View style={styles.formContainer}>
+            {/* Full name */}
             <View style={styles.inputWrapper}>
               <TextInput
                 style={styles.input}
@@ -132,6 +149,7 @@ export default function SignUpScreen() {
               />
             </View>
 
+            {/* Username */}
             <View style={styles.inputWrapper}>
               <TextInput
                 style={styles.input}
@@ -144,6 +162,7 @@ export default function SignUpScreen() {
               />
             </View>
 
+            {/* Email */}
             <View style={styles.inputWrapper}>
               <TextInput
                 style={styles.input}
@@ -156,6 +175,7 @@ export default function SignUpScreen() {
               />
             </View>
 
+            {/* Password */}
             <View style={styles.inputWrapper}>
               <TextInput
                 style={styles.input}
@@ -167,6 +187,7 @@ export default function SignUpScreen() {
               />
             </View>
 
+            {/* Confirm Password */}
             <View style={styles.inputWrapper}>
               <TextInput
                 style={styles.input}
@@ -178,6 +199,7 @@ export default function SignUpScreen() {
               />
             </View>
 
+            {/* Submit button */}
             <View style={styles.submitWrapper}>
               <TouchableOpacity
                 style={styles.submitButton}
@@ -189,6 +211,8 @@ export default function SignUpScreen() {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+
+      {/* Footer logo */}
       <View
         style={{
           width: "100%",
@@ -207,43 +231,29 @@ export default function SignUpScreen() {
   );
 }
 
+// ---------------- Styles ----------------
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
+  container: { flex: 1 },
   scrollContent: {
     flexGrow: 1,
     padding: 24,
     justifyContent: "center",
   },
-  logoContainer: {
-    flexDirection: "row",
-    marginRight: "35%",
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: "bold",
-    color: "#333",
-  },
+  logoContainer: { flexDirection: "row", marginRight: "35%" },
+  title: { fontSize: 32, fontWeight: "bold", color: "#333" },
   dropdownWrapper: {
     zIndex: 1000,
     elevation: 1000,
-    marginBottom: 0, // Remove margin since we're using animated spacer
+    marginBottom: 0, // Spacer handles dropdown space
   },
-  formContainer: {
-    width: "100%",
-    alignItems: "center",
-  },
+  formContainer: { width: "100%", alignItems: "center" },
   inputWrapper: {
     width: "90%",
     borderRadius: 30,
     backgroundColor: "#CCCCCC",
     marginBottom: 20,
     shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 3,
-    },
+    shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.25,
     shadowRadius: 2,
     elevation: 5,
@@ -256,9 +266,8 @@ const styles = StyleSheet.create({
     color: "#58595B",
   },
   submitWrapper: {
-    width: "90%", // Match the button width
-    alignItems: "center", // Center the button
-
+    width: "90%",
+    alignItems: "center",
     marginBottom: 12,
   },
   submitButton: {
@@ -266,25 +275,19 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 30,
     alignItems: "center",
-    width: "100%", // Full width of the wrapper
+    width: "100%",
     shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 3, // Reduced from 3 for better centering
-    },
-    shadowOpacity: 0.25, // Reduced for more subtle shadow
-    shadowRadius: 2, // Increased for softer shadow
-    elevation: 5, // Reduced elevation for Android
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 2,
+    elevation: 5,
   },
   submitButtonText: {
     color: "#58595B",
     fontSize: 18,
     fontFamily: "cardRegular",
   },
-  background: {
-    flex: 1,
-    resizeMode: "cover",
-  },
+  background: { flex: 1, resizeMode: "cover" },
   header: {
     flexDirection: "row",
     alignItems: "center",
@@ -292,10 +295,7 @@ const styles = StyleSheet.create({
     paddingTop: "11%",
     zIndex: 10,
   },
-  backButton: {
-    marginRight: 12,
-    padding: 8,
-  },
+  backButton: { marginRight: 12, padding: 8 },
   headerLogo: {
     height: 30,
     marginTop: "1.5%",
@@ -334,10 +334,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     alignSelf: "center",
     shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 3,
-    },
+    shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.25,
     shadowRadius: 2,
     elevation: 5,
@@ -349,10 +346,7 @@ const styles = StyleSheet.create({
     width: "90%",
     alignSelf: "center",
     shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 5,
     elevation: 5,

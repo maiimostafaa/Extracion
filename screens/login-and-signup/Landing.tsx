@@ -1,4 +1,10 @@
-import React, { useState, useEffect } from "react";
+// README
+// Landing/Login screen for existing users.
+// Lets users enter email/password, navigate to Forgot Password, and Sign Up.
+// Uses AuthContext.login to set authenticated state. Visuals and behavior unchanged.
+
+// -------------------- Imports --------------------
+import React, { useState } from "react";
 import {
   StyleSheet,
   View,
@@ -6,40 +12,49 @@ import {
   TextInput,
   TouchableOpacity,
   Image,
-  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
   ImageBackground,
 } from "react-native";
+
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../../navigation/AppNavigator";
+
 import { useAuth } from "../../context/AuthContext";
 
+// -------------------- Navigation Types --------------------
 type LoginScreenNavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
+// -------------------- Component --------------------
 export default function LoginScreen() {
   const navigation = useNavigation<LoginScreenNavigationProp>();
+
+  // Local state for credentials (kept as-is; no validation added here)
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  // Auth context method (existing wiring preserved)
   const { login } = useAuth();
 
+  // Handler: Trigger auth flow. If email is missing, show a simple alert.
+  // (Kept behavior identical, including minimal check + login payload)
   const handleLogin = () => {
     if (!email) return alert("Please provide login information");
     login({ email }); // you can also include title if you want
-    // navigation.reset({
-    //   index: 0,
-    //   routes: [{ name: "MainTabs" }],
-    // });
+    // Original navigation reset left commented:
+    // navigation.reset({ index: 0, routes: [{ name: "MainTabs" }] });
   };
 
+  // Optional: back handler (not currently used in UI, but left intact)
   const handleBack = () => {
     navigation.goBack();
   };
 
   return (
     <ImageBackground style={styles.background}>
+      {/* Keyboard avoidance for iOS; no visual change */}
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
@@ -49,12 +64,15 @@ export default function LoginScreen() {
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
         >
+          {/* ---------- Header: centered brand logo ---------- */}
           <View style={styles.header}>
             <Image
               source={require("../../assets/graphics/logos/get-the-pong.png")}
               style={styles.headerLogo}
             />
           </View>
+
+          {/* ---------- Form: email/password, actions ---------- */}
           <View style={styles.formContainer}>
             <Text
               style={{
@@ -66,6 +84,8 @@ export default function LoginScreen() {
             >
               Sign in to your account
             </Text>
+
+            {/* Email input */}
             <View style={styles.inputWrapper}>
               <TextInput
                 style={styles.input}
@@ -75,9 +95,12 @@ export default function LoginScreen() {
                 onChangeText={setEmail}
                 keyboardType="email-address"
                 autoCapitalize="none"
+                accessibilityLabel="Email address"
+                accessibilityHint="Enter the email associated with your account"
               />
             </View>
 
+            {/* Password input */}
             <View style={styles.inputWrapper}>
               <TextInput
                 style={styles.input}
@@ -87,8 +110,12 @@ export default function LoginScreen() {
                 onChangeText={setPassword}
                 autoCapitalize="none"
                 secureTextEntry
+                accessibilityLabel="Password"
+                accessibilityHint="Enter your account password"
               />
             </View>
+
+            {/* Forgot password link */}
             <TouchableOpacity
               onPress={() => navigation.navigate("ForgotPassword")}
             >
@@ -102,14 +129,21 @@ export default function LoginScreen() {
                 Forgot Password?
               </Text>
             </TouchableOpacity>
+
+            {/* Submit/login */}
             <View style={styles.submitWrapper}>
               <TouchableOpacity
                 style={styles.submitButton}
                 onPress={handleLogin}
+                accessibilityRole="button"
+                accessibilityLabel="Log In"
+                accessibilityHint="Attempts to log you into your account"
               >
                 <Text style={styles.submitButtonText}>Log In</Text>
               </TouchableOpacity>
             </View>
+
+            {/* Sign up CTA */}
             <View style={styles.textsContainer}>
               <TouchableOpacity onPress={() => navigation.navigate("SignUp")}>
                 <Text
@@ -125,6 +159,7 @@ export default function LoginScreen() {
               </TouchableOpacity>
             </View>
 
+            {/* Terms & Privacy note */}
             <View style={styles.termsofServiceContainer}>
               <Text style={styles.termsofService}>
                 By clicking continue, you agree to our
@@ -136,6 +171,8 @@ export default function LoginScreen() {
               </Text>
             </View>
           </View>
+
+          {/* ---------- Footer: brand mark ---------- */}
           <View
             style={{
               width: "100%",
@@ -160,6 +197,7 @@ export default function LoginScreen() {
   );
 }
 
+// -------------------- Styles --------------------
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -199,13 +237,13 @@ const styles = StyleSheet.create({
   input: {
     padding: 10,
     fontSize: 16,
-    borderRadius: 30, // optional, but keeps inner corners consistent
+    borderRadius: 30, // keeps inner corners consistent
     fontFamily: "cardRegular",
     color: "#58595B",
   },
   submitWrapper: {
-    width: "90%", // Match the button width
-    alignItems: "center", // Center the button
+    width: "90%",
+    alignItems: "center",
     marginTop: 60,
     marginBottom: 12,
   },
@@ -214,15 +252,15 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 30,
     alignItems: "center",
-    width: "100%", // Full width of the wrapper
+    width: "100%", // full width of the wrapper
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
-      height: 3, // Reduced from 3 for better centering
+      height: 3,
     },
-    shadowOpacity: 0.25, // Reduced for more subtle shadow
-    shadowRadius: 2, // Increased for softer shadow
-    elevation: 5, // Reduced elevation for Android
+    shadowOpacity: 0.25,
+    shadowRadius: 2,
+    elevation: 5,
   },
   submitButtonText: {
     color: "#58595B",
@@ -241,7 +279,6 @@ const styles = StyleSheet.create({
     paddingTop: "20%",
     zIndex: 10,
   },
-
   headerLogo: {
     height: 30,
     marginTop: "1.5%",
@@ -278,7 +315,6 @@ const styles = StyleSheet.create({
     fontFamily: "cardRegular",
     flexDirection: "row",
   },
-
   termsofServiceContainer: {
     flexDirection: "column",
     alignItems: "center",

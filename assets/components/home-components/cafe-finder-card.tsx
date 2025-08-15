@@ -1,36 +1,58 @@
+// README
+// Reusable card component for displaying café information in the Cafe Finder screen.
+// Features:
+// - Displays café image, name, location, rating (with stars), and action buttons.
+// - "Save" button (bookmark icon) for marking a café (functionality can be added later).
+// - "Pick up" button for initiating an order or pickup flow.
+// Notes:
+// - Accepts props for name, location, rating, image, and onPress action.
+// - Star rating supports half-star display when applicable.
+// - Designed for use inside lists or scroll views.
+
+// -------------------- Imports --------------------
 import React from "react";
-import {
-  View,
-  Text,
-  Image,
-  StyleSheet,
-  TouchableOpacity,
-} from "react-native";
+import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
 import { FontAwesome, Feather } from "@expo/vector-icons";
 
+// -------------------- Props Interface --------------------
 interface CafeFinderCardProps {
-  name: string;
-  location: string;
-  rating: number;
-  image: any;
-  onPress: () => void;
+  name: string; // Café name
+  location: string; // Café location/address text
+  rating: number; // Numerical rating (e.g., 4.5)
+  image: any; // Image source for café photo
+  onPress: () => void; // Function triggered when card is tapped
 }
 
-const CafeFinderCard = ({ name, location, rating, image, onPress }: CafeFinderCardProps) => {
-  const fullStars = Math.floor(rating);
-  const hasHalfStar = rating - fullStars >= 0.5;
+// -------------------- Component --------------------
+const CafeFinderCard = ({
+  name,
+  location,
+  rating,
+  image,
+  onPress,
+}: CafeFinderCardProps) => {
+  const fullStars = Math.floor(rating); // Full stars count
+  const hasHalfStar = rating - fullStars >= 0.5; // Whether to display a half star
 
   return (
     <TouchableOpacity style={styles.card} onPress={onPress}>
+      {/* Café photo */}
       <Image source={image} style={styles.photo} />
-      
+
+      {/* Card content container */}
       <View style={styles.content}>
+        {/* ---------- Text & Rating Section ---------- */}
         <View style={styles.textContent}>
+          {/* Café name */}
           <Text style={styles.name}>{name}</Text>
+
+          {/* Location row with pin icon */}
           <View style={styles.locationRow}>
             <Feather name="map-pin" size={12} color="#666" />
             <Text style={styles.locationText}>{location}</Text>
           </View>
+
+          {/* Rating row with stars */}
           <View style={styles.ratingRow}>
             {[...Array(fullStars)].map((_, i) => (
               <FontAwesome key={i} name="star" size={12} color="#FFD700" />
@@ -41,11 +63,15 @@ const CafeFinderCard = ({ name, location, rating, image, onPress }: CafeFinderCa
             <Text style={styles.ratingText}>{rating.toFixed(1)}</Text>
           </View>
         </View>
-        
+
+        {/* ---------- Actions Section ---------- */}
         <View style={styles.actionContainer}>
+          {/* Save (bookmark) button */}
           <TouchableOpacity style={styles.saveButton}>
             <Feather name="bookmark" size={20} color="#666" />
           </TouchableOpacity>
+
+          {/* Pick up button */}
           <TouchableOpacity style={styles.pickupButton}>
             <Text style={styles.pickupText}>Pick up</Text>
           </TouchableOpacity>
@@ -55,8 +81,10 @@ const CafeFinderCard = ({ name, location, rating, image, onPress }: CafeFinderCa
   );
 };
 
+// -------------------- Export --------------------
 export default CafeFinderCard;
 
+// -------------------- Styles --------------------
 const styles = StyleSheet.create({
   card: {
     backgroundColor: "#fff",
